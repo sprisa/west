@@ -319,6 +319,14 @@ type Tunnels struct {
 	InactivityTimeout string `yaml:"inactivity_timeout,omitempty"`
 }
 
+// This option is only supported on Linux.
+// Routines is the number of thread pairs to run that consume from the tun and UDP queues.
+// Currently, this defaults to 1 which means we have 1 tun queue reader and 1 UDP queue reader.
+// Setting this above 1 will set IFF_MULTI_QUEUE on the tun device and SO_REUSEPORT on the UDP socket to allow multiple queues.
+// The maximum recommended setting is half of the available CPU cores.
+// It's recommended to set this to a lower value still, to avoid resource starvation.
+type Routines uint8
+
 // Config for Nebula
 //
 // See: https://nebula.defined.net/docs/config/
@@ -337,12 +345,6 @@ type Config struct {
 	Firewall         Firewall         `yaml:"firewall,omitempty"`
 	Handshakes       Handshakes       `yaml:"handshakes,omitempty"`
 	Tunnels          Tunnels          `yaml:"tunnels,omitempty"`
-	// This option is only supported on Linux.
-	// Routines is the number of thread pairs to run that consume from the tun and UDP queues.
-	// Currently, this defaults to 1 which means we have 1 tun queue reader and 1 UDP queue reader.
-	// Setting this above 1 will set IFF_MULTI_QUEUE on the tun device and SO_REUSEPORT on the UDP socket to allow multiple queues.
-	// The maximum recommended setting is half of the available CPU cores.
-	// It's recommended to set this to a lower value still, to avoid resource starvation.
-	Routines uint8 `yaml:"routines,omitempty"`
+	Routines         Routines         `yaml:"routines,omitempty"`
 	// TODO: Add sshd, stats
 }
