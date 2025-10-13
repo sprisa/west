@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/ent/settings"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // SettingsUpdate is the builder for updating Settings entities.
@@ -49,8 +50,16 @@ func (_u *SettingsUpdate) SetNillableCipher(v *string) *SettingsUpdate {
 }
 
 // SetHmac sets the "hmac" field.
-func (_u *SettingsUpdate) SetHmac(v []byte) *SettingsUpdate {
+func (_u *SettingsUpdate) SetHmac(v helpers.EncryptedBytes) *SettingsUpdate {
 	_u.mutation.SetHmac(v)
+	return _u
+}
+
+// SetNillableHmac sets the "hmac" field if the given value is not nil.
+func (_u *SettingsUpdate) SetNillableHmac(v *helpers.EncryptedBytes) *SettingsUpdate {
+	if v != nil {
+		_u.SetHmac(*v)
+	}
 	return _u
 }
 
@@ -154,8 +163,16 @@ func (_u *SettingsUpdateOne) SetNillableCipher(v *string) *SettingsUpdateOne {
 }
 
 // SetHmac sets the "hmac" field.
-func (_u *SettingsUpdateOne) SetHmac(v []byte) *SettingsUpdateOne {
+func (_u *SettingsUpdateOne) SetHmac(v helpers.EncryptedBytes) *SettingsUpdateOne {
 	_u.mutation.SetHmac(v)
+	return _u
+}
+
+// SetNillableHmac sets the "hmac" field if the given value is not nil.
+func (_u *SettingsUpdateOne) SetNillableHmac(v *helpers.EncryptedBytes) *SettingsUpdateOne {
+	if v != nil {
+		_u.SetHmac(*v)
+	}
 	return _u
 }
 

@@ -15,6 +15,7 @@ import (
 	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/ent/settings"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 const (
@@ -693,7 +694,7 @@ type SettingsMutation struct {
 	created_time  *time.Time
 	updated_time  *time.Time
 	cipher        *string
-	hmac          *[]byte
+	hmac          *helpers.EncryptedBytes
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Settings, error)
@@ -907,12 +908,12 @@ func (m *SettingsMutation) ResetCipher() {
 }
 
 // SetHmac sets the "hmac" field.
-func (m *SettingsMutation) SetHmac(b []byte) {
-	m.hmac = &b
+func (m *SettingsMutation) SetHmac(hb helpers.EncryptedBytes) {
+	m.hmac = &hb
 }
 
 // Hmac returns the value of the "hmac" field in the mutation.
-func (m *SettingsMutation) Hmac() (r []byte, exists bool) {
+func (m *SettingsMutation) Hmac() (r helpers.EncryptedBytes, exists bool) {
 	v := m.hmac
 	if v == nil {
 		return
@@ -923,7 +924,7 @@ func (m *SettingsMutation) Hmac() (r []byte, exists bool) {
 // OldHmac returns the old "hmac" field's value of the Settings entity.
 // If the Settings object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SettingsMutation) OldHmac(ctx context.Context) (v []byte, err error) {
+func (m *SettingsMutation) OldHmac(ctx context.Context) (v helpers.EncryptedBytes, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHmac is only allowed on UpdateOne operations")
 	}
@@ -1053,7 +1054,7 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 		m.SetCipher(v)
 		return nil
 	case settings.FieldHmac:
-		v, ok := value.([]byte)
+		v, ok := value.(helpers.EncryptedBytes)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

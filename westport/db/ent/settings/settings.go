@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 const (
@@ -54,7 +55,7 @@ var (
 	// DefaultCipher holds the default value on creation for the "cipher" field.
 	DefaultCipher string
 	// DefaultHmac holds the default value on creation for the "hmac" field.
-	DefaultHmac func() []byte
+	DefaultHmac func() helpers.EncryptedBytes
 )
 
 // OrderOption defines the ordering options for the Settings queries.

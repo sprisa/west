@@ -7,6 +7,7 @@ import (
 
 	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/settings"
+	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/schema"
 )
 
@@ -59,5 +60,5 @@ func init() {
 	// settingsDescHmac is the schema descriptor for hmac field.
 	settingsDescHmac := settingsFields[1].Descriptor()
 	// settings.DefaultHmac holds the default value on creation for the hmac field.
-	settings.DefaultHmac = settingsDescHmac.Default.(func() []byte)
+	settings.DefaultHmac = settingsDescHmac.Default.(func() helpers.EncryptedBytes)
 }

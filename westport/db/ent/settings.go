@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/westport/db/ent/settings"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // Settings is the model entity for the Settings schema.
@@ -24,7 +25,7 @@ type Settings struct {
 	// Nebula cipher. aes or chachapoly
 	Cipher string `json:"cipher,omitempty"`
 	// HS512
-	Hmac         []byte `json:"-"`
+	Hmac         helpers.EncryptedBytes `json:"-"`
 	selectValues sql.SelectValues
 }
 
@@ -34,7 +35,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case settings.FieldHmac:
-			values[i] = new([]byte)
+			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldID:
 			values[i] = new(sql.NullInt64)
 		case settings.FieldCipher:
@@ -81,7 +82,7 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 				_m.Cipher = value.String
 			}
 		case settings.FieldHmac:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
 				return fmt.Errorf("unexpected type %T for field hmac", values[i])
 			} else if value != nil {
 				_m.Hmac = *value

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/westport/db/ent/settings"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // SettingsCreate is the builder for creating a Settings entity.
@@ -63,8 +64,16 @@ func (_c *SettingsCreate) SetNillableCipher(v *string) *SettingsCreate {
 }
 
 // SetHmac sets the "hmac" field.
-func (_c *SettingsCreate) SetHmac(v []byte) *SettingsCreate {
+func (_c *SettingsCreate) SetHmac(v helpers.EncryptedBytes) *SettingsCreate {
 	_c.mutation.SetHmac(v)
+	return _c
+}
+
+// SetNillableHmac sets the "hmac" field if the given value is not nil.
+func (_c *SettingsCreate) SetNillableHmac(v *helpers.EncryptedBytes) *SettingsCreate {
+	if v != nil {
+		_c.SetHmac(*v)
+	}
 	return _c
 }
 

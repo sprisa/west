@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
 )
 
@@ -21,12 +22,13 @@ func (Settings) Fields() []ent.Field {
 			Comment("Nebula cipher. aes or chachapoly"),
 		field.Bytes("hmac").
 			Sensitive().
-			DefaultFunc(func() []byte {
+			GoType(helpers.EncryptedBytes{}).
+			DefaultFunc(func() helpers.EncryptedBytes {
 				key, err := GenerateHMAC(64)
 				if err != nil {
 					l.Log.Panic().Err(err).Msg("error generated hmac key")
 				}
-				return key
+				return helpers.EncryptedBytes{Data: key}
 			}).
 			Comment("HS512"),
 	}

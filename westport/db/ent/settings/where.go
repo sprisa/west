@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/westport/db/ent/predicate"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // ID filters vertices based on their ID field.
@@ -70,7 +71,7 @@ func Cipher(v string) predicate.Settings {
 }
 
 // Hmac applies equality check predicate on the "hmac" field. It's identical to HmacEQ.
-func Hmac(v []byte) predicate.Settings {
+func Hmac(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldHmac, v))
 }
 
@@ -220,42 +221,42 @@ func CipherContainsFold(v string) predicate.Settings {
 }
 
 // HmacEQ applies the EQ predicate on the "hmac" field.
-func HmacEQ(v []byte) predicate.Settings {
+func HmacEQ(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldHmac, v))
 }
 
 // HmacNEQ applies the NEQ predicate on the "hmac" field.
-func HmacNEQ(v []byte) predicate.Settings {
+func HmacNEQ(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldNEQ(FieldHmac, v))
 }
 
 // HmacIn applies the In predicate on the "hmac" field.
-func HmacIn(vs ...[]byte) predicate.Settings {
+func HmacIn(vs ...helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldIn(FieldHmac, vs...))
 }
 
 // HmacNotIn applies the NotIn predicate on the "hmac" field.
-func HmacNotIn(vs ...[]byte) predicate.Settings {
+func HmacNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldNotIn(FieldHmac, vs...))
 }
 
 // HmacGT applies the GT predicate on the "hmac" field.
-func HmacGT(v []byte) predicate.Settings {
+func HmacGT(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldGT(FieldHmac, v))
 }
 
 // HmacGTE applies the GTE predicate on the "hmac" field.
-func HmacGTE(v []byte) predicate.Settings {
+func HmacGTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldGTE(FieldHmac, v))
 }
 
 // HmacLT applies the LT predicate on the "hmac" field.
-func HmacLT(v []byte) predicate.Settings {
+func HmacLT(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLT(FieldHmac, v))
 }
 
 // HmacLTE applies the LTE predicate on the "hmac" field.
-func HmacLTE(v []byte) predicate.Settings {
+func HmacLTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldHmac, v))
 }
 
