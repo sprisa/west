@@ -61,6 +61,7 @@ var InstallCommand = &cli.Command{
 			CaCrt: ca,
 			CaKey: caKey,
 			Name:  "west-port-1",
+			// TODO: Make this cidr range configurable during install
 			Ip:    "10.10.10.1/24",
 		})
 		if err != nil {
