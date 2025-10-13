@@ -46,6 +46,7 @@ var (
 		{Name: "ca_key", Type: field.TypeBytes},
 		{Name: "lighthouse_crt", Type: field.TypeBytes},
 		{Name: "lighthouse_key", Type: field.TypeBytes},
+		{Name: "cidr", Type: field.TypeString},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
 	SettingsTable = &schema.Table{

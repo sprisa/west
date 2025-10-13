@@ -73,6 +73,20 @@ func (_u *SettingsUpdate) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsUp
 	return _u
 }
 
+// SetCidr sets the "cidr" field.
+func (_u *SettingsUpdate) SetCidr(v helpers.IpCidr) *SettingsUpdate {
+	_u.mutation.SetCidr(v)
+	return _u
+}
+
+// SetNillableCidr sets the "cidr" field if the given value is not nil.
+func (_u *SettingsUpdate) SetNillableCidr(v *helpers.IpCidr) *SettingsUpdate {
+	if v != nil {
+		_u.SetCidr(*v)
+	}
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdate) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -141,6 +155,9 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.LighthouseKey(); ok {
 		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
 	}
+	if value, ok := _u.mutation.Cidr(); ok {
+		_spec.SetField(settings.FieldCidr, field.TypeString, value)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{settings.Label}
@@ -202,6 +219,20 @@ func (_u *SettingsUpdateOne) SetLighthouseCrt(v helpers.EncryptedBytes) *Setting
 // SetLighthouseKey sets the "lighthouse_key" field.
 func (_u *SettingsUpdateOne) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsUpdateOne {
 	_u.mutation.SetLighthouseKey(v)
+	return _u
+}
+
+// SetCidr sets the "cidr" field.
+func (_u *SettingsUpdateOne) SetCidr(v helpers.IpCidr) *SettingsUpdateOne {
+	_u.mutation.SetCidr(v)
+	return _u
+}
+
+// SetNillableCidr sets the "cidr" field if the given value is not nil.
+func (_u *SettingsUpdateOne) SetNillableCidr(v *helpers.IpCidr) *SettingsUpdateOne {
+	if v != nil {
+		_u.SetCidr(*v)
+	}
 	return _u
 }
 
@@ -302,6 +333,9 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if value, ok := _u.mutation.LighthouseKey(); ok {
 		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Cidr(); ok {
+		_spec.SetField(settings.FieldCidr, field.TypeString, value)
 	}
 	_node = &Settings{config: _u.config}
 	_spec.Assign = _node.assignValues

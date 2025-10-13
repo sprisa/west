@@ -10,6 +10,7 @@ import (
 	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
+	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
 	"github.com/urfave/cli/v3"
 )
@@ -29,6 +30,11 @@ var InstallCommand = &cli.Command{
 			Value: "ca.key",
 			Usage: "Path to ca key",
 		},
+		&cli.StringFlag{
+			Name:  "cidr",
+			Value: "10.10.10.1/24",
+			Usage: "Network IP cidr range",
+		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
 		caPath := c.String("ca-crt")
@@ -41,6 +47,7 @@ var InstallCommand = &cli.Command{
 		if err != nil {
 			return errutil.WrapError(err, "error reading ca-key at `%s`", caPath)
 		}
+		cidr := c.String("cidr")
 
 		client, err := db.OpenDB()
 		if err != nil {
@@ -61,11 +68,15 @@ var InstallCommand = &cli.Command{
 			CaCrt: ca,
 			CaKey: caKey,
 			Name:  "west-port-1",
-			// TODO: Make this cidr range configurable during install
-			Ip:    "10.10.10.1/24",
+			Ip:    cidr,
 		})
 		if err != nil {
 			return errutil.WrapError(err, "error generating west-port cert")
+		}
+
+		ipCidr, err := helpers.NewIpCidr(cidr)
+		if err != nil {
+			return errutil.WrapError(err, "error parsing cidr")
 		}
 
 		l.Log.Info().Msg("Create a encryption a password")
@@ -79,6 +90,7 @@ var InstallCommand = &cli.Command{
 			SetCaKey(caKey).
 			SetLighthouseCrt(lhCert.Cert).
 			SetLighthouseKey(lhCert.Key).
+			SetCidr(ipCidr).
 			Exec(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving settings")

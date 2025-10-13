@@ -87,6 +87,12 @@ func (_c *SettingsCreate) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsCr
 	return _c
 }
 
+// SetCidr sets the "cidr" field.
+func (_c *SettingsCreate) SetCidr(v helpers.IpCidr) *SettingsCreate {
+	_c.mutation.SetCidr(v)
+	return _c
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_c *SettingsCreate) Mutation() *SettingsMutation {
 	return _c.mutation
@@ -159,6 +165,9 @@ func (_c *SettingsCreate) check() error {
 	if _, ok := _c.mutation.LighthouseKey(); !ok {
 		return &ValidationError{Name: "lighthouse_key", err: errors.New(`ent: missing required field "Settings.lighthouse_key"`)}
 	}
+	if _, ok := _c.mutation.Cidr(); !ok {
+		return &ValidationError{Name: "cidr", err: errors.New(`ent: missing required field "Settings.cidr"`)}
+	}
 	return nil
 }
 
@@ -212,6 +221,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LighthouseKey(); ok {
 		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
 		_node.LighthouseKey = value
+	}
+	if value, ok := _c.mutation.Cidr(); ok {
+		_spec.SetField(settings.FieldCidr, field.TypeString, value)
+		_node.Cidr = value
 	}
 	return _node, _spec
 }

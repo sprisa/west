@@ -5,10 +5,12 @@ import (
 	"os"
 
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/util/sig"
 	"github.com/urfave/cli/v3"
 )
 
 func main() {
+	ctx := sig.ShutdownContext(context.Background())
 	cmd := &cli.Command{
 		Name:      "west",
 		Usage:     "mesh networking",
@@ -21,7 +23,7 @@ func main() {
 		},
 	}
 
-	err := cmd.Run(context.Background(), os.Args)
+	err := cmd.Run(ctx, os.Args)
 	if err != nil {
 		l.Log.Error().Msg(err.Error())
 		defer os.Exit(1)

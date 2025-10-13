@@ -90,6 +90,11 @@ func LighthouseKey(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
 }
 
+// Cidr applies equality check predicate on the "cidr" field. It's identical to CidrEQ.
+func Cidr(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCidr, v))
+}
+
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
 func CreatedTimeEQ(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCreatedTime, v))
@@ -393,6 +398,76 @@ func LighthouseKeyLT(v helpers.EncryptedBytes) predicate.Settings {
 // LighthouseKeyLTE applies the LTE predicate on the "lighthouse_key" field.
 func LighthouseKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldLighthouseKey, v))
+}
+
+// CidrEQ applies the EQ predicate on the "cidr" field.
+func CidrEQ(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCidr, v))
+}
+
+// CidrNEQ applies the NEQ predicate on the "cidr" field.
+func CidrNEQ(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldCidr, v))
+}
+
+// CidrIn applies the In predicate on the "cidr" field.
+func CidrIn(vs ...helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldCidr, vs...))
+}
+
+// CidrNotIn applies the NotIn predicate on the "cidr" field.
+func CidrNotIn(vs ...helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldCidr, vs...))
+}
+
+// CidrGT applies the GT predicate on the "cidr" field.
+func CidrGT(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldCidr, v))
+}
+
+// CidrGTE applies the GTE predicate on the "cidr" field.
+func CidrGTE(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldCidr, v))
+}
+
+// CidrLT applies the LT predicate on the "cidr" field.
+func CidrLT(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldCidr, v))
+}
+
+// CidrLTE applies the LTE predicate on the "cidr" field.
+func CidrLTE(v helpers.IpCidr) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldCidr, v))
+}
+
+// CidrContains applies the Contains predicate on the "cidr" field.
+func CidrContains(v helpers.IpCidr) predicate.Settings {
+	vc := v.String()
+	return predicate.Settings(sql.FieldContains(FieldCidr, vc))
+}
+
+// CidrHasPrefix applies the HasPrefix predicate on the "cidr" field.
+func CidrHasPrefix(v helpers.IpCidr) predicate.Settings {
+	vc := v.String()
+	return predicate.Settings(sql.FieldHasPrefix(FieldCidr, vc))
+}
+
+// CidrHasSuffix applies the HasSuffix predicate on the "cidr" field.
+func CidrHasSuffix(v helpers.IpCidr) predicate.Settings {
+	vc := v.String()
+	return predicate.Settings(sql.FieldHasSuffix(FieldCidr, vc))
+}
+
+// CidrEqualFold applies the EqualFold predicate on the "cidr" field.
+func CidrEqualFold(v helpers.IpCidr) predicate.Settings {
+	vc := v.String()
+	return predicate.Settings(sql.FieldEqualFold(FieldCidr, vc))
+}
+
+// CidrContainsFold applies the ContainsFold predicate on the "cidr" field.
+func CidrContainsFold(v helpers.IpCidr) predicate.Settings {
+	vc := v.String()
+	return predicate.Settings(sql.FieldContainsFold(FieldCidr, vc))
 }
 
 // And groups predicates with the AND operator between them.

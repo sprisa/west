@@ -18,6 +18,7 @@ func main() {
 		Commands: []*cli.Command{
 			InstallCommand,
 			StartCommand,
+			AddCommand,
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			return cli.ShowAppHelp(cmd)

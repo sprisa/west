@@ -30,6 +30,9 @@ func (Settings) Fields() []ent.Field {
 		field.Bytes("lighthouse_key").
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}),
+		field.String("cidr").
+			GoType(helpers.IpCidr{}).
+			Comment("Network cidr range"),
 		// field.Bytes("hmac").
 		// 	Sensitive().
 		// 	GoType(helpers.EncryptedBytes{}).

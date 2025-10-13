@@ -698,6 +698,7 @@ type SettingsMutation struct {
 	ca_key         *helpers.EncryptedBytes
 	lighthouse_crt *helpers.EncryptedBytes
 	lighthouse_key *helpers.EncryptedBytes
+	cidr           *helpers.IpCidr
 	clearedFields  map[string]struct{}
 	done           bool
 	oldValue       func(context.Context) (*Settings, error)
@@ -1054,6 +1055,42 @@ func (m *SettingsMutation) ResetLighthouseKey() {
 	m.lighthouse_key = nil
 }
 
+// SetCidr sets the "cidr" field.
+func (m *SettingsMutation) SetCidr(hc helpers.IpCidr) {
+	m.cidr = &hc
+}
+
+// Cidr returns the value of the "cidr" field in the mutation.
+func (m *SettingsMutation) Cidr() (r helpers.IpCidr, exists bool) {
+	v := m.cidr
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCidr returns the old "cidr" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCidr(ctx context.Context) (v helpers.IpCidr, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCidr is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCidr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCidr: %w", err)
+	}
+	return oldValue.Cidr, nil
+}
+
+// ResetCidr resets all changes to the "cidr" field.
+func (m *SettingsMutation) ResetCidr() {
+	m.cidr = nil
+}
+
 // Where appends a list predicates to the SettingsMutation builder.
 func (m *SettingsMutation) Where(ps ...predicate.Settings) {
 	m.predicates = append(m.predicates, ps...)
@@ -1088,7 +1125,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -1109,6 +1146,9 @@ func (m *SettingsMutation) Fields() []string {
 	}
 	if m.lighthouse_key != nil {
 		fields = append(fields, settings.FieldLighthouseKey)
+	}
+	if m.cidr != nil {
+		fields = append(fields, settings.FieldCidr)
 	}
 	return fields
 }
@@ -1132,6 +1172,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.LighthouseCrt()
 	case settings.FieldLighthouseKey:
 		return m.LighthouseKey()
+	case settings.FieldCidr:
+		return m.Cidr()
 	}
 	return nil, false
 }
@@ -1155,6 +1197,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldLighthouseCrt(ctx)
 	case settings.FieldLighthouseKey:
 		return m.OldLighthouseKey(ctx)
+	case settings.FieldCidr:
+		return m.OldCidr(ctx)
 	}
 	return nil, fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1212,6 +1256,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLighthouseKey(v)
+		return nil
+	case settings.FieldCidr:
+		v, ok := value.(helpers.IpCidr)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCidr(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)
@@ -1282,6 +1333,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldLighthouseKey:
 		m.ResetLighthouseKey()
+		return nil
+	case settings.FieldCidr:
+		m.ResetCidr()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)

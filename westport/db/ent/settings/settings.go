@@ -27,6 +27,8 @@ const (
 	FieldLighthouseCrt = "lighthouse_crt"
 	// FieldLighthouseKey holds the string denoting the lighthouse_key field in the database.
 	FieldLighthouseKey = "lighthouse_key"
+	// FieldCidr holds the string denoting the cidr field in the database.
+	FieldCidr = "cidr"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
 )
@@ -41,6 +43,7 @@ var Columns = []string{
 	FieldCaKey,
 	FieldLighthouseCrt,
 	FieldLighthouseKey,
+	FieldCidr,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,4 +88,9 @@ func ByUpdatedTime(opts ...sql.OrderTermOption) OrderOption {
 // ByCipher orders the results by the cipher field.
 func ByCipher(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCipher, opts...).ToFunc()
+}
+
+// ByCidr orders the results by the cidr field.
+func ByCidr(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCidr, opts...).ToFunc()
 }
