@@ -1,16 +1,16 @@
 package helpers
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
-	"io"
+
+	"golang.org/x/crypto/chacha20poly1305"
 )
 
 var EncryptionKey [32]byte
+
 // var EncryptionKey = []byte("passphrasewhichneedstobe32bytes!")
 
 // EncryptedBytes is a custom type that automatically encrypts/decrypts
@@ -61,22 +61,19 @@ func (e EncryptedBytes) Value() (driver.Value, error) {
 }
 
 func encrypt(plaintext []byte) (string, error) {
-	block, err := aes.NewCipher(EncryptionKey[:])
+	aead, err := chacha20poly1305.NewX(EncryptionKey[:])
 	if err != nil {
 		return "", err
 	}
 
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
+	// Generate a random nonce (24 bytes for XChaCha20)
+	nonce := make([]byte, aead.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
 		return "", err
 	}
 
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", err
-	}
-
-	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
+	// Encrypt and authenticate
+	ciphertext := aead.Seal(nonce, nonce, plaintext, nil)
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
@@ -86,23 +83,18 @@ func decrypt(ciphertext string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	block, err := aes.NewCipher(EncryptionKey[:])
+	aead, err := chacha20poly1305.NewX(EncryptionKey[:])
 	if err != nil {
 		return []byte{}, err
 	}
 
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	nonceSize := gcm.NonceSize()
+	nonceSize := aead.NonceSize()
 	if len(data) < nonceSize {
 		return []byte{}, fmt.Errorf("ciphertext too short")
 	}
 
 	nonce, encrypted := data[:nonceSize], data[nonceSize:]
-	plaintext, err := gcm.Open(nil, nonce, encrypted, nil)
+	plaintext, err := aead.Open(nil, nonce, encrypted, nil)
 	if err != nil {
 		return []byte{}, err
 	}

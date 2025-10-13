@@ -9,6 +9,7 @@ require (
 	entgo.io/ent v0.14.5
 	github.com/99designs/gqlgen v0.17.81
 	github.com/anandvarma/namegen v1.1.1
+	github.com/cqroot/prompt v0.9.4
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/mattn/go-sqlite3 v1.14.17
@@ -17,6 +18,7 @@ require (
 	github.com/slackhq/nebula v1.9.7
 	github.com/urfave/cli/v3 v3.4.1
 	github.com/vektah/gqlparser/v2 v2.5.30
+	golang.org/x/crypto v0.42.0
 	golang.org/x/sync v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -29,11 +31,19 @@ require (
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/charmbracelet/bubbles v0.16.1 // indirect
+	github.com/charmbracelet/bubbletea v0.24.2 // indirect
+	github.com/charmbracelet/lipgloss v0.11.0 // indirect
+	github.com/charmbracelet/x/ansi v0.1.1 // indirect
+	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
+	github.com/cqroot/multichoose v0.1.1 // indirect
 	github.com/cyberdelia/go-metrics-graphite v0.0.0-20161219230853-39f87cc3b432 // indirect
 	github.com/flynn/noise v1.1.0 // indirect
 	github.com/gaissmai/bart v0.11.1 // indirect
@@ -47,16 +57,24 @@ require (
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-localereader v0.0.1 // indirect
+	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/miekg/dns v1.1.61 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
+	github.com/muesli/cancelreader v0.2.2 // indirect
+	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/nbrownus/go-metrics-prometheus v0.0.0-20210712211119-974a6260965f // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/songgao/water v0.0.0-20200317203138-2b4b6d7c09d8 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
@@ -68,7 +86,6 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
