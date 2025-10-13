@@ -20,13 +20,18 @@ func (Settings) Fields() []ent.Field {
 		field.String("cipher").
 			Default("aes").
 			Comment("Nebula cipher. aes or chachapoly"),
+		field.Bytes("ca").
+			GoType(helpers.EncryptedBytes{}),
+		field.Bytes("ca_key").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}),
 		field.Bytes("hmac").
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}).
 			DefaultFunc(func() helpers.EncryptedBytes {
 				key, err := GenerateHMAC(64)
 				if err != nil {
-					l.Log.Panic().Err(err).Msg("error generated hmac key")
+					l.Log.Panic().Err(err).Msg("error generating hmac key")
 				}
 				return helpers.EncryptedBytes(key)
 			}).

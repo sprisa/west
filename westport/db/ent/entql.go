@@ -48,6 +48,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			settings.FieldCreatedTime: {Type: field.TypeTime, Column: settings.FieldCreatedTime},
 			settings.FieldUpdatedTime: {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
 			settings.FieldCipher:      {Type: field.TypeString, Column: settings.FieldCipher},
+			settings.FieldCa:          {Type: field.TypeBytes, Column: settings.FieldCa},
+			settings.FieldCaKey:       {Type: field.TypeBytes, Column: settings.FieldCaKey},
 			settings.FieldHmac:        {Type: field.TypeBytes, Column: settings.FieldHmac},
 		},
 	}
@@ -183,6 +185,16 @@ func (f *SettingsFilter) WhereUpdatedTime(p entql.TimeP) {
 // WhereCipher applies the entql string predicate on the cipher field.
 func (f *SettingsFilter) WhereCipher(p entql.StringP) {
 	f.Where(p.Field(settings.FieldCipher))
+}
+
+// WhereCa applies the entql []byte predicate on the ca field.
+func (f *SettingsFilter) WhereCa(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldCa))
+}
+
+// WhereCaKey applies the entql []byte predicate on the ca_key field.
+func (f *SettingsFilter) WhereCaKey(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldCaKey))
 }
 
 // WhereHmac applies the entql []byte predicate on the hmac field.

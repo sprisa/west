@@ -694,6 +694,8 @@ type SettingsMutation struct {
 	created_time  *time.Time
 	updated_time  *time.Time
 	cipher        *string
+	ca            *helpers.EncryptedBytes
+	ca_key        *helpers.EncryptedBytes
 	hmac          *helpers.EncryptedBytes
 	clearedFields map[string]struct{}
 	done          bool
@@ -907,6 +909,78 @@ func (m *SettingsMutation) ResetCipher() {
 	m.cipher = nil
 }
 
+// SetCa sets the "ca" field.
+func (m *SettingsMutation) SetCa(hb helpers.EncryptedBytes) {
+	m.ca = &hb
+}
+
+// Ca returns the value of the "ca" field in the mutation.
+func (m *SettingsMutation) Ca() (r helpers.EncryptedBytes, exists bool) {
+	v := m.ca
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCa returns the old "ca" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCa(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCa is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCa requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCa: %w", err)
+	}
+	return oldValue.Ca, nil
+}
+
+// ResetCa resets all changes to the "ca" field.
+func (m *SettingsMutation) ResetCa() {
+	m.ca = nil
+}
+
+// SetCaKey sets the "ca_key" field.
+func (m *SettingsMutation) SetCaKey(hb helpers.EncryptedBytes) {
+	m.ca_key = &hb
+}
+
+// CaKey returns the value of the "ca_key" field in the mutation.
+func (m *SettingsMutation) CaKey() (r helpers.EncryptedBytes, exists bool) {
+	v := m.ca_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCaKey returns the old "ca_key" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCaKey(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCaKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCaKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCaKey: %w", err)
+	}
+	return oldValue.CaKey, nil
+}
+
+// ResetCaKey resets all changes to the "ca_key" field.
+func (m *SettingsMutation) ResetCaKey() {
+	m.ca_key = nil
+}
+
 // SetHmac sets the "hmac" field.
 func (m *SettingsMutation) SetHmac(hb helpers.EncryptedBytes) {
 	m.hmac = &hb
@@ -977,7 +1051,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -986,6 +1060,12 @@ func (m *SettingsMutation) Fields() []string {
 	}
 	if m.cipher != nil {
 		fields = append(fields, settings.FieldCipher)
+	}
+	if m.ca != nil {
+		fields = append(fields, settings.FieldCa)
+	}
+	if m.ca_key != nil {
+		fields = append(fields, settings.FieldCaKey)
 	}
 	if m.hmac != nil {
 		fields = append(fields, settings.FieldHmac)
@@ -1004,6 +1084,10 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedTime()
 	case settings.FieldCipher:
 		return m.Cipher()
+	case settings.FieldCa:
+		return m.Ca()
+	case settings.FieldCaKey:
+		return m.CaKey()
 	case settings.FieldHmac:
 		return m.Hmac()
 	}
@@ -1021,6 +1105,10 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUpdatedTime(ctx)
 	case settings.FieldCipher:
 		return m.OldCipher(ctx)
+	case settings.FieldCa:
+		return m.OldCa(ctx)
+	case settings.FieldCaKey:
+		return m.OldCaKey(ctx)
 	case settings.FieldHmac:
 		return m.OldHmac(ctx)
 	}
@@ -1052,6 +1140,20 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCipher(v)
+		return nil
+	case settings.FieldCa:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCa(v)
+		return nil
+	case settings.FieldCaKey:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCaKey(v)
 		return nil
 	case settings.FieldHmac:
 		v, ok := value.(helpers.EncryptedBytes)
@@ -1117,6 +1219,12 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldCipher:
 		m.ResetCipher()
+		return nil
+	case settings.FieldCa:
+		m.ResetCa()
+		return nil
+	case settings.FieldCaKey:
+		m.ResetCaKey()
 		return nil
 	case settings.FieldHmac:
 		m.ResetHmac()

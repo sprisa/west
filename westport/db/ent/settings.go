@@ -24,6 +24,10 @@ type Settings struct {
 	UpdatedTime time.Time `json:"updated_time,omitempty"`
 	// Nebula cipher. aes or chachapoly
 	Cipher string `json:"cipher,omitempty"`
+	// Ca holds the value of the "ca" field.
+	Ca helpers.EncryptedBytes `json:"ca,omitempty"`
+	// CaKey holds the value of the "ca_key" field.
+	CaKey helpers.EncryptedBytes `json:"-"`
 	// HS512
 	Hmac         helpers.EncryptedBytes `json:"-"`
 	selectValues sql.SelectValues
@@ -34,7 +38,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case settings.FieldHmac:
+		case settings.FieldCa, settings.FieldCaKey, settings.FieldHmac:
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -80,6 +84,18 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field cipher", values[i])
 			} else if value.Valid {
 				_m.Cipher = value.String
+			}
+		case settings.FieldCa:
+			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
+				return fmt.Errorf("unexpected type %T for field ca", values[i])
+			} else if value != nil {
+				_m.Ca = *value
+			}
+		case settings.FieldCaKey:
+			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
+				return fmt.Errorf("unexpected type %T for field ca_key", values[i])
+			} else if value != nil {
+				_m.CaKey = *value
 			}
 		case settings.FieldHmac:
 			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
@@ -131,6 +147,11 @@ func (_m *Settings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("cipher=")
 	builder.WriteString(_m.Cipher)
+	builder.WriteString(", ")
+	builder.WriteString("ca=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Ca))
+	builder.WriteString(", ")
+	builder.WriteString("ca_key=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("hmac=<sensitive>")
 	builder.WriteByte(')')

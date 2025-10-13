@@ -49,6 +49,18 @@ func (_u *SettingsUpdate) SetNillableCipher(v *string) *SettingsUpdate {
 	return _u
 }
 
+// SetCa sets the "ca" field.
+func (_u *SettingsUpdate) SetCa(v helpers.EncryptedBytes) *SettingsUpdate {
+	_u.mutation.SetCa(v)
+	return _u
+}
+
+// SetCaKey sets the "ca_key" field.
+func (_u *SettingsUpdate) SetCaKey(v helpers.EncryptedBytes) *SettingsUpdate {
+	_u.mutation.SetCaKey(v)
+	return _u
+}
+
 // SetHmac sets the "hmac" field.
 func (_u *SettingsUpdate) SetHmac(v helpers.EncryptedBytes) *SettingsUpdate {
 	_u.mutation.SetHmac(v)
@@ -111,6 +123,12 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Cipher(); ok {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.Ca(); ok {
+		_spec.SetField(settings.FieldCa, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.CaKey(); ok {
+		_spec.SetField(settings.FieldCaKey, field.TypeBytes, value)
+	}
 	if value, ok := _u.mutation.Hmac(); ok {
 		_spec.SetField(settings.FieldHmac, field.TypeBytes, value)
 	}
@@ -151,6 +169,18 @@ func (_u *SettingsUpdateOne) SetNillableCipher(v *string) *SettingsUpdateOne {
 	if v != nil {
 		_u.SetCipher(*v)
 	}
+	return _u
+}
+
+// SetCa sets the "ca" field.
+func (_u *SettingsUpdateOne) SetCa(v helpers.EncryptedBytes) *SettingsUpdateOne {
+	_u.mutation.SetCa(v)
+	return _u
+}
+
+// SetCaKey sets the "ca_key" field.
+func (_u *SettingsUpdateOne) SetCaKey(v helpers.EncryptedBytes) *SettingsUpdateOne {
+	_u.mutation.SetCaKey(v)
 	return _u
 }
 
@@ -245,6 +275,12 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if value, ok := _u.mutation.Cipher(); ok {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Ca(); ok {
+		_spec.SetField(settings.FieldCa, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.CaKey(); ok {
+		_spec.SetField(settings.FieldCaKey, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.Hmac(); ok {
 		_spec.SetField(settings.FieldHmac, field.TypeBytes, value)

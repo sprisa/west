@@ -70,6 +70,16 @@ func Cipher(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCipher, v))
 }
 
+// Ca applies equality check predicate on the "ca" field. It's identical to CaEQ.
+func Ca(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCa, v))
+}
+
+// CaKey applies equality check predicate on the "ca_key" field. It's identical to CaKeyEQ.
+func CaKey(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCaKey, v))
+}
+
 // Hmac applies equality check predicate on the "hmac" field. It's identical to HmacEQ.
 func Hmac(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldHmac, v))
@@ -218,6 +228,86 @@ func CipherEqualFold(v string) predicate.Settings {
 // CipherContainsFold applies the ContainsFold predicate on the "cipher" field.
 func CipherContainsFold(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldContainsFold(FieldCipher, v))
+}
+
+// CaEQ applies the EQ predicate on the "ca" field.
+func CaEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCa, v))
+}
+
+// CaNEQ applies the NEQ predicate on the "ca" field.
+func CaNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldCa, v))
+}
+
+// CaIn applies the In predicate on the "ca" field.
+func CaIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldCa, vs...))
+}
+
+// CaNotIn applies the NotIn predicate on the "ca" field.
+func CaNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldCa, vs...))
+}
+
+// CaGT applies the GT predicate on the "ca" field.
+func CaGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldCa, v))
+}
+
+// CaGTE applies the GTE predicate on the "ca" field.
+func CaGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldCa, v))
+}
+
+// CaLT applies the LT predicate on the "ca" field.
+func CaLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldCa, v))
+}
+
+// CaLTE applies the LTE predicate on the "ca" field.
+func CaLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldCa, v))
+}
+
+// CaKeyEQ applies the EQ predicate on the "ca_key" field.
+func CaKeyEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCaKey, v))
+}
+
+// CaKeyNEQ applies the NEQ predicate on the "ca_key" field.
+func CaKeyNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldCaKey, v))
+}
+
+// CaKeyIn applies the In predicate on the "ca_key" field.
+func CaKeyIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldCaKey, vs...))
+}
+
+// CaKeyNotIn applies the NotIn predicate on the "ca_key" field.
+func CaKeyNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldCaKey, vs...))
+}
+
+// CaKeyGT applies the GT predicate on the "ca_key" field.
+func CaKeyGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldCaKey, v))
+}
+
+// CaKeyGTE applies the GTE predicate on the "ca_key" field.
+func CaKeyGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldCaKey, v))
+}
+
+// CaKeyLT applies the LT predicate on the "ca_key" field.
+func CaKeyLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldCaKey, v))
+}
+
+// CaKeyLTE applies the LTE predicate on the "ca_key" field.
+func CaKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldCaKey, v))
 }
 
 // HmacEQ applies the EQ predicate on the "hmac" field.
