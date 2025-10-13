@@ -4,11 +4,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/rs/zerolog"
+	l "github.com/sprisa/west/util/log"
 	"github.com/urfave/cli/v3"
 )
-
-var log = zerolog.New(zerolog.NewConsoleWriter())
 
 func main() {
 	cmd := &cli.Command{
@@ -25,7 +23,7 @@ func main() {
 
 	err := cmd.Run(context.Background(), os.Args)
 	if err != nil {
-		log.Error().Msg(err.Error())
+		l.Log.Error().Msg(err.Error())
 		defer os.Exit(1)
 	}
 }
