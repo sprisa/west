@@ -55,14 +55,6 @@ func (_u *SettingsUpdate) SetHmac(v helpers.EncryptedBytes) *SettingsUpdate {
 	return _u
 }
 
-// SetNillableHmac sets the "hmac" field if the given value is not nil.
-func (_u *SettingsUpdate) SetNillableHmac(v *helpers.EncryptedBytes) *SettingsUpdate {
-	if v != nil {
-		_u.SetHmac(*v)
-	}
-	return _u
-}
-
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdate) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -165,14 +157,6 @@ func (_u *SettingsUpdateOne) SetNillableCipher(v *string) *SettingsUpdateOne {
 // SetHmac sets the "hmac" field.
 func (_u *SettingsUpdateOne) SetHmac(v helpers.EncryptedBytes) *SettingsUpdateOne {
 	_u.mutation.SetHmac(v)
-	return _u
-}
-
-// SetNillableHmac sets the "hmac" field if the given value is not nil.
-func (_u *SettingsUpdateOne) SetNillableHmac(v *helpers.EncryptedBytes) *SettingsUpdateOne {
-	if v != nil {
-		_u.SetHmac(*v)
-	}
 	return _u
 }
 

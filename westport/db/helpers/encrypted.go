@@ -14,14 +14,12 @@ var EncryptionKey [32]byte
 // var EncryptionKey = []byte("passphrasewhichneedstobe32bytes!")
 
 // EncryptedBytes is a custom type that automatically encrypts/decrypts
-type EncryptedBytes struct {
-	Data []byte
-}
+type EncryptedBytes []byte
 
 // Scan decrypts when reading from the database
 func (e *EncryptedBytes) Scan(value any) error {
 	if value == nil {
-		e.Data = []byte{}
+		*e = []byte{}
 		return nil
 	}
 
@@ -44,17 +42,17 @@ func (e *EncryptedBytes) Scan(value any) error {
 		return fmt.Errorf("failed to decrypt: %w", err)
 	}
 
-	e.Data = decrypted
+	*e = decrypted
 	return nil
 }
 
 // Value encrypts when writing to the database
 func (e EncryptedBytes) Value() (driver.Value, error) {
-	if len(e.Data) == 0 {
+	if len(e) == 0 {
 		return []byte{}, nil
 	}
 
-	encrypted, err := encrypt(e.Data)
+	encrypted, err := encrypt(e)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt: %w", err)
 	}
@@ -114,5 +112,5 @@ func decrypt(ciphertext string) ([]byte, error) {
 
 // String returns the decrypted value as a string
 func (e EncryptedBytes) String() string {
-	return string(e.Data)
+	return string(e)
 }

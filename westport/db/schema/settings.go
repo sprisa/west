@@ -28,7 +28,7 @@ func (Settings) Fields() []ent.Field {
 				if err != nil {
 					l.Log.Panic().Err(err).Msg("error generated hmac key")
 				}
-				return helpers.EncryptedBytes{Data: key}
+				return helpers.EncryptedBytes(key)
 			}).
 			Comment("HS512"),
 	}
