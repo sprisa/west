@@ -45,7 +45,7 @@ type Server struct {
 	args *ServerArgs
 }
 
-func InitServer(args *ServerArgs) (*Server, error) {
+func NewServer(args *ServerArgs) (*Server, error) {
 	log := args.Log
 	if log == nil {
 		return nil, errors.New("expected Log arg")
@@ -60,13 +60,13 @@ func InitServer(args *ServerArgs) (*Server, error) {
 		return nil, err
 	}
 
-	return InitServerWithConfigCtrl(args, c)
+	return NewServerWithConfigCtrl(args, c)
 }
 
-func InitServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, error) {
+func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, error) {
 	log := args.Log
 	if log == nil {
-		return nil, errors.New("expected Log arg")
+		log = logrus.StandardLogger()
 	}
 	nebulaConfig := args.Config
 	if nebulaConfig == nil {
@@ -115,8 +115,32 @@ func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConf
 	return c, nil
 }
 
-func configToYaml(cfg *config.Config) ([]byte, error) {
-	return yaml.Marshal(cfg)
+// TODO: Not sure if I want this and instead just use a JWT to provision
+func NewServerWithYamlConfig(args *ServerArgs, yamlCfg []byte) (*Server, error) {
+	log := args.Log
+	if log == nil {
+		log = logrus.StandardLogger()
+	}
+	c := nebulaCfg.NewC(log)
+	// TODO: Just run yaml unmarshel to the any map and set in Settings
+	err := c.LoadString(string(yamlCfg))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load nebula config: %w", err)
+	}
+
+	ctrl, err := nebula.Main(c, false, Build, log, args.deviceFactory, nil)
+	if err != nil {
+		switch v := err.(type) {
+		case *util.ContextualError:
+			v.Log(log)
+			return nil, v.Unwrap()
+		default:
+			return nil, err
+		}
+	}
+
+	// TODO: Use mergo and merge west config from the yaml version
+	return &Server{Ctrl: ctrl, args: args}, nil
 }
 
 func (s *Server) Listen(ctx context.Context) error {
@@ -141,4 +165,8 @@ func (s *Server) Listen(ctx context.Context) error {
 
 func (s *Server) IFaceName() string {
 	return s.Ctrl.Device().Name()
+}
+
+func configToYaml(cfg *config.Config) ([]byte, error) {
+	return yaml.Marshal(cfg)
 }

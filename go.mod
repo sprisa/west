@@ -3,8 +3,11 @@ module github.com/sprisa/west
 go 1.25.2
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/rs/zerolog v1.34.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slackhq/nebula v1.9.7
+	github.com/urfave/cli/v3 v3.4.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -20,6 +23,8 @@ require (
 	github.com/gaissmai/bart v0.11.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/miekg/dns v1.1.61 // indirect
 	github.com/nbrownus/go-metrics-prometheus v0.0.0-20210712211119-974a6260965f // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
