@@ -60,7 +60,6 @@ func startWestPort(ctx context.Context) error {
 	}
 
 	l.Log.Info().Msgf("settings: %+v", settings)
-	l.Log.Info().Msgf("hmac: %+v", settings.Hmac.String())
 
 	group, ctx := errgroup.WithContext(ctx)
 
