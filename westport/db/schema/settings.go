@@ -25,7 +25,7 @@ func (Settings) Fields() []ent.Field {
 			DefaultFunc(func() []byte {
 				key, err := GenerateHMAC(64)
 				if err != nil {
-					l.Log.Fatal().Err(err).Msg("error generated hmac key")
+					l.Log.Panic().Err(err).Msg("error generated hmac key")
 				}
 				return key
 			}).

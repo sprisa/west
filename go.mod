@@ -11,6 +11,7 @@ require (
 	github.com/anandvarma/namegen v1.1.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/rs/zerolog v1.34.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slackhq/nebula v1.9.7
