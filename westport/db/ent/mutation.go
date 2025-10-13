@@ -14,6 +14,7 @@ import (
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/predicate"
+	"github.com/sprisa/west/westport/db/ent/settings"
 )
 
 const (
@@ -25,7 +26,8 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDevice = "Device"
+	TypeDevice   = "Device"
+	TypeSettings = "Settings"
 )
 
 // DeviceMutation represents an operation that mutates the Device nodes in the graph.
@@ -680,4 +682,492 @@ func (m *DeviceMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DeviceMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Device edge %s", name)
+}
+
+// SettingsMutation represents an operation that mutates the Settings nodes in the graph.
+type SettingsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_time  *time.Time
+	updated_time  *time.Time
+	cipher        *string
+	hmac          *[]byte
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Settings, error)
+	predicates    []predicate.Settings
+}
+
+var _ ent.Mutation = (*SettingsMutation)(nil)
+
+// settingsOption allows management of the mutation configuration using functional options.
+type settingsOption func(*SettingsMutation)
+
+// newSettingsMutation creates new mutation for the Settings entity.
+func newSettingsMutation(c config, op Op, opts ...settingsOption) *SettingsMutation {
+	m := &SettingsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSettings,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSettingsID sets the ID field of the mutation.
+func withSettingsID(id int) settingsOption {
+	return func(m *SettingsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Settings
+		)
+		m.oldValue = func(ctx context.Context) (*Settings, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Settings.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSettings sets the old Settings of the mutation.
+func withSettings(node *Settings) settingsOption {
+	return func(m *SettingsMutation) {
+		m.oldValue = func(context.Context) (*Settings, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SettingsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SettingsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SettingsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SettingsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Settings.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedTime sets the "created_time" field.
+func (m *SettingsMutation) SetCreatedTime(t time.Time) {
+	m.created_time = &t
+}
+
+// CreatedTime returns the value of the "created_time" field in the mutation.
+func (m *SettingsMutation) CreatedTime() (r time.Time, exists bool) {
+	v := m.created_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedTime returns the old "created_time" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCreatedTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedTime: %w", err)
+	}
+	return oldValue.CreatedTime, nil
+}
+
+// ResetCreatedTime resets all changes to the "created_time" field.
+func (m *SettingsMutation) ResetCreatedTime() {
+	m.created_time = nil
+}
+
+// SetUpdatedTime sets the "updated_time" field.
+func (m *SettingsMutation) SetUpdatedTime(t time.Time) {
+	m.updated_time = &t
+}
+
+// UpdatedTime returns the value of the "updated_time" field in the mutation.
+func (m *SettingsMutation) UpdatedTime() (r time.Time, exists bool) {
+	v := m.updated_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedTime returns the old "updated_time" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldUpdatedTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedTime: %w", err)
+	}
+	return oldValue.UpdatedTime, nil
+}
+
+// ResetUpdatedTime resets all changes to the "updated_time" field.
+func (m *SettingsMutation) ResetUpdatedTime() {
+	m.updated_time = nil
+}
+
+// SetCipher sets the "cipher" field.
+func (m *SettingsMutation) SetCipher(s string) {
+	m.cipher = &s
+}
+
+// Cipher returns the value of the "cipher" field in the mutation.
+func (m *SettingsMutation) Cipher() (r string, exists bool) {
+	v := m.cipher
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCipher returns the old "cipher" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCipher(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCipher is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCipher requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCipher: %w", err)
+	}
+	return oldValue.Cipher, nil
+}
+
+// ResetCipher resets all changes to the "cipher" field.
+func (m *SettingsMutation) ResetCipher() {
+	m.cipher = nil
+}
+
+// SetHmac sets the "hmac" field.
+func (m *SettingsMutation) SetHmac(b []byte) {
+	m.hmac = &b
+}
+
+// Hmac returns the value of the "hmac" field in the mutation.
+func (m *SettingsMutation) Hmac() (r []byte, exists bool) {
+	v := m.hmac
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHmac returns the old "hmac" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldHmac(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHmac is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHmac requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHmac: %w", err)
+	}
+	return oldValue.Hmac, nil
+}
+
+// ResetHmac resets all changes to the "hmac" field.
+func (m *SettingsMutation) ResetHmac() {
+	m.hmac = nil
+}
+
+// Where appends a list predicates to the SettingsMutation builder.
+func (m *SettingsMutation) Where(ps ...predicate.Settings) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SettingsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SettingsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Settings, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SettingsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SettingsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Settings).
+func (m *SettingsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SettingsMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_time != nil {
+		fields = append(fields, settings.FieldCreatedTime)
+	}
+	if m.updated_time != nil {
+		fields = append(fields, settings.FieldUpdatedTime)
+	}
+	if m.cipher != nil {
+		fields = append(fields, settings.FieldCipher)
+	}
+	if m.hmac != nil {
+		fields = append(fields, settings.FieldHmac)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case settings.FieldCreatedTime:
+		return m.CreatedTime()
+	case settings.FieldUpdatedTime:
+		return m.UpdatedTime()
+	case settings.FieldCipher:
+		return m.Cipher()
+	case settings.FieldHmac:
+		return m.Hmac()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case settings.FieldCreatedTime:
+		return m.OldCreatedTime(ctx)
+	case settings.FieldUpdatedTime:
+		return m.OldUpdatedTime(ctx)
+	case settings.FieldCipher:
+		return m.OldCipher(ctx)
+	case settings.FieldHmac:
+		return m.OldHmac(ctx)
+	}
+	return nil, fmt.Errorf("unknown Settings field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SettingsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case settings.FieldCreatedTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedTime(v)
+		return nil
+	case settings.FieldUpdatedTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedTime(v)
+		return nil
+	case settings.FieldCipher:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCipher(v)
+		return nil
+	case settings.FieldHmac:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHmac(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Settings field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SettingsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SettingsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SettingsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Settings numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SettingsMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SettingsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SettingsMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Settings nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SettingsMutation) ResetField(name string) error {
+	switch name {
+	case settings.FieldCreatedTime:
+		m.ResetCreatedTime()
+		return nil
+	case settings.FieldUpdatedTime:
+		m.ResetUpdatedTime()
+		return nil
+	case settings.FieldCipher:
+		m.ResetCipher()
+		return nil
+	case settings.FieldHmac:
+		m.ResetHmac()
+		return nil
+	}
+	return fmt.Errorf("unknown Settings field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SettingsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SettingsMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SettingsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SettingsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SettingsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SettingsMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SettingsMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Settings unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SettingsMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Settings edge %s", name)
 }

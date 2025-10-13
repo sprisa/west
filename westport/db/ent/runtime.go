@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/schema"
 )
 
@@ -36,4 +37,27 @@ func init() {
 	deviceDescIP := deviceFields[1].Descriptor()
 	// device.IPValidator is a validator for the "ip" field. It is called by the builders before save.
 	device.IPValidator = deviceDescIP.Validators[0].(func(uint32) error)
+	settingsMixin := schema.Settings{}.Mixin()
+	settingsMixinFields0 := settingsMixin[0].Fields()
+	_ = settingsMixinFields0
+	settingsFields := schema.Settings{}.Fields()
+	_ = settingsFields
+	// settingsDescCreatedTime is the schema descriptor for created_time field.
+	settingsDescCreatedTime := settingsMixinFields0[0].Descriptor()
+	// settings.DefaultCreatedTime holds the default value on creation for the created_time field.
+	settings.DefaultCreatedTime = settingsDescCreatedTime.Default.(func() time.Time)
+	// settingsDescUpdatedTime is the schema descriptor for updated_time field.
+	settingsDescUpdatedTime := settingsMixinFields0[1].Descriptor()
+	// settings.DefaultUpdatedTime holds the default value on creation for the updated_time field.
+	settings.DefaultUpdatedTime = settingsDescUpdatedTime.Default.(func() time.Time)
+	// settings.UpdateDefaultUpdatedTime holds the default value on update for the updated_time field.
+	settings.UpdateDefaultUpdatedTime = settingsDescUpdatedTime.UpdateDefault.(func() time.Time)
+	// settingsDescCipher is the schema descriptor for cipher field.
+	settingsDescCipher := settingsFields[0].Descriptor()
+	// settings.DefaultCipher holds the default value on creation for the cipher field.
+	settings.DefaultCipher = settingsDescCipher.Default.(string)
+	// settingsDescHmac is the schema descriptor for hmac field.
+	settingsDescHmac := settingsFields[1].Descriptor()
+	// settings.DefaultHmac holds the default value on creation for the hmac field.
+	settings.DefaultHmac = settingsDescHmac.Default.(func() []byte)
 }

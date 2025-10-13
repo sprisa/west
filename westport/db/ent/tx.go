@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// Settings is the client for interacting with the Settings builders.
+	Settings *SettingsClient
 
 	// lazily loaded.
 	client     *Client
@@ -146,6 +148,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Device = NewDeviceClient(tx.config)
+	tx.Settings = NewSettingsClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

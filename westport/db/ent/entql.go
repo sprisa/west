@@ -4,6 +4,7 @@ package ent
 
 import (
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/settings"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -13,7 +14,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 1)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 2)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   device.Table,
@@ -31,6 +32,23 @@ var schemaGraph = func() *sqlgraph.Schema {
 			device.FieldIP:                {Type: field.TypeUint32, Column: device.FieldIP},
 			device.FieldLeasedAccessToken: {Type: field.TypeString, Column: device.FieldLeasedAccessToken},
 			device.FieldCertFingerprint:   {Type: field.TypeString, Column: device.FieldCertFingerprint},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   settings.Table,
+			Columns: settings.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: settings.FieldID,
+			},
+		},
+		Type: "Settings",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			settings.FieldCreatedTime: {Type: field.TypeTime, Column: settings.FieldCreatedTime},
+			settings.FieldUpdatedTime: {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
+			settings.FieldCipher:      {Type: field.TypeString, Column: settings.FieldCipher},
+			settings.FieldHmac:        {Type: field.TypeBytes, Column: settings.FieldHmac},
 		},
 	}
 	return graph
@@ -110,4 +128,64 @@ func (f *DeviceFilter) WhereLeasedAccessToken(p entql.StringP) {
 // WhereCertFingerprint applies the entql string predicate on the cert_fingerprint field.
 func (f *DeviceFilter) WhereCertFingerprint(p entql.StringP) {
 	f.Where(p.Field(device.FieldCertFingerprint))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *SettingsQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the SettingsQuery builder.
+func (_q *SettingsQuery) Filter() *SettingsFilter {
+	return &SettingsFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *SettingsMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the SettingsMutation builder.
+func (m *SettingsMutation) Filter() *SettingsFilter {
+	return &SettingsFilter{config: m.config, predicateAdder: m}
+}
+
+// SettingsFilter provides a generic filtering capability at runtime for SettingsQuery.
+type SettingsFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *SettingsFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *SettingsFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(settings.FieldID))
+}
+
+// WhereCreatedTime applies the entql time.Time predicate on the created_time field.
+func (f *SettingsFilter) WhereCreatedTime(p entql.TimeP) {
+	f.Where(p.Field(settings.FieldCreatedTime))
+}
+
+// WhereUpdatedTime applies the entql time.Time predicate on the updated_time field.
+func (f *SettingsFilter) WhereUpdatedTime(p entql.TimeP) {
+	f.Where(p.Field(settings.FieldUpdatedTime))
+}
+
+// WhereCipher applies the entql string predicate on the cipher field.
+func (f *SettingsFilter) WhereCipher(p entql.StringP) {
+	f.Where(p.Field(settings.FieldCipher))
+}
+
+// WhereHmac applies the entql []byte predicate on the hmac field.
+func (f *SettingsFilter) WhereHmac(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldHmac))
 }
