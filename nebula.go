@@ -64,9 +64,8 @@ func NewServer(args *ServerArgs) (*Server, error) {
 }
 
 func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, error) {
-	log := args.Log
-	if log == nil {
-		log = logrus.StandardLogger()
+	if args.Log == nil {
+		args.Log = logrus.StandardLogger()
 	}
 	nebulaConfig := args.Config
 	if nebulaConfig == nil {
@@ -77,12 +76,12 @@ func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, er
 
 	// TODO: Ensure mknod is still upstream
 
-	ctrl, err := nebula.Main(c, false, Build, log, args.deviceFactory, nil)
+	ctrl, err := nebula.Main(c, false, Build, args.Log, args.deviceFactory, nil)
 
 	if err != nil {
 		switch v := err.(type) {
 		case *util.ContextualError:
-			v.Log(log)
+			v.Log(args.Log)
 			return nil, v.Unwrap()
 		default:
 			// TODO: Move this port error decoration up into harbor
@@ -117,22 +116,21 @@ func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConf
 
 // TODO: Not sure if I want this and instead just use a JWT to provision
 func NewServerWithYamlConfig(args *ServerArgs, yamlCfg []byte) (*Server, error) {
-	log := args.Log
-	if log == nil {
-		log = logrus.StandardLogger()
+	if args.Log == nil {
+		args.Log = logrus.StandardLogger()
 	}
-	c := nebulaCfg.NewC(log)
+	c := nebulaCfg.NewC(args.Log)
 	// TODO: Just run yaml unmarshel to the any map and set in Settings
 	err := c.LoadString(string(yamlCfg))
 	if err != nil {
 		return nil, fmt.Errorf("failed to load nebula config: %w", err)
 	}
 
-	ctrl, err := nebula.Main(c, false, Build, log, args.deviceFactory, nil)
+	ctrl, err := nebula.Main(c, false, Build, args.Log, args.deviceFactory, nil)
 	if err != nil {
 		switch v := err.(type) {
 		case *util.ContextualError:
-			v.Log(log)
+			v.Log(args.Log)
 			return nil, v.Unwrap()
 		default:
 			return nil, err

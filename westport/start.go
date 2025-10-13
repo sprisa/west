@@ -12,15 +12,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/cqroot/prompt"
-	"github.com/cqroot/prompt/input"
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
-	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
 	"github.com/sprisa/west/westport/gql"
 	"github.com/urfave/cli/v3"
@@ -39,14 +36,10 @@ var StartCommand = &cli.Command{
 }
 
 func startWestPort(ctx context.Context) error {
-	pswd, err := prompt.New().Ask("password:").
-		Input("", input.WithEchoMode(input.EchoPassword), input.WithHelp(true))
+	err := promptEncryptionPassword()
 	if err != nil {
 		return err
 	}
-	copy(helpers.EncryptionKey[:], pswd)
-	// l.Log.Info().Msg(pswd)
-	// l.Log.Info().Msgf("key: %s", string(helpers.EncryptionKey[:]))
 
 	client, err := db.OpenDB()
 	if err != nil {
@@ -61,16 +54,9 @@ func startWestPort(ctx context.Context) error {
 	settings, err := client.Settings.Query().Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			settings, err = client.Settings.Create().
-				SetCa([]byte("todo")).
-				SetCaKey([]byte("todo")).
-				Save(ctx)
-			if err != nil {
-				return errutil.WrapError(err, "error initializing settings")
-			}
-		} else {
-			return errutil.WrapError(err, "error initializing settings")
+			return errors.New("error finding settings. Trying installing first.")
 		}
+		return errutil.WrapError(err, "error initializing settings")
 	}
 
 	l.Log.Info().Msgf("settings: %+v", settings)
@@ -109,7 +95,6 @@ func startWestPort(ctx context.Context) error {
 
 	// Start Nebula
 	group.Go(func() error {
-		return nil
 		cipher := config.CipherAes
 		if settings.Cipher == "chachapoly" {
 			cipher = config.CipherChaChaPoly
@@ -117,6 +102,20 @@ func startWestPort(ctx context.Context) error {
 
 		opts := &west.ServerArgs{
 			Config: &config.Config{
+				Pki: config.Pki{
+					Ca: string(settings.Ca),
+					Cert: `-----BEGIN NEBULA CERTIFICATE-----
+CmkKC2xpZ2h0aG91c2UxEgqByKGFDID+//8PKJvTtccGMPivutYGOiBqjllwQsah
+aSFqVWE4172h0kjPs0CB7X8e5bVTAJ7KdEogoQiig3VaURjHQv2n0cZd7P+DSe1D
+71qX0f4oDbCTVCESQOX7B/i4pLPZyTughRsXRS8FwtSQHnhsD/KqIJfCQwnLh1Rs
+EEi0T7SIb9QbOTehk8uULjkPbu2KpbjeCdlB4gQ=
+-----END NEBULA CERTIFICATE-----
+`,
+					Key: `-----BEGIN NEBULA X25519 PRIVATE KEY-----
+IOYGJ975LH0Qqq7PfvmAyrrGzO5+kOMw6J540+PFiSw=
+-----END NEBULA X25519 PRIVATE KEY-----
+`,
+				},
 				Lighthouse: config.Lighthouse{
 					Am_lighthouse: true,
 				},

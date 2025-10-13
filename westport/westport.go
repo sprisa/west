@@ -13,8 +13,10 @@ func main() {
 	ctx := sig.ShutdownContext(context.Background())
 	cmd := &cli.Command{
 		Name:      "west-port",
+		Usage:     "West port network mesh",
 		UsageText: "west-port install",
 		Commands: []*cli.Command{
+			InstallCommand,
 			StartCommand,
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
