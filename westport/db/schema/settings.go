@@ -15,7 +15,6 @@ type Settings struct {
 }
 
 func (Settings) Fields() []ent.Field {
-
 	return []ent.Field{
 		field.String("cipher").
 			Default("aes").

@@ -173,13 +173,13 @@ type Relay struct {
 }
 
 type TunRoute struct {
-	Mtu   int    `yaml:"mtu"`
-	Route string `yaml:"route"`
+	Mtu   int    `yaml:"mtu,omitempty"`
+	Route string `yaml:"route,omitempty"`
 }
 
 type TunUnsafeRoute struct {
-	Route  string `yaml:"route"`
-	Via    string `yaml:"via"`
+	Route  string `yaml:"route,omitempty"`
+	Via    string `yaml:"via,omitempty"`
 	Mtu    int    `yaml:"mtu,omitempty"`
 	Metric int    `yaml:"metric,omitempty"`
 }

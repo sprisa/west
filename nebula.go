@@ -1,4 +1,4 @@
-package nebula
+package west
 
 import (
 	"context"
@@ -48,7 +48,7 @@ type Server struct {
 func NewServer(args *ServerArgs) (*Server, error) {
 	log := args.Log
 	if log == nil {
-		return nil, errors.New("expected Log arg")
+		log = logrus.StandardLogger()
 	}
 	nebulaConfig := args.Config
 	if nebulaConfig == nil {

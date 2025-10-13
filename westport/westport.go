@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/sprisa/west"
+	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/sig"
@@ -43,8 +45,9 @@ func main() {
 
 	l.Log.Info().Msgf("settings: %+v", settings)
 
-	group, _ := errgroup.WithContext(ctx)
+	group, ctx := errgroup.WithContext(ctx)
 
+	// Start Graphql API Server
 	group.Go(func() error {
 		handler := NewGQLServer(gql.NewSchema(client), client)
 		address := ":3003"
@@ -71,6 +74,37 @@ func main() {
 			return nil
 		}
 		return err
+	})
+
+	// Start Nebula
+	group.Go(func() error {
+		cipher := config.CipherAes
+		if settings.Cipher == "chachapoly" {
+			cipher = config.CipherChaChaPoly
+		}
+
+		opts := &west.ServerArgs{
+			Config: &config.Config{
+				Lighthouse: config.Lighthouse{
+					Am_lighthouse: true,
+				},
+				Tun: config.Tun{
+					Disabled: true,
+				},
+				Listen: config.Listen{
+					Host: "::",
+					Port: 4242,
+				},
+				Preferred_ranges: config.DefaultPreferredRanges,
+				Cipher:           cipher,
+			},
+		}
+		srv, err := west.NewServer(opts)
+		if err != nil {
+			return errutil.WrapError(err, "error creating nebula server")
+		}
+
+		return srv.Listen(ctx)
 	})
 
 	err = group.Wait()
