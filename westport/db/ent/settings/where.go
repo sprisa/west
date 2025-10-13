@@ -70,14 +70,24 @@ func Cipher(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCipher, v))
 }
 
-// Ca applies equality check predicate on the "ca" field. It's identical to CaEQ.
-func Ca(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldCa, v))
+// CaCrt applies equality check predicate on the "ca_crt" field. It's identical to CaCrtEQ.
+func CaCrt(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCaCrt, v))
 }
 
 // CaKey applies equality check predicate on the "ca_key" field. It's identical to CaKeyEQ.
 func CaKey(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCaKey, v))
+}
+
+// LighthouseCrt applies equality check predicate on the "lighthouse_crt" field. It's identical to LighthouseCrtEQ.
+func LighthouseCrt(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLighthouseCrt, v))
+}
+
+// LighthouseKey applies equality check predicate on the "lighthouse_key" field. It's identical to LighthouseKeyEQ.
+func LighthouseKey(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
 }
 
 // Hmac applies equality check predicate on the "hmac" field. It's identical to HmacEQ.
@@ -230,44 +240,44 @@ func CipherContainsFold(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldContainsFold(FieldCipher, v))
 }
 
-// CaEQ applies the EQ predicate on the "ca" field.
-func CaEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldCa, v))
+// CaCrtEQ applies the EQ predicate on the "ca_crt" field.
+func CaCrtEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldCaCrt, v))
 }
 
-// CaNEQ applies the NEQ predicate on the "ca" field.
-func CaNEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNEQ(FieldCa, v))
+// CaCrtNEQ applies the NEQ predicate on the "ca_crt" field.
+func CaCrtNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldCaCrt, v))
 }
 
-// CaIn applies the In predicate on the "ca" field.
-func CaIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldIn(FieldCa, vs...))
+// CaCrtIn applies the In predicate on the "ca_crt" field.
+func CaCrtIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldCaCrt, vs...))
 }
 
-// CaNotIn applies the NotIn predicate on the "ca" field.
-func CaNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNotIn(FieldCa, vs...))
+// CaCrtNotIn applies the NotIn predicate on the "ca_crt" field.
+func CaCrtNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldCaCrt, vs...))
 }
 
-// CaGT applies the GT predicate on the "ca" field.
-func CaGT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGT(FieldCa, v))
+// CaCrtGT applies the GT predicate on the "ca_crt" field.
+func CaCrtGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldCaCrt, v))
 }
 
-// CaGTE applies the GTE predicate on the "ca" field.
-func CaGTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGTE(FieldCa, v))
+// CaCrtGTE applies the GTE predicate on the "ca_crt" field.
+func CaCrtGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldCaCrt, v))
 }
 
-// CaLT applies the LT predicate on the "ca" field.
-func CaLT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLT(FieldCa, v))
+// CaCrtLT applies the LT predicate on the "ca_crt" field.
+func CaCrtLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldCaCrt, v))
 }
 
-// CaLTE applies the LTE predicate on the "ca" field.
-func CaLTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLTE(FieldCa, v))
+// CaCrtLTE applies the LTE predicate on the "ca_crt" field.
+func CaCrtLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldCaCrt, v))
 }
 
 // CaKeyEQ applies the EQ predicate on the "ca_key" field.
@@ -308,6 +318,86 @@ func CaKeyLT(v helpers.EncryptedBytes) predicate.Settings {
 // CaKeyLTE applies the LTE predicate on the "ca_key" field.
 func CaKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldCaKey, v))
+}
+
+// LighthouseCrtEQ applies the EQ predicate on the "lighthouse_crt" field.
+func LighthouseCrtEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLighthouseCrt, v))
+}
+
+// LighthouseCrtNEQ applies the NEQ predicate on the "lighthouse_crt" field.
+func LighthouseCrtNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldLighthouseCrt, v))
+}
+
+// LighthouseCrtIn applies the In predicate on the "lighthouse_crt" field.
+func LighthouseCrtIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldLighthouseCrt, vs...))
+}
+
+// LighthouseCrtNotIn applies the NotIn predicate on the "lighthouse_crt" field.
+func LighthouseCrtNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldLighthouseCrt, vs...))
+}
+
+// LighthouseCrtGT applies the GT predicate on the "lighthouse_crt" field.
+func LighthouseCrtGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldLighthouseCrt, v))
+}
+
+// LighthouseCrtGTE applies the GTE predicate on the "lighthouse_crt" field.
+func LighthouseCrtGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldLighthouseCrt, v))
+}
+
+// LighthouseCrtLT applies the LT predicate on the "lighthouse_crt" field.
+func LighthouseCrtLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldLighthouseCrt, v))
+}
+
+// LighthouseCrtLTE applies the LTE predicate on the "lighthouse_crt" field.
+func LighthouseCrtLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldLighthouseCrt, v))
+}
+
+// LighthouseKeyEQ applies the EQ predicate on the "lighthouse_key" field.
+func LighthouseKeyEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
+}
+
+// LighthouseKeyNEQ applies the NEQ predicate on the "lighthouse_key" field.
+func LighthouseKeyNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldLighthouseKey, v))
+}
+
+// LighthouseKeyIn applies the In predicate on the "lighthouse_key" field.
+func LighthouseKeyIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldLighthouseKey, vs...))
+}
+
+// LighthouseKeyNotIn applies the NotIn predicate on the "lighthouse_key" field.
+func LighthouseKeyNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldLighthouseKey, vs...))
+}
+
+// LighthouseKeyGT applies the GT predicate on the "lighthouse_key" field.
+func LighthouseKeyGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldLighthouseKey, v))
+}
+
+// LighthouseKeyGTE applies the GTE predicate on the "lighthouse_key" field.
+func LighthouseKeyGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldLighthouseKey, v))
+}
+
+// LighthouseKeyLT applies the LT predicate on the "lighthouse_key" field.
+func LighthouseKeyLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldLighthouseKey, v))
+}
+
+// LighthouseKeyLTE applies the LTE predicate on the "lighthouse_key" field.
+func LighthouseKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldLighthouseKey, v))
 }
 
 // HmacEQ applies the EQ predicate on the "hmac" field.

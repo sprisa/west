@@ -20,10 +20,14 @@ const (
 	FieldUpdatedTime = "updated_time"
 	// FieldCipher holds the string denoting the cipher field in the database.
 	FieldCipher = "cipher"
-	// FieldCa holds the string denoting the ca field in the database.
-	FieldCa = "ca"
+	// FieldCaCrt holds the string denoting the ca_crt field in the database.
+	FieldCaCrt = "ca_crt"
 	// FieldCaKey holds the string denoting the ca_key field in the database.
 	FieldCaKey = "ca_key"
+	// FieldLighthouseCrt holds the string denoting the lighthouse_crt field in the database.
+	FieldLighthouseCrt = "lighthouse_crt"
+	// FieldLighthouseKey holds the string denoting the lighthouse_key field in the database.
+	FieldLighthouseKey = "lighthouse_key"
 	// FieldHmac holds the string denoting the hmac field in the database.
 	FieldHmac = "hmac"
 	// Table holds the table name of the settings in the database.
@@ -36,8 +40,10 @@ var Columns = []string{
 	FieldCreatedTime,
 	FieldUpdatedTime,
 	FieldCipher,
-	FieldCa,
+	FieldCaCrt,
 	FieldCaKey,
+	FieldLighthouseCrt,
+	FieldLighthouseKey,
 	FieldHmac,
 }
 

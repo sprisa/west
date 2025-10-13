@@ -103,18 +103,9 @@ func startWestPort(ctx context.Context) error {
 		opts := &west.ServerArgs{
 			Config: &config.Config{
 				Pki: config.Pki{
-					Ca: string(settings.Ca),
-					Cert: `-----BEGIN NEBULA CERTIFICATE-----
-CmkKC2xpZ2h0aG91c2UxEgqByKGFDID+//8PKJvTtccGMPivutYGOiBqjllwQsah
-aSFqVWE4172h0kjPs0CB7X8e5bVTAJ7KdEogoQiig3VaURjHQv2n0cZd7P+DSe1D
-71qX0f4oDbCTVCESQOX7B/i4pLPZyTughRsXRS8FwtSQHnhsD/KqIJfCQwnLh1Rs
-EEi0T7SIb9QbOTehk8uULjkPbu2KpbjeCdlB4gQ=
------END NEBULA CERTIFICATE-----
-`,
-					Key: `-----BEGIN NEBULA X25519 PRIVATE KEY-----
-IOYGJ975LH0Qqq7PfvmAyrrGzO5+kOMw6J540+PFiSw=
------END NEBULA X25519 PRIVATE KEY-----
-`,
+					Ca:   string(settings.CaCrt),
+					Cert: string(settings.LighthouseCrt),
+					Key:  string(settings.LighthouseKey),
 				},
 				Lighthouse: config.Lighthouse{
 					Am_lighthouse: true,

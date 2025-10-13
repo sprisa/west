@@ -20,9 +20,15 @@ func (Settings) Fields() []ent.Field {
 		field.String("cipher").
 			Default("aes").
 			Comment("Nebula cipher. aes or chachapoly"),
-		field.Bytes("ca").
+		field.Bytes("ca_crt").
 			GoType(helpers.EncryptedBytes{}),
 		field.Bytes("ca_key").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}),
+		field.Bytes("lighthouse_crt").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}),
+		field.Bytes("lighthouse_key").
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}),
 		field.Bytes("hmac").

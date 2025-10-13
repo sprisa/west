@@ -688,19 +688,21 @@ func (m *DeviceMutation) ResetEdge(name string) error {
 // SettingsMutation represents an operation that mutates the Settings nodes in the graph.
 type SettingsMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_time  *time.Time
-	updated_time  *time.Time
-	cipher        *string
-	ca            *helpers.EncryptedBytes
-	ca_key        *helpers.EncryptedBytes
-	hmac          *helpers.EncryptedBytes
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Settings, error)
-	predicates    []predicate.Settings
+	op             Op
+	typ            string
+	id             *int
+	created_time   *time.Time
+	updated_time   *time.Time
+	cipher         *string
+	ca_crt         *helpers.EncryptedBytes
+	ca_key         *helpers.EncryptedBytes
+	lighthouse_crt *helpers.EncryptedBytes
+	lighthouse_key *helpers.EncryptedBytes
+	hmac           *helpers.EncryptedBytes
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*Settings, error)
+	predicates     []predicate.Settings
 }
 
 var _ ent.Mutation = (*SettingsMutation)(nil)
@@ -909,40 +911,40 @@ func (m *SettingsMutation) ResetCipher() {
 	m.cipher = nil
 }
 
-// SetCa sets the "ca" field.
-func (m *SettingsMutation) SetCa(hb helpers.EncryptedBytes) {
-	m.ca = &hb
+// SetCaCrt sets the "ca_crt" field.
+func (m *SettingsMutation) SetCaCrt(hb helpers.EncryptedBytes) {
+	m.ca_crt = &hb
 }
 
-// Ca returns the value of the "ca" field in the mutation.
-func (m *SettingsMutation) Ca() (r helpers.EncryptedBytes, exists bool) {
-	v := m.ca
+// CaCrt returns the value of the "ca_crt" field in the mutation.
+func (m *SettingsMutation) CaCrt() (r helpers.EncryptedBytes, exists bool) {
+	v := m.ca_crt
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCa returns the old "ca" field's value of the Settings entity.
+// OldCaCrt returns the old "ca_crt" field's value of the Settings entity.
 // If the Settings object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SettingsMutation) OldCa(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+func (m *SettingsMutation) OldCaCrt(ctx context.Context) (v helpers.EncryptedBytes, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCa is only allowed on UpdateOne operations")
+		return v, errors.New("OldCaCrt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCa requires an ID field in the mutation")
+		return v, errors.New("OldCaCrt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCa: %w", err)
+		return v, fmt.Errorf("querying old value for OldCaCrt: %w", err)
 	}
-	return oldValue.Ca, nil
+	return oldValue.CaCrt, nil
 }
 
-// ResetCa resets all changes to the "ca" field.
-func (m *SettingsMutation) ResetCa() {
-	m.ca = nil
+// ResetCaCrt resets all changes to the "ca_crt" field.
+func (m *SettingsMutation) ResetCaCrt() {
+	m.ca_crt = nil
 }
 
 // SetCaKey sets the "ca_key" field.
@@ -979,6 +981,78 @@ func (m *SettingsMutation) OldCaKey(ctx context.Context) (v helpers.EncryptedByt
 // ResetCaKey resets all changes to the "ca_key" field.
 func (m *SettingsMutation) ResetCaKey() {
 	m.ca_key = nil
+}
+
+// SetLighthouseCrt sets the "lighthouse_crt" field.
+func (m *SettingsMutation) SetLighthouseCrt(hb helpers.EncryptedBytes) {
+	m.lighthouse_crt = &hb
+}
+
+// LighthouseCrt returns the value of the "lighthouse_crt" field in the mutation.
+func (m *SettingsMutation) LighthouseCrt() (r helpers.EncryptedBytes, exists bool) {
+	v := m.lighthouse_crt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLighthouseCrt returns the old "lighthouse_crt" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldLighthouseCrt(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLighthouseCrt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLighthouseCrt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLighthouseCrt: %w", err)
+	}
+	return oldValue.LighthouseCrt, nil
+}
+
+// ResetLighthouseCrt resets all changes to the "lighthouse_crt" field.
+func (m *SettingsMutation) ResetLighthouseCrt() {
+	m.lighthouse_crt = nil
+}
+
+// SetLighthouseKey sets the "lighthouse_key" field.
+func (m *SettingsMutation) SetLighthouseKey(hb helpers.EncryptedBytes) {
+	m.lighthouse_key = &hb
+}
+
+// LighthouseKey returns the value of the "lighthouse_key" field in the mutation.
+func (m *SettingsMutation) LighthouseKey() (r helpers.EncryptedBytes, exists bool) {
+	v := m.lighthouse_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLighthouseKey returns the old "lighthouse_key" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldLighthouseKey(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLighthouseKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLighthouseKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLighthouseKey: %w", err)
+	}
+	return oldValue.LighthouseKey, nil
+}
+
+// ResetLighthouseKey resets all changes to the "lighthouse_key" field.
+func (m *SettingsMutation) ResetLighthouseKey() {
+	m.lighthouse_key = nil
 }
 
 // SetHmac sets the "hmac" field.
@@ -1051,7 +1125,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -1061,11 +1135,17 @@ func (m *SettingsMutation) Fields() []string {
 	if m.cipher != nil {
 		fields = append(fields, settings.FieldCipher)
 	}
-	if m.ca != nil {
-		fields = append(fields, settings.FieldCa)
+	if m.ca_crt != nil {
+		fields = append(fields, settings.FieldCaCrt)
 	}
 	if m.ca_key != nil {
 		fields = append(fields, settings.FieldCaKey)
+	}
+	if m.lighthouse_crt != nil {
+		fields = append(fields, settings.FieldLighthouseCrt)
+	}
+	if m.lighthouse_key != nil {
+		fields = append(fields, settings.FieldLighthouseKey)
 	}
 	if m.hmac != nil {
 		fields = append(fields, settings.FieldHmac)
@@ -1084,10 +1164,14 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedTime()
 	case settings.FieldCipher:
 		return m.Cipher()
-	case settings.FieldCa:
-		return m.Ca()
+	case settings.FieldCaCrt:
+		return m.CaCrt()
 	case settings.FieldCaKey:
 		return m.CaKey()
+	case settings.FieldLighthouseCrt:
+		return m.LighthouseCrt()
+	case settings.FieldLighthouseKey:
+		return m.LighthouseKey()
 	case settings.FieldHmac:
 		return m.Hmac()
 	}
@@ -1105,10 +1189,14 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUpdatedTime(ctx)
 	case settings.FieldCipher:
 		return m.OldCipher(ctx)
-	case settings.FieldCa:
-		return m.OldCa(ctx)
+	case settings.FieldCaCrt:
+		return m.OldCaCrt(ctx)
 	case settings.FieldCaKey:
 		return m.OldCaKey(ctx)
+	case settings.FieldLighthouseCrt:
+		return m.OldLighthouseCrt(ctx)
+	case settings.FieldLighthouseKey:
+		return m.OldLighthouseKey(ctx)
 	case settings.FieldHmac:
 		return m.OldHmac(ctx)
 	}
@@ -1141,12 +1229,12 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCipher(v)
 		return nil
-	case settings.FieldCa:
+	case settings.FieldCaCrt:
 		v, ok := value.(helpers.EncryptedBytes)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCa(v)
+		m.SetCaCrt(v)
 		return nil
 	case settings.FieldCaKey:
 		v, ok := value.(helpers.EncryptedBytes)
@@ -1154,6 +1242,20 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCaKey(v)
+		return nil
+	case settings.FieldLighthouseCrt:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLighthouseCrt(v)
+		return nil
+	case settings.FieldLighthouseKey:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLighthouseKey(v)
 		return nil
 	case settings.FieldHmac:
 		v, ok := value.(helpers.EncryptedBytes)
@@ -1220,11 +1322,17 @@ func (m *SettingsMutation) ResetField(name string) error {
 	case settings.FieldCipher:
 		m.ResetCipher()
 		return nil
-	case settings.FieldCa:
-		m.ResetCa()
+	case settings.FieldCaCrt:
+		m.ResetCaCrt()
 		return nil
 	case settings.FieldCaKey:
 		m.ResetCaKey()
+		return nil
+	case settings.FieldLighthouseCrt:
+		m.ResetLighthouseCrt()
+		return nil
+	case settings.FieldLighthouseKey:
+		m.ResetLighthouseKey()
 		return nil
 	case settings.FieldHmac:
 		m.ResetHmac()

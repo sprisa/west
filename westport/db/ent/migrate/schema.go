@@ -42,8 +42,10 @@ var (
 		{Name: "created_time", Type: field.TypeTime},
 		{Name: "updated_time", Type: field.TypeTime},
 		{Name: "cipher", Type: field.TypeString, Default: "aes"},
-		{Name: "ca", Type: field.TypeBytes},
+		{Name: "ca_crt", Type: field.TypeBytes},
 		{Name: "ca_key", Type: field.TypeBytes},
+		{Name: "lighthouse_crt", Type: field.TypeBytes},
+		{Name: "lighthouse_key", Type: field.TypeBytes},
 		{Name: "hmac", Type: field.TypeBytes},
 	}
 	// SettingsTable holds the schema information for the "settings" table.

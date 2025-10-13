@@ -58,7 +58,7 @@ func init() {
 	// settings.DefaultCipher holds the default value on creation for the cipher field.
 	settings.DefaultCipher = settingsDescCipher.Default.(string)
 	// settingsDescHmac is the schema descriptor for hmac field.
-	settingsDescHmac := settingsFields[3].Descriptor()
+	settingsDescHmac := settingsFields[5].Descriptor()
 	// settings.DefaultHmac holds the default value on creation for the hmac field.
 	settings.DefaultHmac = settingsDescHmac.Default.(func() helpers.EncryptedBytes)
 }

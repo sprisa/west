@@ -63,15 +63,27 @@ func (_c *SettingsCreate) SetNillableCipher(v *string) *SettingsCreate {
 	return _c
 }
 
-// SetCa sets the "ca" field.
-func (_c *SettingsCreate) SetCa(v helpers.EncryptedBytes) *SettingsCreate {
-	_c.mutation.SetCa(v)
+// SetCaCrt sets the "ca_crt" field.
+func (_c *SettingsCreate) SetCaCrt(v helpers.EncryptedBytes) *SettingsCreate {
+	_c.mutation.SetCaCrt(v)
 	return _c
 }
 
 // SetCaKey sets the "ca_key" field.
 func (_c *SettingsCreate) SetCaKey(v helpers.EncryptedBytes) *SettingsCreate {
 	_c.mutation.SetCaKey(v)
+	return _c
+}
+
+// SetLighthouseCrt sets the "lighthouse_crt" field.
+func (_c *SettingsCreate) SetLighthouseCrt(v helpers.EncryptedBytes) *SettingsCreate {
+	_c.mutation.SetLighthouseCrt(v)
+	return _c
+}
+
+// SetLighthouseKey sets the "lighthouse_key" field.
+func (_c *SettingsCreate) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsCreate {
+	_c.mutation.SetLighthouseKey(v)
 	return _c
 }
 
@@ -145,11 +157,17 @@ func (_c *SettingsCreate) check() error {
 	if _, ok := _c.mutation.Cipher(); !ok {
 		return &ValidationError{Name: "cipher", err: errors.New(`ent: missing required field "Settings.cipher"`)}
 	}
-	if _, ok := _c.mutation.Ca(); !ok {
-		return &ValidationError{Name: "ca", err: errors.New(`ent: missing required field "Settings.ca"`)}
+	if _, ok := _c.mutation.CaCrt(); !ok {
+		return &ValidationError{Name: "ca_crt", err: errors.New(`ent: missing required field "Settings.ca_crt"`)}
 	}
 	if _, ok := _c.mutation.CaKey(); !ok {
 		return &ValidationError{Name: "ca_key", err: errors.New(`ent: missing required field "Settings.ca_key"`)}
+	}
+	if _, ok := _c.mutation.LighthouseCrt(); !ok {
+		return &ValidationError{Name: "lighthouse_crt", err: errors.New(`ent: missing required field "Settings.lighthouse_crt"`)}
+	}
+	if _, ok := _c.mutation.LighthouseKey(); !ok {
+		return &ValidationError{Name: "lighthouse_key", err: errors.New(`ent: missing required field "Settings.lighthouse_key"`)}
 	}
 	if _, ok := _c.mutation.Hmac(); !ok {
 		return &ValidationError{Name: "hmac", err: errors.New(`ent: missing required field "Settings.hmac"`)}
@@ -192,13 +210,21 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)
 		_node.Cipher = value
 	}
-	if value, ok := _c.mutation.Ca(); ok {
-		_spec.SetField(settings.FieldCa, field.TypeBytes, value)
-		_node.Ca = value
+	if value, ok := _c.mutation.CaCrt(); ok {
+		_spec.SetField(settings.FieldCaCrt, field.TypeBytes, value)
+		_node.CaCrt = value
 	}
 	if value, ok := _c.mutation.CaKey(); ok {
 		_spec.SetField(settings.FieldCaKey, field.TypeBytes, value)
 		_node.CaKey = value
+	}
+	if value, ok := _c.mutation.LighthouseCrt(); ok {
+		_spec.SetField(settings.FieldLighthouseCrt, field.TypeBytes, value)
+		_node.LighthouseCrt = value
+	}
+	if value, ok := _c.mutation.LighthouseKey(); ok {
+		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
+		_node.LighthouseKey = value
 	}
 	if value, ok := _c.mutation.Hmac(); ok {
 		_spec.SetField(settings.FieldHmac, field.TypeBytes, value)

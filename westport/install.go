@@ -7,6 +7,7 @@ import (
 
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
@@ -56,6 +57,16 @@ var InstallCommand = &cli.Command{
 			return errors.New("west port already installed with database present.")
 		}
 
+		lhCert, err := pki.SignCert(&pki.SignCertOptions{
+			CaCrt: ca,
+			CaKey: caKey,
+			Name:  "west-port-1",
+			Ip:    "10.10.10.1/24",
+		})
+		if err != nil {
+			return errutil.WrapError(err, "error generating west-port cert")
+		}
+
 		l.Log.Info().Msg("Create a encryption a password")
 		err = promptEncryptionPassword()
 		if err != nil {
@@ -63,8 +74,10 @@ var InstallCommand = &cli.Command{
 		}
 
 		err = client.Settings.Create().
-			SetCa(ca).
+			SetCaCrt(ca).
 			SetCaKey(caKey).
+			SetLighthouseCrt(lhCert.Cert).
+			SetLighthouseKey(lhCert.Key).
 			Exec(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving settings")

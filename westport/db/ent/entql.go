@@ -45,12 +45,14 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Settings",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			settings.FieldCreatedTime: {Type: field.TypeTime, Column: settings.FieldCreatedTime},
-			settings.FieldUpdatedTime: {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
-			settings.FieldCipher:      {Type: field.TypeString, Column: settings.FieldCipher},
-			settings.FieldCa:          {Type: field.TypeBytes, Column: settings.FieldCa},
-			settings.FieldCaKey:       {Type: field.TypeBytes, Column: settings.FieldCaKey},
-			settings.FieldHmac:        {Type: field.TypeBytes, Column: settings.FieldHmac},
+			settings.FieldCreatedTime:   {Type: field.TypeTime, Column: settings.FieldCreatedTime},
+			settings.FieldUpdatedTime:   {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
+			settings.FieldCipher:        {Type: field.TypeString, Column: settings.FieldCipher},
+			settings.FieldCaCrt:         {Type: field.TypeBytes, Column: settings.FieldCaCrt},
+			settings.FieldCaKey:         {Type: field.TypeBytes, Column: settings.FieldCaKey},
+			settings.FieldLighthouseCrt: {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
+			settings.FieldLighthouseKey: {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
+			settings.FieldHmac:          {Type: field.TypeBytes, Column: settings.FieldHmac},
 		},
 	}
 	return graph
@@ -187,14 +189,24 @@ func (f *SettingsFilter) WhereCipher(p entql.StringP) {
 	f.Where(p.Field(settings.FieldCipher))
 }
 
-// WhereCa applies the entql []byte predicate on the ca field.
-func (f *SettingsFilter) WhereCa(p entql.BytesP) {
-	f.Where(p.Field(settings.FieldCa))
+// WhereCaCrt applies the entql []byte predicate on the ca_crt field.
+func (f *SettingsFilter) WhereCaCrt(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldCaCrt))
 }
 
 // WhereCaKey applies the entql []byte predicate on the ca_key field.
 func (f *SettingsFilter) WhereCaKey(p entql.BytesP) {
 	f.Where(p.Field(settings.FieldCaKey))
+}
+
+// WhereLighthouseCrt applies the entql []byte predicate on the lighthouse_crt field.
+func (f *SettingsFilter) WhereLighthouseCrt(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldLighthouseCrt))
+}
+
+// WhereLighthouseKey applies the entql []byte predicate on the lighthouse_key field.
+func (f *SettingsFilter) WhereLighthouseKey(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldLighthouseKey))
 }
 
 // WhereHmac applies the entql []byte predicate on the hmac field.
