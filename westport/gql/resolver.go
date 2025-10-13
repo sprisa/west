@@ -1,4 +1,4 @@
-package db
+package gql
 
 import (
 	"github.com/99designs/gqlgen/graphql"
