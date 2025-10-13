@@ -72,7 +72,6 @@ func (Device) Indexes() []ent.Index {
 func (Device) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entgql.Skip(helpers.EntGQLSkipNone),
-		entgql.RelayConnection(),
 	}
 }
 

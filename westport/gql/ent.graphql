@@ -25,36 +25,6 @@ type Device implements Node {
   ip: Int!
 }
 """
-A connection to a list of items.
-"""
-type DeviceConnection {
-  """
-  A list of edges.
-  """
-  edges: [DeviceEdge]
-  """
-  Information to aid in pagination.
-  """
-  pageInfo: PageInfo!
-  """
-  Identifies the total count of items in the connection.
-  """
-  totalCount: Int!
-}
-"""
-An edge in a connection.
-"""
-type DeviceEdge {
-  """
-  The item at the end of the edge.
-  """
-  node: Device
-  """
-  A cursor for use in pagination.
-  """
-  cursor: Cursor!
-}
-"""
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
