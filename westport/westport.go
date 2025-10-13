@@ -44,6 +44,8 @@ func main() {
 	}
 
 	l.Log.Info().Msgf("settings: %+v", settings)
+	l.Log.Info().Msgf("hmac: %+v", settings.Hmac.String())
+
 
 	group, ctx := errgroup.WithContext(ctx)
 
@@ -78,6 +80,7 @@ func main() {
 
 	// Start Nebula
 	group.Go(func() error {
+		return nil;
 		cipher := config.CipherAes
 		if settings.Cipher == "chachapoly" {
 			cipher = config.CipherChaChaPoly

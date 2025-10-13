@@ -25,22 +25,21 @@ func (e *EncryptedBytes) Scan(value any) error {
 		return nil
 	}
 
-	var encrypted string
+	var encrypted []byte
 	switch v := value.(type) {
 	case string:
-		encrypted = v
+		encrypted = []byte(v)
 	case []byte:
-		encrypted = string(v)
+		encrypted = v
 	default:
 		return fmt.Errorf("unexpected type for EncryptedString: %T", value)
 	}
 
-	if encrypted == "" {
-		e.Data = []byte{}
+	if len(encrypted) == 0 {
 		return nil
 	}
 
-	decrypted, err := decrypt(encrypted)
+	decrypted, err := decrypt(string(encrypted))
 	if err != nil {
 		return fmt.Errorf("failed to decrypt: %w", err)
 	}
@@ -60,7 +59,7 @@ func (e EncryptedBytes) Value() (driver.Value, error) {
 		return nil, fmt.Errorf("failed to encrypt: %w", err)
 	}
 
-	return encrypted, nil
+	return []byte(encrypted), nil
 }
 
 func encrypt(plaintext []byte) (string, error) {
