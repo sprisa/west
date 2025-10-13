@@ -7,13 +7,9 @@ import (
 	"reship/util/print"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sprisa/west/util/auth"
 	"github.com/urfave/cli/v3"
 )
-
-type TokenClaims struct {
-	Endpoint string `json:"endpoint"`
-	jwt.RegisteredClaims
-}
 
 var StartCommand = &cli.Command{
 	Name:      "start",
@@ -31,7 +27,7 @@ var StartCommand = &cli.Command{
 	Action: func(ctx context.Context, c *cli.Command) error {
 		token := c.String("token")
 		parser := jwt.NewParser()
-		claims := &TokenClaims{}
+		claims := &auth.TokenClaims{}
 		info, _, err := parser.ParseUnverified(token, claims)
 		if err != nil {
 			return fmt.Errorf("error parsing token: %w", err)

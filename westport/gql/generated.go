@@ -42,6 +42,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Device() DeviceResolver
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -57,11 +58,22 @@ type ComplexityRoot struct {
 		UpdatedTime func(childComplexity int) int
 	}
 
+	Mutation struct {
+		ProvisionDevice func(childComplexity int, input ProvisionDeviceInput) int
+	}
+
 	PageInfo struct {
 		EndCursor       func(childComplexity int) int
 		HasNextPage     func(childComplexity int) int
 		HasPreviousPage func(childComplexity int) int
 		StartCursor     func(childComplexity int) int
+	}
+
+	ProvisionDeviceResponse struct {
+		AccessToken   func(childComplexity int) int
+		Cert          func(childComplexity int) int
+		Key           func(childComplexity int) int
+		NetworkCipher func(childComplexity int) int
 	}
 
 	Query struct {
@@ -72,6 +84,9 @@ type ComplexityRoot struct {
 
 type DeviceResolver interface {
 	IP(ctx context.Context, obj *ent.Device) (int, error)
+}
+type MutationResolver interface {
+	ProvisionDevice(ctx context.Context, input ProvisionDeviceInput) (*ProvisionDeviceResponse, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id int) (ent.Noder, error)
@@ -128,6 +143,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Device.UpdatedTime(childComplexity), true
 
+	case "Mutation.provision_device":
+		if e.complexity.Mutation.ProvisionDevice == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_provision_device_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ProvisionDevice(childComplexity, args["input"].(ProvisionDeviceInput)), true
+
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
 			break
@@ -152,6 +179,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.PageInfo.StartCursor(childComplexity), true
+
+	case "ProvisionDeviceResponse.access_token":
+		if e.complexity.ProvisionDeviceResponse.AccessToken == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.AccessToken(childComplexity), true
+	case "ProvisionDeviceResponse.cert":
+		if e.complexity.ProvisionDeviceResponse.Cert == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.Cert(childComplexity), true
+	case "ProvisionDeviceResponse.key":
+		if e.complexity.ProvisionDeviceResponse.Key == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.Key(childComplexity), true
+	case "ProvisionDeviceResponse.networkCipher":
+		if e.complexity.ProvisionDeviceResponse.NetworkCipher == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.NetworkCipher(childComplexity), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -183,7 +235,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputProvisionDeviceInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -216,6 +270,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 
 			return &response
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
 		}
 
 	default:
@@ -264,7 +333,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "ent.graphql"
+//go:embed "ent.graphql" "provision.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -277,12 +346,24 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "ent.graphql", Input: sourceData("ent.graphql"), BuiltIn: false},
+	{Name: "provision.graphql", Input: sourceData("provision.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_provision_device_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNProvisionDeviceInput2githubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -514,6 +595,57 @@ func (ec *executionContext) fieldContext_Device_ip(_ context.Context, field grap
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_provision_device(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_provision_device,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ProvisionDevice(ctx, fc.Args["input"].(ProvisionDeviceInput))
+		},
+		nil,
+		ec.marshalNProvisionDeviceResponse2ᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_provision_device(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cert":
+				return ec.fieldContext_ProvisionDeviceResponse_cert(ctx, field)
+			case "key":
+				return ec.fieldContext_ProvisionDeviceResponse_key(ctx, field)
+			case "access_token":
+				return ec.fieldContext_ProvisionDeviceResponse_access_token(ctx, field)
+			case "networkCipher":
+				return ec.fieldContext_ProvisionDeviceResponse_networkCipher(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProvisionDeviceResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_provision_device_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *entgql.PageInfo[int]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -625,6 +757,122 @@ func (ec *executionContext) fieldContext_PageInfo_endCursor(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_cert(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_cert,
+		func(ctx context.Context) (any, error) {
+			return obj.Cert, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_cert(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_key(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_key,
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_access_token(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_access_token,
+		func(ctx context.Context) (any, error) {
+			return obj.AccessToken, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_access_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_networkCipher(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_networkCipher,
+		func(ctx context.Context) (any, error) {
+			return obj.NetworkCipher, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_networkCipher(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2266,6 +2514,33 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputProvisionDeviceInput(ctx context.Context, obj any) (ProvisionDeviceInput, error) {
+	var it ProvisionDeviceInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"token"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2378,6 +2653,55 @@ func (ec *executionContext) _Device(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "provision_device":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_provision_device(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var pageInfoImplementors = []string{"PageInfo"}
 
 func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *entgql.PageInfo[int]) graphql.Marshaler {
@@ -2403,6 +2727,60 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
 		case "endCursor":
 			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var provisionDeviceResponseImplementors = []string{"ProvisionDeviceResponse"}
+
+func (ec *executionContext) _ProvisionDeviceResponse(ctx context.Context, sel ast.SelectionSet, obj *ProvisionDeviceResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, provisionDeviceResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProvisionDeviceResponse")
+		case "cert":
+			out.Values[i] = ec._ProvisionDeviceResponse_cert(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "key":
+			out.Values[i] = ec._ProvisionDeviceResponse_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "access_token":
+			out.Values[i] = ec._ProvisionDeviceResponse_access_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "networkCipher":
+			out.Values[i] = ec._ProvisionDeviceResponse_networkCipher(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2966,6 +3344,25 @@ func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋsprisaᚋwestᚋwestp
 	wg.Wait()
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalNProvisionDeviceInput2githubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceInput(ctx context.Context, v any) (ProvisionDeviceInput, error) {
+	res, err := ec.unmarshalInputProvisionDeviceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProvisionDeviceResponse2githubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceResponse(ctx context.Context, sel ast.SelectionSet, v ProvisionDeviceResponse) graphql.Marshaler {
+	return ec._ProvisionDeviceResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProvisionDeviceResponse2ᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceResponse(ctx context.Context, sel ast.SelectionSet, v *ProvisionDeviceResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProvisionDeviceResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
