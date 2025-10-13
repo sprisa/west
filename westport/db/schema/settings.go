@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
 )
@@ -31,17 +30,17 @@ func (Settings) Fields() []ent.Field {
 		field.Bytes("lighthouse_key").
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}),
-		field.Bytes("hmac").
-			Sensitive().
-			GoType(helpers.EncryptedBytes{}).
-			DefaultFunc(func() helpers.EncryptedBytes {
-				key, err := GenerateHMAC(64)
-				if err != nil {
-					l.Log.Panic().Err(err).Msg("error generating hmac key")
-				}
-				return helpers.EncryptedBytes(key)
-			}).
-			Comment("HS512"),
+		// field.Bytes("hmac").
+		// 	Sensitive().
+		// 	GoType(helpers.EncryptedBytes{}).
+		// 	DefaultFunc(func() helpers.EncryptedBytes {
+		// 		key, err := GenerateHMAC(64)
+		// 		if err != nil {
+		// 			l.Log.Panic().Err(err).Msg("error generating hmac key")
+		// 		}
+		// 		return helpers.EncryptedBytes(key)
+		// 	}).
+		// 	Comment("HS512"),
 	}
 }
 

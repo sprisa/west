@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/sprisa/west/westport/db/helpers"
 )
 
 const (
@@ -28,8 +27,6 @@ const (
 	FieldLighthouseCrt = "lighthouse_crt"
 	// FieldLighthouseKey holds the string denoting the lighthouse_key field in the database.
 	FieldLighthouseKey = "lighthouse_key"
-	// FieldHmac holds the string denoting the hmac field in the database.
-	FieldHmac = "hmac"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
 )
@@ -44,7 +41,6 @@ var Columns = []string{
 	FieldCaKey,
 	FieldLighthouseCrt,
 	FieldLighthouseKey,
-	FieldHmac,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -66,8 +62,6 @@ var (
 	UpdateDefaultUpdatedTime func() time.Time
 	// DefaultCipher holds the default value on creation for the "cipher" field.
 	DefaultCipher string
-	// DefaultHmac holds the default value on creation for the "hmac" field.
-	DefaultHmac func() helpers.EncryptedBytes
 )
 
 // OrderOption defines the ordering options for the Settings queries.

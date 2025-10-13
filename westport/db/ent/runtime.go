@@ -7,7 +7,6 @@ import (
 
 	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/settings"
-	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/schema"
 )
 
@@ -57,8 +56,4 @@ func init() {
 	settingsDescCipher := settingsFields[0].Descriptor()
 	// settings.DefaultCipher holds the default value on creation for the cipher field.
 	settings.DefaultCipher = settingsDescCipher.Default.(string)
-	// settingsDescHmac is the schema descriptor for hmac field.
-	settingsDescHmac := settingsFields[5].Descriptor()
-	// settings.DefaultHmac holds the default value on creation for the hmac field.
-	settings.DefaultHmac = settingsDescHmac.Default.(func() helpers.EncryptedBytes)
 }

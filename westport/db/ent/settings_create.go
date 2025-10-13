@@ -87,12 +87,6 @@ func (_c *SettingsCreate) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsCr
 	return _c
 }
 
-// SetHmac sets the "hmac" field.
-func (_c *SettingsCreate) SetHmac(v helpers.EncryptedBytes) *SettingsCreate {
-	_c.mutation.SetHmac(v)
-	return _c
-}
-
 // Mutation returns the SettingsMutation object of the builder.
 func (_c *SettingsCreate) Mutation() *SettingsMutation {
 	return _c.mutation
@@ -140,10 +134,6 @@ func (_c *SettingsCreate) defaults() {
 		v := settings.DefaultCipher
 		_c.mutation.SetCipher(v)
 	}
-	if _, ok := _c.mutation.Hmac(); !ok {
-		v := settings.DefaultHmac()
-		_c.mutation.SetHmac(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -168,9 +158,6 @@ func (_c *SettingsCreate) check() error {
 	}
 	if _, ok := _c.mutation.LighthouseKey(); !ok {
 		return &ValidationError{Name: "lighthouse_key", err: errors.New(`ent: missing required field "Settings.lighthouse_key"`)}
-	}
-	if _, ok := _c.mutation.Hmac(); !ok {
-		return &ValidationError{Name: "hmac", err: errors.New(`ent: missing required field "Settings.hmac"`)}
 	}
 	return nil
 }
@@ -225,10 +212,6 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LighthouseKey(); ok {
 		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
 		_node.LighthouseKey = value
-	}
-	if value, ok := _c.mutation.Hmac(); ok {
-		_spec.SetField(settings.FieldHmac, field.TypeBytes, value)
-		_node.Hmac = value
 	}
 	return _node, _spec
 }

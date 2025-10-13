@@ -52,7 +52,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 			settings.FieldCaKey:         {Type: field.TypeBytes, Column: settings.FieldCaKey},
 			settings.FieldLighthouseCrt: {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
 			settings.FieldLighthouseKey: {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
-			settings.FieldHmac:          {Type: field.TypeBytes, Column: settings.FieldHmac},
 		},
 	}
 	return graph
@@ -207,9 +206,4 @@ func (f *SettingsFilter) WhereLighthouseCrt(p entql.BytesP) {
 // WhereLighthouseKey applies the entql []byte predicate on the lighthouse_key field.
 func (f *SettingsFilter) WhereLighthouseKey(p entql.BytesP) {
 	f.Where(p.Field(settings.FieldLighthouseKey))
-}
-
-// WhereHmac applies the entql []byte predicate on the hmac field.
-func (f *SettingsFilter) WhereHmac(p entql.BytesP) {
-	f.Where(p.Field(settings.FieldHmac))
 }

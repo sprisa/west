@@ -32,9 +32,7 @@ type Settings struct {
 	LighthouseCrt helpers.EncryptedBytes `json:"-"`
 	// LighthouseKey holds the value of the "lighthouse_key" field.
 	LighthouseKey helpers.EncryptedBytes `json:"-"`
-	// HS512
-	Hmac         helpers.EncryptedBytes `json:"-"`
-	selectValues sql.SelectValues
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -42,7 +40,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey, settings.FieldHmac:
+		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey:
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -113,12 +111,6 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.LighthouseKey = *value
 			}
-		case settings.FieldHmac:
-			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
-				return fmt.Errorf("unexpected type %T for field hmac", values[i])
-			} else if value != nil {
-				_m.Hmac = *value
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -172,8 +164,6 @@ func (_m *Settings) String() string {
 	builder.WriteString("lighthouse_crt=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("lighthouse_key=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("hmac=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -90,11 +90,6 @@ func LighthouseKey(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
 }
 
-// Hmac applies equality check predicate on the "hmac" field. It's identical to HmacEQ.
-func Hmac(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldHmac, v))
-}
-
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
 func CreatedTimeEQ(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCreatedTime, v))
@@ -398,46 +393,6 @@ func LighthouseKeyLT(v helpers.EncryptedBytes) predicate.Settings {
 // LighthouseKeyLTE applies the LTE predicate on the "lighthouse_key" field.
 func LighthouseKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldLighthouseKey, v))
-}
-
-// HmacEQ applies the EQ predicate on the "hmac" field.
-func HmacEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldHmac, v))
-}
-
-// HmacNEQ applies the NEQ predicate on the "hmac" field.
-func HmacNEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNEQ(FieldHmac, v))
-}
-
-// HmacIn applies the In predicate on the "hmac" field.
-func HmacIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldIn(FieldHmac, vs...))
-}
-
-// HmacNotIn applies the NotIn predicate on the "hmac" field.
-func HmacNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNotIn(FieldHmac, vs...))
-}
-
-// HmacGT applies the GT predicate on the "hmac" field.
-func HmacGT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGT(FieldHmac, v))
-}
-
-// HmacGTE applies the GTE predicate on the "hmac" field.
-func HmacGTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGTE(FieldHmac, v))
-}
-
-// HmacLT applies the LT predicate on the "hmac" field.
-func HmacLT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLT(FieldHmac, v))
-}
-
-// HmacLTE applies the LTE predicate on the "hmac" field.
-func HmacLTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLTE(FieldHmac, v))
 }
 
 // And groups predicates with the AND operator between them.
