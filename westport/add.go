@@ -3,11 +3,16 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/netip"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/sprisa/west/util/auth"
 	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
+	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
 	"github.com/urfave/cli/v3"
 )
@@ -33,6 +38,13 @@ var AddCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		name := c.String("name")
+		ipStr := c.String("ip")
+		ip, err := netip.ParseAddr(ipStr)
+		if err != nil {
+			return errutil.WrapError(err, "error parsing ip `%s`", ipStr)
+		}
+
 		client, err := db.OpenDB()
 		if err != nil {
 			return errutil.WrapError(err, "error opening db")
@@ -56,8 +68,25 @@ var AddCommand = &cli.Command{
 			return errutil.WrapError(err, "error initializing settings")
 		}
 
+		if settings.Cidr.Contains(ip) == false {
+			return fmt.Errorf("ip `%s` must be within network cidr `%s`", ip, settings.Cidr)
+		}
 
-		print(settings.Cidr.String())
+		nebulaIp := netip.PrefixFrom(ip, settings.Cidr.Bits())
+
+		claims := &auth.TokenClaims{
+			Endpoint: "https://api.priv.sh",
+			Name:     name,
+			IP:       nebulaIp.String(),
+		}
+
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
+			SignedString(helpers.EncryptionKey[:])
+		if err != nil {
+			return errutil.WrapError(err, "error creating token")
+		}
+
+		println(token)
 
 		return nil
 	},
