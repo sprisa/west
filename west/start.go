@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -29,15 +30,28 @@ var StartCommand = &cli.Command{
 		&cli.StringFlag{
 			// TODO: Would be better if this was set in a different command
 			// then stored in a secure enclave for start.
-			Name:     "token",
-			Aliases:  []string{"t"},
-			Required: true,
+			Name:    "token",
+			Aliases: []string{"t"},
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		token := c.String("token")
+		// Read via stdin if available
+		if token == "" {
+			stat, err := os.Stdin.Stat()
+			if err == nil && stat.Size() > 0 {
+				tokenBytes, err := io.ReadAll(os.Stdin)
+				if err != nil {
+					return err
+				}
+				token = string(tokenBytes)
+			}
+		}
+		if token == "" {
+			return errors.New("No token supplied. Pass via flag or stdin.")
+		}
 		endpoint := os.Getenv("WEST_ENDPOINT")
 
-		token := c.String("token")
 		parser := jwt.NewParser()
 		claims := &auth.TokenClaims{}
 		_, _, err := parser.ParseUnverified(token, claims)
