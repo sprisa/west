@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // Device is the model entity for the Device schema.
@@ -28,9 +29,9 @@ type Device struct {
 	IP ipconv.IP `json:"ip,omitempty"`
 	// Access Token leased to a provisioned device. Can only issue 1 at a time, similar to a lock. Used to verify only 1 instance of the Device is running.
 	LeasedAccessToken *string `json:"-"`
-	// Cert fingerprint
-	CertFingerprint string `json:"-"`
-	selectValues    sql.SelectValues
+	// Token holds the value of the "token" field.
+	Token        helpers.EncryptedBytes `json:"-"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -38,9 +39,11 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case device.FieldToken:
+			values[i] = new(helpers.EncryptedBytes)
 		case device.FieldID, device.FieldIP:
 			values[i] = new(sql.NullInt64)
-		case device.FieldName, device.FieldLeasedAccessToken, device.FieldCertFingerprint:
+		case device.FieldName, device.FieldLeasedAccessToken:
 			values[i] = new(sql.NullString)
 		case device.FieldCreatedTime, device.FieldUpdatedTime:
 			values[i] = new(sql.NullTime)
@@ -96,11 +99,11 @@ func (_m *Device) assignValues(columns []string, values []any) error {
 				_m.LeasedAccessToken = new(string)
 				*_m.LeasedAccessToken = value.String
 			}
-		case device.FieldCertFingerprint:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field cert_fingerprint", values[i])
-			} else if value.Valid {
-				_m.CertFingerprint = value.String
+		case device.FieldToken:
+			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
+				return fmt.Errorf("unexpected type %T for field token", values[i])
+			} else if value != nil {
+				_m.Token = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -152,7 +155,7 @@ func (_m *Device) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("leased_access_token=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("cert_fingerprint=<sensitive>")
+	builder.WriteString("token=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

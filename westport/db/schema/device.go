@@ -49,9 +49,12 @@ func (Device) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			Comment("Access Token leased to a provisioned device. Can only issue 1 at a time, similar to a lock. Used to verify only 1 instance of the Device is running."),
-		field.String("cert_fingerprint").
+		// field.String("cert_fingerprint").
+		// 	Sensitive().
+		// 	Comment("Cert fingerprint"),
+		field.Bytes("token").
 			Sensitive().
-			Comment("Cert fingerprint"),
+			GoType(helpers.EncryptedBytes{}),
 	}
 }
 
@@ -61,10 +64,11 @@ func (Device) Edges() []ent.Edge {
 
 func (Device) Indexes() []ent.Index {
 	return []ent.Index{
-		// IP must be unique
 		index.Fields("ip").
 			Unique(),
 		index.Fields("name").
+			Unique(),
+		index.Fields("token").
 			Unique(),
 	}
 }

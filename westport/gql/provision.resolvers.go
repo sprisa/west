@@ -7,29 +7,61 @@ package gql
 import (
 	"context"
 	"errors"
+	"net/netip"
+	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west/util/auth"
+	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/util/pki"
+	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // ProvisionDevice is the resolver for the provision_device field.
 func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionDeviceInput) (*ProvisionDeviceResponse, error) {
+	settings, err := r.client.Settings.Query().Only(ctx)
+	if err != nil {
+		return nil, errutil.WrapError(err, "error fetching settings")
+	}
+	dvc, err := r.client.Device.Query().
+		Where(device.Token(helpers.EncryptedBytes(input.Token))).
+		Only(ctx)
+	if err != nil {
+		return nil, errutil.WrapError(err, "error finding device")
+	}
+
 	claims := &auth.TokenClaims{}
 	parser := jwt.NewParser()
-	_, err := parser.ParseWithClaims(input.Token, claims, func(t *jwt.Token) (any, error) {
-		return "myfancykeyhere", nil
+	_, err = parser.ParseWithClaims(input.Token, claims, func(t *jwt.Token) (any, error) {
+		return helpers.EncryptionKey, nil
 	})
 	if err != nil {
 		l.Log.Err(err).Msg("ProvisionDevice: error parsing jwt")
 		return nil, errors.New("error parsing jwt")
 	}
 
+	if claims.ExpiresAt.After(time.Now()) {
+		return nil, errors.New("invalid token")
+	}
+
+	ip := dvc.IP.ToIpAddr()
+	nebulaIp := netip.PrefixFrom(ip, settings.Cidr.Bits())
+
+	cert, err := pki.SignCert(&pki.SignCertOptions{
+		CaCrt: settings.CaCrt,
+		CaKey: settings.CaKey,
+		Name:  dvc.Name,
+		Ip:    nebulaIp.String(),
+	})
+
 	res := &ProvisionDeviceResponse{
-		Cert:          "",
-		Key:           "",
-		AccessToken:   "",
-		NetworkCipher: "",
+		Name:          dvc.Name,
+		Cert:          string(cert.Cert),
+		Key:           string(cert.Key),
+		AccessToken:   "todo",
+		NetworkCipher: settings.Cipher,
 	}
 	return res, nil
 }

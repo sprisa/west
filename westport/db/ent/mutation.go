@@ -43,7 +43,7 @@ type DeviceMutation struct {
 	ip                  *ipconv.IP
 	addip               *ipconv.IP
 	leased_access_token *string
-	cert_fingerprint    *string
+	token               *helpers.EncryptedBytes
 	clearedFields       map[string]struct{}
 	done                bool
 	oldValue            func(context.Context) (*Device, error)
@@ -361,40 +361,40 @@ func (m *DeviceMutation) ResetLeasedAccessToken() {
 	delete(m.clearedFields, device.FieldLeasedAccessToken)
 }
 
-// SetCertFingerprint sets the "cert_fingerprint" field.
-func (m *DeviceMutation) SetCertFingerprint(s string) {
-	m.cert_fingerprint = &s
+// SetToken sets the "token" field.
+func (m *DeviceMutation) SetToken(hb helpers.EncryptedBytes) {
+	m.token = &hb
 }
 
-// CertFingerprint returns the value of the "cert_fingerprint" field in the mutation.
-func (m *DeviceMutation) CertFingerprint() (r string, exists bool) {
-	v := m.cert_fingerprint
+// Token returns the value of the "token" field in the mutation.
+func (m *DeviceMutation) Token() (r helpers.EncryptedBytes, exists bool) {
+	v := m.token
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCertFingerprint returns the old "cert_fingerprint" field's value of the Device entity.
+// OldToken returns the old "token" field's value of the Device entity.
 // If the Device object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeviceMutation) OldCertFingerprint(ctx context.Context) (v string, err error) {
+func (m *DeviceMutation) OldToken(ctx context.Context) (v helpers.EncryptedBytes, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCertFingerprint is only allowed on UpdateOne operations")
+		return v, errors.New("OldToken is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCertFingerprint requires an ID field in the mutation")
+		return v, errors.New("OldToken requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCertFingerprint: %w", err)
+		return v, fmt.Errorf("querying old value for OldToken: %w", err)
 	}
-	return oldValue.CertFingerprint, nil
+	return oldValue.Token, nil
 }
 
-// ResetCertFingerprint resets all changes to the "cert_fingerprint" field.
-func (m *DeviceMutation) ResetCertFingerprint() {
-	m.cert_fingerprint = nil
+// ResetToken resets all changes to the "token" field.
+func (m *DeviceMutation) ResetToken() {
+	m.token = nil
 }
 
 // Where appends a list predicates to the DeviceMutation builder.
@@ -447,8 +447,8 @@ func (m *DeviceMutation) Fields() []string {
 	if m.leased_access_token != nil {
 		fields = append(fields, device.FieldLeasedAccessToken)
 	}
-	if m.cert_fingerprint != nil {
-		fields = append(fields, device.FieldCertFingerprint)
+	if m.token != nil {
+		fields = append(fields, device.FieldToken)
 	}
 	return fields
 }
@@ -468,8 +468,8 @@ func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
 		return m.IP()
 	case device.FieldLeasedAccessToken:
 		return m.LeasedAccessToken()
-	case device.FieldCertFingerprint:
-		return m.CertFingerprint()
+	case device.FieldToken:
+		return m.Token()
 	}
 	return nil, false
 }
@@ -489,8 +489,8 @@ func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldIP(ctx)
 	case device.FieldLeasedAccessToken:
 		return m.OldLeasedAccessToken(ctx)
-	case device.FieldCertFingerprint:
-		return m.OldCertFingerprint(ctx)
+	case device.FieldToken:
+		return m.OldToken(ctx)
 	}
 	return nil, fmt.Errorf("unknown Device field %s", name)
 }
@@ -535,12 +535,12 @@ func (m *DeviceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLeasedAccessToken(v)
 		return nil
-	case device.FieldCertFingerprint:
-		v, ok := value.(string)
+	case device.FieldToken:
+		v, ok := value.(helpers.EncryptedBytes)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCertFingerprint(v)
+		m.SetToken(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Device field %s", name)
@@ -630,8 +630,8 @@ func (m *DeviceMutation) ResetField(name string) error {
 	case device.FieldLeasedAccessToken:
 		m.ResetLeasedAccessToken()
 		return nil
-	case device.FieldCertFingerprint:
-		m.ResetCertFingerprint()
+	case device.FieldToken:
+		m.ResetToken()
 		return nil
 	}
 	return fmt.Errorf("unknown Device field %s", name)

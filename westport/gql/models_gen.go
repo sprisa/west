@@ -7,6 +7,7 @@ type ProvisionDeviceInput struct {
 }
 
 type ProvisionDeviceResponse struct {
+	Name          string `json:"name"`
 	Cert          string `json:"cert"`
 	Key           string `json:"key"`
 	AccessToken   string `json:"access_token"`

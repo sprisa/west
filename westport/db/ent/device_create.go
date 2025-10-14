@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // DeviceCreate is the builder for creating a Device entity.
@@ -83,9 +84,9 @@ func (_c *DeviceCreate) SetNillableLeasedAccessToken(v *string) *DeviceCreate {
 	return _c
 }
 
-// SetCertFingerprint sets the "cert_fingerprint" field.
-func (_c *DeviceCreate) SetCertFingerprint(v string) *DeviceCreate {
-	_c.mutation.SetCertFingerprint(v)
+// SetToken sets the "token" field.
+func (_c *DeviceCreate) SetToken(v helpers.EncryptedBytes) *DeviceCreate {
+	_c.mutation.SetToken(v)
 	return _c
 }
 
@@ -157,8 +158,8 @@ func (_c *DeviceCreate) check() error {
 			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Device.ip": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CertFingerprint(); !ok {
-		return &ValidationError{Name: "cert_fingerprint", err: errors.New(`ent: missing required field "Device.cert_fingerprint"`)}
+	if _, ok := _c.mutation.Token(); !ok {
+		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "Device.token"`)}
 	}
 	return nil
 }
@@ -206,9 +207,9 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		_spec.SetField(device.FieldLeasedAccessToken, field.TypeString, value)
 		_node.LeasedAccessToken = &value
 	}
-	if value, ok := _c.mutation.CertFingerprint(); ok {
-		_spec.SetField(device.FieldCertFingerprint, field.TypeString, value)
-		_node.CertFingerprint = value
+	if value, ok := _c.mutation.Token(); ok {
+		_spec.SetField(device.FieldToken, field.TypeBytes, value)
+		_node.Token = value
 	}
 	return _node, _spec
 }

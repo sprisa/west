@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/predicate"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // DeviceUpdate is the builder for updating Device entities.
@@ -68,17 +69,9 @@ func (_u *DeviceUpdate) ClearLeasedAccessToken() *DeviceUpdate {
 	return _u
 }
 
-// SetCertFingerprint sets the "cert_fingerprint" field.
-func (_u *DeviceUpdate) SetCertFingerprint(v string) *DeviceUpdate {
-	_u.mutation.SetCertFingerprint(v)
-	return _u
-}
-
-// SetNillableCertFingerprint sets the "cert_fingerprint" field if the given value is not nil.
-func (_u *DeviceUpdate) SetNillableCertFingerprint(v *string) *DeviceUpdate {
-	if v != nil {
-		_u.SetCertFingerprint(*v)
-	}
+// SetToken sets the "token" field.
+func (_u *DeviceUpdate) SetToken(v helpers.EncryptedBytes) *DeviceUpdate {
+	_u.mutation.SetToken(v)
 	return _u
 }
 
@@ -144,8 +137,8 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.LeasedAccessTokenCleared() {
 		_spec.ClearField(device.FieldLeasedAccessToken, field.TypeString)
 	}
-	if value, ok := _u.mutation.CertFingerprint(); ok {
-		_spec.SetField(device.FieldCertFingerprint, field.TypeString, value)
+	if value, ok := _u.mutation.Token(); ok {
+		_spec.SetField(device.FieldToken, field.TypeBytes, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -207,17 +200,9 @@ func (_u *DeviceUpdateOne) ClearLeasedAccessToken() *DeviceUpdateOne {
 	return _u
 }
 
-// SetCertFingerprint sets the "cert_fingerprint" field.
-func (_u *DeviceUpdateOne) SetCertFingerprint(v string) *DeviceUpdateOne {
-	_u.mutation.SetCertFingerprint(v)
-	return _u
-}
-
-// SetNillableCertFingerprint sets the "cert_fingerprint" field if the given value is not nil.
-func (_u *DeviceUpdateOne) SetNillableCertFingerprint(v *string) *DeviceUpdateOne {
-	if v != nil {
-		_u.SetCertFingerprint(*v)
-	}
+// SetToken sets the "token" field.
+func (_u *DeviceUpdateOne) SetToken(v helpers.EncryptedBytes) *DeviceUpdateOne {
+	_u.mutation.SetToken(v)
 	return _u
 }
 
@@ -313,8 +298,8 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 	if _u.mutation.LeasedAccessTokenCleared() {
 		_spec.ClearField(device.FieldLeasedAccessToken, field.TypeString)
 	}
-	if value, ok := _u.mutation.CertFingerprint(); ok {
-		_spec.SetField(device.FieldCertFingerprint, field.TypeString, value)
+	if value, ok := _u.mutation.Token(); ok {
+		_spec.SetField(device.FieldToken, field.TypeBytes, value)
 	}
 	_node = &Device{config: _u.config}
 	_spec.Assign = _node.assignValues

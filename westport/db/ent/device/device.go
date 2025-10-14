@@ -23,8 +23,8 @@ const (
 	FieldIP = "ip"
 	// FieldLeasedAccessToken holds the string denoting the leased_access_token field in the database.
 	FieldLeasedAccessToken = "leased_access_token"
-	// FieldCertFingerprint holds the string denoting the cert_fingerprint field in the database.
-	FieldCertFingerprint = "cert_fingerprint"
+	// FieldToken holds the string denoting the token field in the database.
+	FieldToken = "token"
 	// Table holds the table name of the device in the database.
 	Table = "devices"
 )
@@ -37,7 +37,7 @@ var Columns = []string{
 	FieldName,
 	FieldIP,
 	FieldLeasedAccessToken,
-	FieldCertFingerprint,
+	FieldToken,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -94,9 +94,4 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByLeasedAccessToken orders the results by the leased_access_token field.
 func ByLeasedAccessToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLeasedAccessToken, opts...).ToFunc()
-}
-
-// ByCertFingerprint orders the results by the cert_fingerprint field.
-func ByCertFingerprint(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCertFingerprint, opts...).ToFunc()
 }

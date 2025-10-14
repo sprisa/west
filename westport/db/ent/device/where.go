@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/predicate"
+	"github.com/sprisa/west/westport/db/helpers"
 )
 
 // ID filters vertices based on their ID field.
@@ -81,9 +82,9 @@ func LeasedAccessToken(v string) predicate.Device {
 	return predicate.Device(sql.FieldEQ(FieldLeasedAccessToken, v))
 }
 
-// CertFingerprint applies equality check predicate on the "cert_fingerprint" field. It's identical to CertFingerprintEQ.
-func CertFingerprint(v string) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldCertFingerprint, v))
+// Token applies equality check predicate on the "token" field. It's identical to TokenEQ.
+func Token(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldEQ(FieldToken, v))
 }
 
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
@@ -360,69 +361,44 @@ func LeasedAccessTokenContainsFold(v string) predicate.Device {
 	return predicate.Device(sql.FieldContainsFold(FieldLeasedAccessToken, v))
 }
 
-// CertFingerprintEQ applies the EQ predicate on the "cert_fingerprint" field.
-func CertFingerprintEQ(v string) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldCertFingerprint, v))
+// TokenEQ applies the EQ predicate on the "token" field.
+func TokenEQ(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldEQ(FieldToken, v))
 }
 
-// CertFingerprintNEQ applies the NEQ predicate on the "cert_fingerprint" field.
-func CertFingerprintNEQ(v string) predicate.Device {
-	return predicate.Device(sql.FieldNEQ(FieldCertFingerprint, v))
+// TokenNEQ applies the NEQ predicate on the "token" field.
+func TokenNEQ(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldNEQ(FieldToken, v))
 }
 
-// CertFingerprintIn applies the In predicate on the "cert_fingerprint" field.
-func CertFingerprintIn(vs ...string) predicate.Device {
-	return predicate.Device(sql.FieldIn(FieldCertFingerprint, vs...))
+// TokenIn applies the In predicate on the "token" field.
+func TokenIn(vs ...helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldIn(FieldToken, vs...))
 }
 
-// CertFingerprintNotIn applies the NotIn predicate on the "cert_fingerprint" field.
-func CertFingerprintNotIn(vs ...string) predicate.Device {
-	return predicate.Device(sql.FieldNotIn(FieldCertFingerprint, vs...))
+// TokenNotIn applies the NotIn predicate on the "token" field.
+func TokenNotIn(vs ...helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldNotIn(FieldToken, vs...))
 }
 
-// CertFingerprintGT applies the GT predicate on the "cert_fingerprint" field.
-func CertFingerprintGT(v string) predicate.Device {
-	return predicate.Device(sql.FieldGT(FieldCertFingerprint, v))
+// TokenGT applies the GT predicate on the "token" field.
+func TokenGT(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldGT(FieldToken, v))
 }
 
-// CertFingerprintGTE applies the GTE predicate on the "cert_fingerprint" field.
-func CertFingerprintGTE(v string) predicate.Device {
-	return predicate.Device(sql.FieldGTE(FieldCertFingerprint, v))
+// TokenGTE applies the GTE predicate on the "token" field.
+func TokenGTE(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldGTE(FieldToken, v))
 }
 
-// CertFingerprintLT applies the LT predicate on the "cert_fingerprint" field.
-func CertFingerprintLT(v string) predicate.Device {
-	return predicate.Device(sql.FieldLT(FieldCertFingerprint, v))
+// TokenLT applies the LT predicate on the "token" field.
+func TokenLT(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldLT(FieldToken, v))
 }
 
-// CertFingerprintLTE applies the LTE predicate on the "cert_fingerprint" field.
-func CertFingerprintLTE(v string) predicate.Device {
-	return predicate.Device(sql.FieldLTE(FieldCertFingerprint, v))
-}
-
-// CertFingerprintContains applies the Contains predicate on the "cert_fingerprint" field.
-func CertFingerprintContains(v string) predicate.Device {
-	return predicate.Device(sql.FieldContains(FieldCertFingerprint, v))
-}
-
-// CertFingerprintHasPrefix applies the HasPrefix predicate on the "cert_fingerprint" field.
-func CertFingerprintHasPrefix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasPrefix(FieldCertFingerprint, v))
-}
-
-// CertFingerprintHasSuffix applies the HasSuffix predicate on the "cert_fingerprint" field.
-func CertFingerprintHasSuffix(v string) predicate.Device {
-	return predicate.Device(sql.FieldHasSuffix(FieldCertFingerprint, v))
-}
-
-// CertFingerprintEqualFold applies the EqualFold predicate on the "cert_fingerprint" field.
-func CertFingerprintEqualFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldEqualFold(FieldCertFingerprint, v))
-}
-
-// CertFingerprintContainsFold applies the ContainsFold predicate on the "cert_fingerprint" field.
-func CertFingerprintContainsFold(v string) predicate.Device {
-	return predicate.Device(sql.FieldContainsFold(FieldCertFingerprint, v))
+// TokenLTE applies the LTE predicate on the "token" field.
+func TokenLTE(v helpers.EncryptedBytes) predicate.Device {
+	return predicate.Device(sql.FieldLTE(FieldToken, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -31,7 +31,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			device.FieldName:              {Type: field.TypeString, Column: device.FieldName},
 			device.FieldIP:                {Type: field.TypeUint32, Column: device.FieldIP},
 			device.FieldLeasedAccessToken: {Type: field.TypeString, Column: device.FieldLeasedAccessToken},
-			device.FieldCertFingerprint:   {Type: field.TypeString, Column: device.FieldCertFingerprint},
+			device.FieldToken:             {Type: field.TypeBytes, Column: device.FieldToken},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -129,9 +129,9 @@ func (f *DeviceFilter) WhereLeasedAccessToken(p entql.StringP) {
 	f.Where(p.Field(device.FieldLeasedAccessToken))
 }
 
-// WhereCertFingerprint applies the entql string predicate on the cert_fingerprint field.
-func (f *DeviceFilter) WhereCertFingerprint(p entql.StringP) {
-	f.Where(p.Field(device.FieldCertFingerprint))
+// WhereToken applies the entql []byte predicate on the token field.
+func (f *DeviceFilter) WhereToken(p entql.BytesP) {
+	f.Where(p.Field(device.FieldToken))
 }
 
 // addPredicate implements the predicateAdder interface.

@@ -86,8 +86,21 @@ var AddCommand = &cli.Command{
 			return errutil.WrapError(err, "error creating token")
 		}
 
-		println(token)
+		ipInt, err := ipconv.FromIPAddr(nebulaIp.Addr())
+		if err != nil {
+			return errutil.WrapError(err, "error converting ip")
+		}
 
+		err = client.Device.Create().
+			SetName(name).
+			SetIP(ipInt).
+			SetToken(helpers.EncryptedBytes(token)).
+			Exec(ctx)
+		if err != nil {
+			return errutil.WrapError(err, "error saving device")
+		}
+
+		println(token)
 		return nil
 	},
 }

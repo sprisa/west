@@ -73,6 +73,7 @@ type ComplexityRoot struct {
 		AccessToken   func(childComplexity int) int
 		Cert          func(childComplexity int) int
 		Key           func(childComplexity int) int
+		Name          func(childComplexity int) int
 		NetworkCipher func(childComplexity int) int
 	}
 
@@ -198,6 +199,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ProvisionDeviceResponse.Key(childComplexity), true
+	case "ProvisionDeviceResponse.name":
+		if e.complexity.ProvisionDeviceResponse.Name == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.Name(childComplexity), true
 	case "ProvisionDeviceResponse.networkCipher":
 		if e.complexity.ProvisionDeviceResponse.NetworkCipher == nil {
 			break
@@ -620,6 +627,8 @@ func (ec *executionContext) fieldContext_Mutation_provision_device(ctx context.C
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "name":
+				return ec.fieldContext_ProvisionDeviceResponse_name(ctx, field)
 			case "cert":
 				return ec.fieldContext_ProvisionDeviceResponse_cert(ctx, field)
 			case "key":
@@ -757,6 +766,35 @@ func (ec *executionContext) fieldContext_PageInfo_endCursor(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_name(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2761,6 +2799,11 @@ func (ec *executionContext) _ProvisionDeviceResponse(ctx context.Context, sel as
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProvisionDeviceResponse")
+		case "name":
+			out.Values[i] = ec._ProvisionDeviceResponse_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "cert":
 			out.Values[i] = ec._ProvisionDeviceResponse_cert(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

@@ -3,6 +3,7 @@ input ProvisionDeviceInput {
 }
 
 type ProvisionDeviceResponse {
+  name: String!
   cert: String!
   key: String!
   access_token: String!

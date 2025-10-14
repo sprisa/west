@@ -16,7 +16,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "ip", Type: field.TypeUint32},
 		{Name: "leased_access_token", Type: field.TypeString, Nullable: true},
-		{Name: "cert_fingerprint", Type: field.TypeString},
+		{Name: "token", Type: field.TypeBytes},
 	}
 	// DevicesTable holds the schema information for the "devices" table.
 	DevicesTable = &schema.Table{
@@ -33,6 +33,11 @@ var (
 				Name:    "device_name",
 				Unique:  true,
 				Columns: []*schema.Column{DevicesColumns[3]},
+			},
+			{
+				Name:    "device_token",
+				Unique:  true,
+				Columns: []*schema.Column{DevicesColumns[6]},
 			},
 		},
 	}
