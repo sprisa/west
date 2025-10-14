@@ -12,6 +12,6 @@ type ProvisionDeviceResponse {
 }
 
 
-extend type Mutation {
+type Mutation {
   provision_device(input: ProvisionDeviceInput!): ProvisionDeviceResponse!
 }
