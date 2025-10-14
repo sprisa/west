@@ -1,33 +1,21 @@
-package main
+package westport
 
 import (
 	"context"
-	"os"
 
-	l "github.com/sprisa/west/util/log"
-	"github.com/sprisa/west/util/sig"
 	"github.com/urfave/cli/v3"
 )
 
-func main() {
-	ctx := sig.ShutdownContext(context.Background())
-	cmd := &cli.Command{
-		Name:      "west-port",
-		Usage:     "West port network mesh",
-		UsageText: "west-port install",
-		Commands: []*cli.Command{
-			InstallCommand,
-			StartCommand,
-			AddCommand,
-		},
-		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return cli.ShowAppHelp(cmd)
-		},
-	}
-
-	err := cmd.Run(ctx, os.Args)
-	if err != nil {
-		l.Log.Error().Msg(err.Error())
-		defer os.Exit(1)
-	}
+var WestPortCommand = &cli.Command{
+	Name:      "port",
+	Usage:     "West port coordination server",
+	UsageText: "west port install",
+	Commands: []*cli.Command{
+		InstallCommand,
+		StartCommand,
+		AddCommand,
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		return cli.ShowSubcommandHelp(cmd)
+	},
 }

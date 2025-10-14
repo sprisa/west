@@ -6,6 +6,7 @@ import (
 
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/sig"
+	"github.com/sprisa/west/westport"
 	"github.com/urfave/cli/v3"
 )
 
@@ -17,6 +18,7 @@ func main() {
 		UsageText: "west start [jwt_token]",
 		Commands: []*cli.Command{
 			StartCommand,
+			westport.WestPortCommand,
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			return cli.ShowAppHelp(cmd)
