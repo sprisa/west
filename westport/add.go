@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west/util/auth"
@@ -76,8 +77,14 @@ var AddCommand = &cli.Command{
 
 		claims := &auth.TokenClaims{
 			Endpoint: "https://api.priv.sh",
-			Name:     name,
 			IP:       nebulaIp.String(),
+			Ca:       string(settings.CaCrt),
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(
+					// 1 year
+					time.Now().Add(time.Hour * 8760),
+				),
+			},
 		}
 
 		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
@@ -91,11 +98,11 @@ var AddCommand = &cli.Command{
 			return errutil.WrapError(err, "error converting ip")
 		}
 
-		err = client.Device.Create().
+		_, err = client.Device.Create().
 			SetName(name).
 			SetIP(ipInt).
 			SetToken(helpers.EncryptedBytes(token)).
-			Exec(ctx)
+			Save(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving device")
 		}

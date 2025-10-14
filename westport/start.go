@@ -70,7 +70,7 @@ func startWestPort(ctx context.Context) error {
 		mux := http.NewServeMux()
 		server := &http.Server{Addr: address, Handler: mux}
 		mux.Handle(
-			"/graphql",
+			"/",
 			handler,
 		)
 
@@ -99,7 +99,7 @@ func startWestPort(ctx context.Context) error {
 			cipher = config.CipherChaChaPoly
 		}
 
-		opts := &west.ServerArgs{
+		opts := &west.ServerOpts{
 			Config: &config.Config{
 				Pki: config.Pki{
 					Ca:   string(settings.CaCrt),

@@ -71,6 +71,7 @@ type ComplexityRoot struct {
 
 	ProvisionDeviceResponse struct {
 		AccessToken   func(childComplexity int) int
+		Ca            func(childComplexity int) int
 		Cert          func(childComplexity int) int
 		Key           func(childComplexity int) int
 		Name          func(childComplexity int) int
@@ -187,6 +188,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ProvisionDeviceResponse.AccessToken(childComplexity), true
+	case "ProvisionDeviceResponse.ca":
+		if e.complexity.ProvisionDeviceResponse.Ca == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.Ca(childComplexity), true
 	case "ProvisionDeviceResponse.cert":
 		if e.complexity.ProvisionDeviceResponse.Cert == nil {
 			break
@@ -629,6 +636,8 @@ func (ec *executionContext) fieldContext_Mutation_provision_device(ctx context.C
 			switch field.Name {
 			case "name":
 				return ec.fieldContext_ProvisionDeviceResponse_name(ctx, field)
+			case "ca":
+				return ec.fieldContext_ProvisionDeviceResponse_ca(ctx, field)
 			case "cert":
 				return ec.fieldContext_ProvisionDeviceResponse_cert(ctx, field)
 			case "key":
@@ -788,6 +797,35 @@ func (ec *executionContext) _ProvisionDeviceResponse_name(ctx context.Context, f
 }
 
 func (ec *executionContext) fieldContext_ProvisionDeviceResponse_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_ca(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_ca,
+		func(ctx context.Context) (any, error) {
+			return obj.Ca, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_ca(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ProvisionDeviceResponse",
 		Field:      field,
@@ -2801,6 +2839,11 @@ func (ec *executionContext) _ProvisionDeviceResponse(ctx context.Context, sel as
 			out.Values[i] = graphql.MarshalString("ProvisionDeviceResponse")
 		case "name":
 			out.Values[i] = ec._ProvisionDeviceResponse_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ca":
+			out.Values[i] = ec._ProvisionDeviceResponse_ca(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

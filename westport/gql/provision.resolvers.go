@@ -11,11 +11,12 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/samber/lo"
 	"github.com/sprisa/west/util/auth"
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/pki"
-	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
 )
 
@@ -25,24 +26,47 @@ func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionD
 	if err != nil {
 		return nil, errutil.WrapError(err, "error fetching settings")
 	}
-	dvc, err := r.client.Device.Query().
-		Where(device.Token(helpers.EncryptedBytes(input.Token))).
-		Only(ctx)
+	dvcs, err := r.client.Device.Query().
+		All(ctx)
 	if err != nil {
 		return nil, errutil.WrapError(err, "error finding device")
 	}
+	// for _, dvc := range dvcs {
+	// 	l.Log.Info().Msgf("%+v", dvc)
+	// 	l.Log.Info().Msgf("%s", dvc.Token)
+	// }
+
+	dvc, found := lo.Find(dvcs, func(dvc *ent.Device) bool {
+		return dvc.Token.String() == input.Token
+	})
+	if !found {
+		return nil, errors.New("device not found")
+	}
+
+	// TODO: Not sure how to do a correct Where search on the encrypted token value
+	// encToken, err :=  helpers.EncryptedBytes(input.Token).Value()
+	// if err != nil {
+	// 	return nil, errors.New("token error")
+	// }
+
+	// dvc, err := r.client.Debug().Device.Query().
+	// 	Where(device.Token(helpers.EncryptedBytes(encToken.([]byte)))).
+	// 	Only(ctx)
+	// if err != nil {
+	// 	return nil, errutil.WrapError(err, "error finding device")
+	// }
 
 	claims := &auth.TokenClaims{}
 	parser := jwt.NewParser()
 	_, err = parser.ParseWithClaims(input.Token, claims, func(t *jwt.Token) (any, error) {
-		return helpers.EncryptionKey, nil
+		return helpers.EncryptionKey[:], nil
 	})
 	if err != nil {
 		l.Log.Err(err).Msg("ProvisionDevice: error parsing jwt")
 		return nil, errors.New("error parsing jwt")
 	}
 
-	if claims.ExpiresAt.After(time.Now()) {
+	if claims.ExpiresAt.Before(time.Now()) {
 		return nil, errors.New("invalid token")
 	}
 
@@ -55,9 +79,13 @@ func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionD
 		Name:  dvc.Name,
 		Ip:    nebulaIp.String(),
 	})
+	if err != nil {
+		return nil, errutil.WrapError(err, "error signing cert")
+	}
 
 	res := &ProvisionDeviceResponse{
 		Name:          dvc.Name,
+		Ca:            string(settings.CaCrt),
 		Cert:          string(cert.Cert),
 		Key:           string(cert.Key),
 		AccessToken:   "todo",

@@ -4,6 +4,7 @@ input ProvisionDeviceInput {
 
 type ProvisionDeviceResponse {
   name: String!
+  ca: String!
   cert: String!
   key: String!
   access_token: String!

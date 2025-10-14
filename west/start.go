@@ -2,12 +2,22 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"time"
 
 	"reship/util/print"
 
+	"github.com/Khan/genqlient/graphql"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sprisa/west"
+	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/auth"
+	"github.com/sprisa/west/util/errutil"
+	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/west/gql"
 	"github.com/urfave/cli/v3"
 )
 
@@ -25,17 +35,62 @@ var StartCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		endpoint := os.Getenv("WEST_ENDPOINT")
+
 		token := c.String("token")
 		parser := jwt.NewParser()
 		claims := &auth.TokenClaims{}
-		info, _, err := parser.ParseUnverified(token, claims)
+		_, _, err := parser.ParseUnverified(token, claims)
 		if err != nil {
 			return fmt.Errorf("error parsing token: %w", err)
 		}
-		print.PrettyPrint(info)
+		if claims.ExpiresAt.Before(time.Now()) {
+			return errors.New("token expired")
+		}
+		if endpoint == "" {
+			endpoint = claims.Endpoint
+		}
 
 		print.PrettyPrint(claims)
 
-		return nil
+		client := graphql.NewClient(endpoint, http.DefaultClient)
+		data, err := gql.ProvisionDevice(ctx, client, gql.ProvisionDeviceInput{
+			Token: token,
+		})
+		if err != nil {
+			return errutil.WrapError(err, "error provisioning device")
+		}
+		dvc := data.GetProvision_device()
+		l.Log.Info().
+			Str("name", dvc.Name).
+			Str("ip", claims.IP).
+			Msg("Received provisioning")
+
+		srv, err := west.NewServer(&west.ServerOpts{
+			Config: &config.Config{
+				Pki: config.Pki{
+					Ca:   dvc.Ca,
+					Cert: dvc.Cert,
+					Key:  dvc.Key,
+				},
+				Lighthouse: config.Lighthouse{
+					Hosts: []string{},
+				},
+				Tun: config.Tun{
+					Disabled: true,
+				},
+				Listen: config.Listen{
+					Host: "::",
+					Port: 4243,
+				},
+				Preferred_ranges: config.DefaultPreferredRanges,
+				Cipher:           config.Cipher(dvc.NetworkCipher),
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		return srv.Listen(ctx)
 	},
 }

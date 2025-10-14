@@ -27,7 +27,7 @@ type NebulaConfigCtrl = nebulaCfg.C
 
 // TODO: Add add an `onReady` and wait for Nebula to be fully up.
 // e.g. after "handshake message received"
-type ServerArgs struct {
+type ServerOpts struct {
 	// Custom Logging
 	Log *logrus.Logger
 	// Nebula config
@@ -42,15 +42,15 @@ type ServerArgs struct {
 
 type Server struct {
 	Ctrl *Control
-	args *ServerArgs
+	opts *ServerOpts
 }
 
-func NewServer(args *ServerArgs) (*Server, error) {
-	log := args.Log
+func NewServer(opts *ServerOpts) (*Server, error) {
+	log := opts.Log
 	if log == nil {
 		log = logrus.StandardLogger()
 	}
-	nebulaConfig := args.Config
+	nebulaConfig := opts.Config
 	if nebulaConfig == nil {
 		return nil, errors.New("expected west config")
 	}
@@ -60,14 +60,14 @@ func NewServer(args *ServerArgs) (*Server, error) {
 		return nil, err
 	}
 
-	return NewServerWithConfigCtrl(args, c)
+	return NewServerWithConfigCtrl(opts, c)
 }
 
-func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, error) {
-	if args.Log == nil {
-		args.Log = logrus.StandardLogger()
+func NewServerWithConfigCtrl(opts *ServerOpts, c *NebulaConfigCtrl) (*Server, error) {
+	if opts.Log == nil {
+		opts.Log = logrus.StandardLogger()
 	}
-	nebulaConfig := args.Config
+	nebulaConfig := opts.Config
 	if nebulaConfig == nil {
 		return nil, errors.New("expected west config")
 	}
@@ -76,12 +76,12 @@ func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, er
 
 	// TODO: Ensure mknod is still upstream
 
-	ctrl, err := nebula.Main(c, false, Build, args.Log, args.deviceFactory, nil)
+	ctrl, err := nebula.Main(c, false, Build, opts.Log, opts.deviceFactory, nil)
 
 	if err != nil {
 		switch v := err.(type) {
 		case *util.ContextualError:
-			v.Log(args.Log)
+			v.Log(opts.Log)
 			return nil, v.Unwrap()
 		default:
 			// TODO: Move this port error decoration up into harbor
@@ -89,7 +89,7 @@ func NewServerWithConfigCtrl(args *ServerArgs, c *NebulaConfigCtrl) (*Server, er
 		}
 	}
 
-	return &Server{Ctrl: ctrl, args: args}, nil
+	return &Server{Ctrl: ctrl, opts: opts}, nil
 }
 
 func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConfigCtrl, error) {
@@ -115,7 +115,7 @@ func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConf
 }
 
 // TODO: Not sure if I want this and instead just use a JWT to provision
-func NewServerWithYamlConfig(args *ServerArgs, yamlCfg []byte) (*Server, error) {
+func NewServerWithYamlConfig(args *ServerOpts, yamlCfg []byte) (*Server, error) {
 	if args.Log == nil {
 		args.Log = logrus.StandardLogger()
 	}
@@ -138,23 +138,23 @@ func NewServerWithYamlConfig(args *ServerArgs, yamlCfg []byte) (*Server, error) 
 	}
 
 	// TODO: Use mergo and merge west config from the yaml version
-	return &Server{Ctrl: ctrl, args: args}, nil
+	return &Server{Ctrl: ctrl, opts: args}, nil
 }
 
 func (s *Server) Listen(ctx context.Context) error {
-	log := s.args.Log
-	port := s.args.Config.Listen.Port
+	log := s.opts.Log
+	port := s.opts.Config.Listen.Port
 	// Start Nebula Server
 	s.Ctrl.Start()
 	// Wait for OnStart hook
-	if s.args.OnStart != nil {
-		s.args.OnStart(s.Ctrl)
+	if s.opts.OnStart != nil {
+		s.opts.OnStart(s.Ctrl)
 	}
 	// Wait for server to be stopped (context cancelled)
 	<-ctx.Done()
 	// Wait for OnShutdown hook
-	if s.args.OnShutdown != nil {
-		s.args.OnShutdown()
+	if s.opts.OnShutdown != nil {
+		s.opts.OnShutdown()
 	}
 	log.Infof("Shutting down nebula server on port %d \n", port)
 	s.Ctrl.Stop()
