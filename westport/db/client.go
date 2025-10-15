@@ -13,6 +13,7 @@ import (
 
 func OpenDB() (*ent.Client, error) {
 	sql.Register("sqlite3", &sqliteDriver{})
+	// TODO: Change this to the common dir on snap
 	return ent.Open(dialect.SQLite, "file:westdb?mode=rwc&cache=shared&_fk=1")
 }
 
