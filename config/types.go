@@ -247,6 +247,12 @@ const (
 	ProtoIcmp Proto = "icmp"
 )
 
+const (
+	PortAny  = 0
+	HostAny  = "any"
+	GroupAny = "any"
+)
+
 type FirewallRule struct {
 	// Takes 0 or any as any, a single number (e.g. 80), a range (e.g. 200-901),
 	// or fragment to match second and further fragments of fragmented packets (since there is no port available).

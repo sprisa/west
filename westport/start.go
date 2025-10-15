@@ -118,6 +118,22 @@ func startWestPort(ctx context.Context) error {
 				},
 				Preferred_ranges: config.DefaultPreferredRanges,
 				Cipher:           cipher,
+				Firewall: config.Firewall{
+					Inbound: []config.FirewallRule{
+						{
+							Port:  config.PortAny,
+							Proto: config.ProtoAny,
+							Host:  config.HostAny,
+						},
+					},
+					Outbound: []config.FirewallRule{
+						{
+							Port:  config.PortAny,
+							Proto: config.ProtoAny,
+							Host:  config.HostAny,
+						},
+					},
+				},
 			},
 		}
 		srv, err := west.NewServer(opts)

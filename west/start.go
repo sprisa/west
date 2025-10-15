@@ -119,6 +119,22 @@ var StartCommand = &cli.Command{
 				},
 				Preferred_ranges: config.DefaultPreferredRanges,
 				Cipher:           config.Cipher(dvc.NetworkCipher),
+				Firewall: config.Firewall{
+					Inbound: []config.FirewallRule{
+						{
+							Port:  config.PortAny,
+							Proto: config.ProtoAny,
+							Host:  config.HostAny,
+						},
+					},
+					Outbound: []config.FirewallRule{
+						{
+							Port:  config.PortAny,
+							Proto: config.ProtoAny,
+							Host:  config.HostAny,
+						},
+					},
+				},
 			},
 		})
 		if err != nil {
