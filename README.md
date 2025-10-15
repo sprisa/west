@@ -20,6 +20,8 @@ Global mesh networking for distributed datacenters.
 
 ## Install
 
+TODO: Add Docker install method. Npm could be cool too.
+
 **Snap / Ubuntu (auto updates)**
 
 ```sh
