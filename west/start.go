@@ -40,8 +40,13 @@ var StartCommand = &cli.Command{
 			Name:  "disable-tun",
 			Usage: "Disabled TUN network binding. Useful for rootless testing",
 		},
+		&cli.IntFlag{
+			Name:  "port",
+			Usage: "Port to use for Nebula. Defaults to a random free port.",
+		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		port := c.Int("port")
 		disableTun := c.Bool("disable-tun")
 		token := c.String("token")
 		// Read via stdin if available
@@ -93,6 +98,13 @@ var StartCommand = &cli.Command{
 			Str("ip", claims.IP).
 			Msg("Received provisioning")
 
+		if port == 0 {
+			port, err = getFreePort()
+			if err != nil {
+				return errutil.WrapError(err, "erroring find free port")
+			}
+		}
+
 		srv, err := west.NewServer(&west.ServerOpts{
 			Config: &config.Config{
 				Pki: config.Pki{
@@ -115,7 +127,7 @@ var StartCommand = &cli.Command{
 				},
 				Listen: config.Listen{
 					Host: "::",
-					Port: 4243,
+					Port: port,
 				},
 				Preferred_ranges: config.DefaultPreferredRanges,
 				Cipher:           config.Cipher(dvc.NetworkCipher),
@@ -143,4 +155,18 @@ var StartCommand = &cli.Command{
 
 		return srv.Listen(ctx)
 	},
+}
+
+func getFreePort() (port int, err error) {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
 }
