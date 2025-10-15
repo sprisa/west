@@ -3,6 +3,7 @@ package westport
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"time"
 
@@ -30,13 +31,25 @@ var StartCommand = &cli.Command{
 	Name:      "start",
 	Usage:     "Start west port",
 	UsageText: "west port start",
-	Flags:     []cli.Flag{},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "private-dns",
+			Usage: "DNS server will only be accessible within the network. Requires DNS configuration on each client.",
+		},
+		&cli.BoolFlag{
+			Name:  "disable-tun",
+			Usage: "Disabled TUN network binding",
+		},
+	},
 	Action: func(ctx context.Context, c *cli.Command) error {
-		return startWestPort(ctx)
+		return startWestPort(ctx, c)
 	},
 }
 
-func startWestPort(ctx context.Context) error {
+func startWestPort(ctx context.Context, c *cli.Command) error {
+	privateDns := c.Bool("private-dns")
+	disableTun := c.Bool("disable-tun")
+
 	err := promptEncryptionPassword()
 	if err != nil {
 		return err
@@ -95,10 +108,20 @@ func startWestPort(ctx context.Context) error {
 		return err
 	})
 
-	// Start Compass DNS
-	group.Go(func() error {
-		return dns.StartCompassDNSServer(ctx, client, settings)
-	})
+	// Depends on Nebula interface
+	var onNebulaStart = func(ctrl *west.Control) {
+		// Start Compass DNS
+		group.Go(func() error {
+			addr := "0.0.0.0:53"
+			if privateDns {
+				if disableTun {
+					return errors.New("private dns cannot be used with tun disabled")
+				}
+				addr = net.JoinHostPort(settings.PortOverlayIP.ToIpAddr().String(), "53")
+			}
+			return dns.StartCompassDNSServer(ctx, addr, client, settings)
+		})
+	}
 
 	// Start Nebula
 	group.Go(func() error {
@@ -108,6 +131,7 @@ func startWestPort(ctx context.Context) error {
 		}
 
 		opts := &west.ServerOpts{
+			OnStart: onNebulaStart,
 			Config: &config.Config{
 				Pki: config.Pki{
 					Ca:   string(settings.CaCrt),
@@ -118,7 +142,7 @@ func startWestPort(ctx context.Context) error {
 					Am_lighthouse: true,
 				},
 				Tun: config.Tun{
-					Disabled: true,
+					Disabled: disableTun,
 				},
 				Listen: config.Listen{
 					Host: "::",

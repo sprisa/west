@@ -11,13 +11,18 @@ import (
 	"github.com/sprisa/west/westport/db/ent/device"
 )
 
-func StartCompassDNSServer(ctx context.Context, client *ent.Client, settings *ent.Settings) error {
+func StartCompassDNSServer(
+	ctx context.Context,
+	addr string,
+	client *ent.Client,
+	settings *ent.Settings,
+) error {
 	if settings.DomainZone == "" {
 		l.Log.Warn().Msg("No domain zone configured. Compass DNS server disabled.")
 		return nil
 	}
 
-	dnsServer := &dns.Server{Addr: "0.0.0.0:53", Net: "udp"}
+	dnsServer := &dns.Server{Addr: addr, Net: "udp"}
 	dns.HandleFunc(".", func(res dns.ResponseWriter, msg *dns.Msg) {
 		handleDnsRequest(ctx, res, msg, client, settings)
 	})

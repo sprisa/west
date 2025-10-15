@@ -25,6 +25,8 @@ var Build string = "west v0.0.1"
 type Control = nebula.Control
 type NebulaConfigCtrl = nebulaCfg.C
 
+type OnStartFunc = func(*Control)
+
 // TODO: Add add an `onReady` and wait for Nebula to be fully up.
 // e.g. after "handshake message received"
 type ServerOpts struct {
@@ -33,7 +35,7 @@ type ServerOpts struct {
 	// Nebula config
 	Config *config.Config
 	// Hook called after Nebula server starts
-	OnStart func(*Control)
+	OnStart OnStartFunc
 	// Hook called before Nebula shuts down.
 	// Will block until function returns.
 	OnShutdown    func()
