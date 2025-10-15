@@ -140,6 +140,7 @@ snapcrafts:
         plugs:
           # - avahi-control
           # - avahi-observe
+          - home
           - network
           - network-bind
           - network-control
