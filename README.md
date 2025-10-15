@@ -4,6 +4,20 @@ Global mesh networking for distributed datacenters.
 
 > ⚠️ West has not yet hit v1 and it's api shouldn't be considered stable
 
+## Features  
+
+- 🌍 Connect to your network from anywhere in the world.
+- 🔐 Private subnet for your services / apps.
+  - Services can be bound to the internet network and will be completely unreachable externally.
+  - Only your devices can send traffic
+- 🪄 Magic DNS with bring your own subdomain
+  - IP to DNS names are managed by West. Communicate by device name.
+    - `ssh myserver.net.mycompany.dev`
+- 🚂 API Device Provisioning
+  - Register new devices as needed.
+  - Use the provisioning token to connect devices from anywhere.
+
+
 ## Install
 
 **Snap / Ubuntu (auto updates)**
