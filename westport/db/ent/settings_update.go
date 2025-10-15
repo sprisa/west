@@ -36,6 +36,26 @@ func (_u *SettingsUpdate) SetUpdatedTime(v time.Time) *SettingsUpdate {
 	return _u
 }
 
+// SetDomainZone sets the "domain_zone" field.
+func (_u *SettingsUpdate) SetDomainZone(v string) *SettingsUpdate {
+	_u.mutation.SetDomainZone(v)
+	return _u
+}
+
+// SetNillableDomainZone sets the "domain_zone" field if the given value is not nil.
+func (_u *SettingsUpdate) SetNillableDomainZone(v *string) *SettingsUpdate {
+	if v != nil {
+		_u.SetDomainZone(*v)
+	}
+	return _u
+}
+
+// ClearDomainZone clears the value of the "domain_zone" field.
+func (_u *SettingsUpdate) ClearDomainZone() *SettingsUpdate {
+	_u.mutation.ClearDomainZone()
+	return _u
+}
+
 // SetCipher sets the "cipher" field.
 func (_u *SettingsUpdate) SetCipher(v string) *SettingsUpdate {
 	_u.mutation.SetCipher(v)
@@ -162,6 +182,12 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedTime(); ok {
 		_spec.SetField(settings.FieldUpdatedTime, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DomainZone(); ok {
+		_spec.SetField(settings.FieldDomainZone, field.TypeString, value)
+	}
+	if _u.mutation.DomainZoneCleared() {
+		_spec.ClearField(settings.FieldDomainZone, field.TypeString)
+	}
 	if value, ok := _u.mutation.Cipher(); ok {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)
 	}
@@ -209,6 +235,26 @@ type SettingsUpdateOne struct {
 // SetUpdatedTime sets the "updated_time" field.
 func (_u *SettingsUpdateOne) SetUpdatedTime(v time.Time) *SettingsUpdateOne {
 	_u.mutation.SetUpdatedTime(v)
+	return _u
+}
+
+// SetDomainZone sets the "domain_zone" field.
+func (_u *SettingsUpdateOne) SetDomainZone(v string) *SettingsUpdateOne {
+	_u.mutation.SetDomainZone(v)
+	return _u
+}
+
+// SetNillableDomainZone sets the "domain_zone" field if the given value is not nil.
+func (_u *SettingsUpdateOne) SetNillableDomainZone(v *string) *SettingsUpdateOne {
+	if v != nil {
+		_u.SetDomainZone(*v)
+	}
+	return _u
+}
+
+// ClearDomainZone clears the value of the "domain_zone" field.
+func (_u *SettingsUpdateOne) ClearDomainZone() *SettingsUpdateOne {
+	_u.mutation.ClearDomainZone()
 	return _u
 }
 
@@ -367,6 +413,12 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if value, ok := _u.mutation.UpdatedTime(); ok {
 		_spec.SetField(settings.FieldUpdatedTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DomainZone(); ok {
+		_spec.SetField(settings.FieldDomainZone, field.TypeString, value)
+	}
+	if _u.mutation.DomainZoneCleared() {
+		_spec.ClearField(settings.FieldDomainZone, field.TypeString)
 	}
 	if value, ok := _u.mutation.Cipher(); ok {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)

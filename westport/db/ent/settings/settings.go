@@ -17,6 +17,8 @@ const (
 	FieldCreatedTime = "created_time"
 	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
 	FieldUpdatedTime = "updated_time"
+	// FieldDomainZone holds the string denoting the domain_zone field in the database.
+	FieldDomainZone = "domain_zone"
 	// FieldCipher holds the string denoting the cipher field in the database.
 	FieldCipher = "cipher"
 	// FieldCaCrt holds the string denoting the ca_crt field in the database.
@@ -40,6 +42,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedTime,
 	FieldUpdatedTime,
+	FieldDomainZone,
 	FieldCipher,
 	FieldCaCrt,
 	FieldCaKey,
@@ -86,6 +89,11 @@ func ByCreatedTime(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedTime orders the results by the updated_time field.
 func ByUpdatedTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedTime, opts...).ToFunc()
+}
+
+// ByDomainZone orders the results by the domain_zone field.
+func ByDomainZone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDomainZone, opts...).ToFunc()
 }
 
 // ByCipher orders the results by the cipher field.

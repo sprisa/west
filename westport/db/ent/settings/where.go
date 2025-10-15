@@ -66,6 +66,11 @@ func UpdatedTime(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldUpdatedTime, v))
 }
 
+// DomainZone applies equality check predicate on the "domain_zone" field. It's identical to DomainZoneEQ.
+func DomainZone(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldDomainZone, v))
+}
+
 // Cipher applies equality check predicate on the "cipher" field. It's identical to CipherEQ.
 func Cipher(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCipher, v))
@@ -180,6 +185,81 @@ func UpdatedTimeLT(v time.Time) predicate.Settings {
 // UpdatedTimeLTE applies the LTE predicate on the "updated_time" field.
 func UpdatedTimeLTE(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldUpdatedTime, v))
+}
+
+// DomainZoneEQ applies the EQ predicate on the "domain_zone" field.
+func DomainZoneEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldDomainZone, v))
+}
+
+// DomainZoneNEQ applies the NEQ predicate on the "domain_zone" field.
+func DomainZoneNEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldDomainZone, v))
+}
+
+// DomainZoneIn applies the In predicate on the "domain_zone" field.
+func DomainZoneIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldDomainZone, vs...))
+}
+
+// DomainZoneNotIn applies the NotIn predicate on the "domain_zone" field.
+func DomainZoneNotIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldDomainZone, vs...))
+}
+
+// DomainZoneGT applies the GT predicate on the "domain_zone" field.
+func DomainZoneGT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldDomainZone, v))
+}
+
+// DomainZoneGTE applies the GTE predicate on the "domain_zone" field.
+func DomainZoneGTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldDomainZone, v))
+}
+
+// DomainZoneLT applies the LT predicate on the "domain_zone" field.
+func DomainZoneLT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldDomainZone, v))
+}
+
+// DomainZoneLTE applies the LTE predicate on the "domain_zone" field.
+func DomainZoneLTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldDomainZone, v))
+}
+
+// DomainZoneContains applies the Contains predicate on the "domain_zone" field.
+func DomainZoneContains(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContains(FieldDomainZone, v))
+}
+
+// DomainZoneHasPrefix applies the HasPrefix predicate on the "domain_zone" field.
+func DomainZoneHasPrefix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasPrefix(FieldDomainZone, v))
+}
+
+// DomainZoneHasSuffix applies the HasSuffix predicate on the "domain_zone" field.
+func DomainZoneHasSuffix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasSuffix(FieldDomainZone, v))
+}
+
+// DomainZoneIsNil applies the IsNil predicate on the "domain_zone" field.
+func DomainZoneIsNil() predicate.Settings {
+	return predicate.Settings(sql.FieldIsNull(FieldDomainZone))
+}
+
+// DomainZoneNotNil applies the NotNil predicate on the "domain_zone" field.
+func DomainZoneNotNil() predicate.Settings {
+	return predicate.Settings(sql.FieldNotNull(FieldDomainZone))
+}
+
+// DomainZoneEqualFold applies the EqualFold predicate on the "domain_zone" field.
+func DomainZoneEqualFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEqualFold(FieldDomainZone, v))
+}
+
+// DomainZoneContainsFold applies the ContainsFold predicate on the "domain_zone" field.
+func DomainZoneContainsFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContainsFold(FieldDomainZone, v))
 }
 
 // CipherEQ applies the EQ predicate on the "cipher" field.

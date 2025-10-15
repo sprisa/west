@@ -17,6 +17,9 @@ type Settings struct {
 
 func (Settings) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("domain_zone").
+			Optional().
+			Comment("Domain zone to use for nameserver"),
 		field.String("cipher").
 			Default("aes").
 			Comment("Nebula cipher. aes or chachapoly"),

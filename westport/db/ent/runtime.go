@@ -53,7 +53,7 @@ func init() {
 	// settings.UpdateDefaultUpdatedTime holds the default value on update for the updated_time field.
 	settings.UpdateDefaultUpdatedTime = settingsDescUpdatedTime.UpdateDefault.(func() time.Time)
 	// settingsDescCipher is the schema descriptor for cipher field.
-	settingsDescCipher := settingsFields[0].Descriptor()
+	settingsDescCipher := settingsFields[1].Descriptor()
 	// settings.DefaultCipher holds the default value on creation for the cipher field.
 	settings.DefaultCipher = settingsDescCipher.Default.(string)
 }

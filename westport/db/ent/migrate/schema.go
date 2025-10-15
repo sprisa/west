@@ -46,6 +46,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_time", Type: field.TypeTime},
 		{Name: "updated_time", Type: field.TypeTime},
+		{Name: "domain_zone", Type: field.TypeString, Nullable: true},
 		{Name: "cipher", Type: field.TypeString, Default: "aes"},
 		{Name: "ca_crt", Type: field.TypeBytes},
 		{Name: "ca_key", Type: field.TypeBytes},

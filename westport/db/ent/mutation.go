@@ -693,6 +693,7 @@ type SettingsMutation struct {
 	id                 *int
 	created_time       *time.Time
 	updated_time       *time.Time
+	domain_zone        *string
 	cipher             *string
 	ca_crt             *helpers.EncryptedBytes
 	ca_key             *helpers.EncryptedBytes
@@ -875,6 +876,55 @@ func (m *SettingsMutation) OldUpdatedTime(ctx context.Context) (v time.Time, err
 // ResetUpdatedTime resets all changes to the "updated_time" field.
 func (m *SettingsMutation) ResetUpdatedTime() {
 	m.updated_time = nil
+}
+
+// SetDomainZone sets the "domain_zone" field.
+func (m *SettingsMutation) SetDomainZone(s string) {
+	m.domain_zone = &s
+}
+
+// DomainZone returns the value of the "domain_zone" field in the mutation.
+func (m *SettingsMutation) DomainZone() (r string, exists bool) {
+	v := m.domain_zone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDomainZone returns the old "domain_zone" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldDomainZone(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDomainZone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDomainZone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDomainZone: %w", err)
+	}
+	return oldValue.DomainZone, nil
+}
+
+// ClearDomainZone clears the value of the "domain_zone" field.
+func (m *SettingsMutation) ClearDomainZone() {
+	m.domain_zone = nil
+	m.clearedFields[settings.FieldDomainZone] = struct{}{}
+}
+
+// DomainZoneCleared returns if the "domain_zone" field was cleared in this mutation.
+func (m *SettingsMutation) DomainZoneCleared() bool {
+	_, ok := m.clearedFields[settings.FieldDomainZone]
+	return ok
+}
+
+// ResetDomainZone resets all changes to the "domain_zone" field.
+func (m *SettingsMutation) ResetDomainZone() {
+	m.domain_zone = nil
+	delete(m.clearedFields, settings.FieldDomainZone)
 }
 
 // SetCipher sets the "cipher" field.
@@ -1183,12 +1233,15 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
 	if m.updated_time != nil {
 		fields = append(fields, settings.FieldUpdatedTime)
+	}
+	if m.domain_zone != nil {
+		fields = append(fields, settings.FieldDomainZone)
 	}
 	if m.cipher != nil {
 		fields = append(fields, settings.FieldCipher)
@@ -1223,6 +1276,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedTime()
 	case settings.FieldUpdatedTime:
 		return m.UpdatedTime()
+	case settings.FieldDomainZone:
+		return m.DomainZone()
 	case settings.FieldCipher:
 		return m.Cipher()
 	case settings.FieldCaCrt:
@@ -1250,6 +1305,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCreatedTime(ctx)
 	case settings.FieldUpdatedTime:
 		return m.OldUpdatedTime(ctx)
+	case settings.FieldDomainZone:
+		return m.OldDomainZone(ctx)
 	case settings.FieldCipher:
 		return m.OldCipher(ctx)
 	case settings.FieldCaCrt:
@@ -1286,6 +1343,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedTime(v)
+		return nil
+	case settings.FieldDomainZone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDomainZone(v)
 		return nil
 	case settings.FieldCipher:
 		v, ok := value.(string)
@@ -1380,7 +1444,11 @@ func (m *SettingsMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SettingsMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(settings.FieldDomainZone) {
+		fields = append(fields, settings.FieldDomainZone)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1393,6 +1461,11 @@ func (m *SettingsMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SettingsMutation) ClearField(name string) error {
+	switch name {
+	case settings.FieldDomainZone:
+		m.ClearDomainZone()
+		return nil
+	}
 	return fmt.Errorf("unknown Settings nullable field %s", name)
 }
 
@@ -1405,6 +1478,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldUpdatedTime:
 		m.ResetUpdatedTime()
+		return nil
+	case settings.FieldDomainZone:
+		m.ResetDomainZone()
 		return nil
 	case settings.FieldCipher:
 		m.ResetCipher()

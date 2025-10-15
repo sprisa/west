@@ -47,6 +47,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Fields: map[string]*sqlgraph.FieldSpec{
 			settings.FieldCreatedTime:   {Type: field.TypeTime, Column: settings.FieldCreatedTime},
 			settings.FieldUpdatedTime:   {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
+			settings.FieldDomainZone:    {Type: field.TypeString, Column: settings.FieldDomainZone},
 			settings.FieldCipher:        {Type: field.TypeString, Column: settings.FieldCipher},
 			settings.FieldCaCrt:         {Type: field.TypeBytes, Column: settings.FieldCaCrt},
 			settings.FieldCaKey:         {Type: field.TypeBytes, Column: settings.FieldCaKey},
@@ -183,6 +184,11 @@ func (f *SettingsFilter) WhereCreatedTime(p entql.TimeP) {
 // WhereUpdatedTime applies the entql time.Time predicate on the updated_time field.
 func (f *SettingsFilter) WhereUpdatedTime(p entql.TimeP) {
 	f.Where(p.Field(settings.FieldUpdatedTime))
+}
+
+// WhereDomainZone applies the entql string predicate on the domain_zone field.
+func (f *SettingsFilter) WhereDomainZone(p entql.StringP) {
+	f.Where(p.Field(settings.FieldDomainZone))
 }
 
 // WhereCipher applies the entql string predicate on the cipher field.

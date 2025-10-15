@@ -50,6 +50,20 @@ func (_c *SettingsCreate) SetNillableUpdatedTime(v *time.Time) *SettingsCreate {
 	return _c
 }
 
+// SetDomainZone sets the "domain_zone" field.
+func (_c *SettingsCreate) SetDomainZone(v string) *SettingsCreate {
+	_c.mutation.SetDomainZone(v)
+	return _c
+}
+
+// SetNillableDomainZone sets the "domain_zone" field if the given value is not nil.
+func (_c *SettingsCreate) SetNillableDomainZone(v *string) *SettingsCreate {
+	if v != nil {
+		_c.SetDomainZone(*v)
+	}
+	return _c
+}
+
 // SetCipher sets the "cipher" field.
 func (_c *SettingsCreate) SetCipher(v string) *SettingsCreate {
 	_c.mutation.SetCipher(v)
@@ -211,6 +225,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedTime(); ok {
 		_spec.SetField(settings.FieldUpdatedTime, field.TypeTime, value)
 		_node.UpdatedTime = value
+	}
+	if value, ok := _c.mutation.DomainZone(); ok {
+		_spec.SetField(settings.FieldDomainZone, field.TypeString, value)
+		_node.DomainZone = value
 	}
 	if value, ok := _c.mutation.Cipher(); ok {
 		_spec.SetField(settings.FieldCipher, field.TypeString, value)
