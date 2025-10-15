@@ -98,6 +98,8 @@ var InstallCommand = &cli.Command{
 		err = client.Settings.Create().
 			SetCaCrt(ca).
 			SetCaKey(caKey).
+			// TODO: Store info in a device so it get's all the
+			// DNS and uniqueness built in.
 			SetLighthouseCrt(lhCert.Cert).
 			SetLighthouseKey(lhCert.Key).
 			SetCidr(ipCidr).
