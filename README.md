@@ -5,7 +5,7 @@ Global mesh networking for distributed datacenters.
 
 ## Install
 
-**Snap (auto updates)**  
+**Snap / Ubuntu (auto updates)**  
 ```sh
 snap install west
 ```
