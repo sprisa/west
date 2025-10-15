@@ -46,7 +46,7 @@ west help
 ```
 
 **Manual Install**  
-Grab a release asset for your machine specific build from [Github](https://github.com/sprisa/west/releases).
+Grab a release asset for your machine specific build from [Github](https://github.com/sprisa/west/releases/latest).
 
 ## Getting Started
 
