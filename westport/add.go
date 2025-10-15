@@ -21,7 +21,7 @@ import (
 var AddCommand = &cli.Command{
 	Name:      "add",
 	Usage:     "Register a new west device",
-	UsageText: "west-port add",
+	UsageText: "west port add",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:     "name",

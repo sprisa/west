@@ -2,3 +2,4 @@
 westdb
 *.crt
 *.key
+dist/

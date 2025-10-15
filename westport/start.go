@@ -28,7 +28,7 @@ import (
 var StartCommand = &cli.Command{
 	Name:      "start",
 	Usage:     "Start west port",
-	UsageText: "west-port start",
+	UsageText: "west port start",
 	Flags:     []cli.Flag{},
 	Action: func(ctx context.Context, c *cli.Command) error {
 		return startWestPort(ctx)

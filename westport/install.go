@@ -19,7 +19,7 @@ import (
 var InstallCommand = &cli.Command{
 	Name:      "install",
 	Usage:     "Install west port",
-	UsageText: "west-port install",
+	UsageText: "west port install",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "ca-crt",
