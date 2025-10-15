@@ -34,9 +34,15 @@ var StartCommand = &cli.Command{
 			// then stored in a secure enclave for start.
 			Name:    "token",
 			Aliases: []string{"t"},
+			Usage:   "API token. Can be passed via flag or stdin.",
+		},
+		&cli.BoolFlag{
+			Name:  "disable-tun",
+			Usage: "Disabled TUN network binding. Useful for rootless testing",
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		disableTun := c.Bool("disable-tun")
 		token := c.String("token")
 		// Read via stdin if available
 		if token == "" {
@@ -105,7 +111,7 @@ var StartCommand = &cli.Command{
 					},
 				},
 				Tun: config.Tun{
-					Disabled: true,
+					Disabled: disableTun,
 				},
 				Listen: config.Listen{
 					Host: "::",
