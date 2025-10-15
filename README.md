@@ -132,6 +132,7 @@ You'll need that same encryption password.
 sudo west port start
 # West can also read the password from stdin.
 # Useful for piping in from your secrets store (infisical in this case).
+# TODO: Add support for stdin
 infisical secrets get WEST_PORT_PASSWORD | sudo west port start
 ```
 
@@ -179,6 +180,9 @@ Make sure to save the secret tokens outputted from these two commands. These wil
 Adding our two devices will complete the mesh network.
 
 On each device, `home` and `api` in our case, run `west start` and pass in that secret token you saved.
+
+TODO: Fix the api url in the jwt
+TODO: Also need certs / cert-manager for securing the api with https
 
 ```sh
 # Less secure as your shell will save you private token in history
