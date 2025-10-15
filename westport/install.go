@@ -109,6 +109,8 @@ var InstallCommand = &cli.Command{
 		}
 
 		l.Log.Info().Msg("Done! Use `west port start` to run")
+		// TODO: Show extra steps on snap mode
+		// sudo snap connect west:network-control
 		return nil
 	},
 }
