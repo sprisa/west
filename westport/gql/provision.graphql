@@ -1,0 +1,17 @@
+input ProvisionDeviceInput {
+  token: String!
+}
+
+type ProvisionDeviceResponse {
+  name: String!
+  ca: String!
+  cert: String!
+  key: String!
+  access_token: String!
+  networkCipher: String!
+}
+
+
+type Mutation {
+  provision_device(input: ProvisionDeviceInput!): ProvisionDeviceResponse!
+}

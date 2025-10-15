@@ -1,0 +1,9 @@
+mutation ProvisionDevice($input: ProvisionDeviceInput!) {
+  provision_device(input: $input) {
+    name
+    ca
+    cert
+    key
+    networkCipher
+  }
+}
