@@ -8,7 +8,7 @@ Global mesh networking for distributed datacenters.
 
 - 🌍 Connect to your network from anywhere in the world.
 - 🔐 Private subnet for your services / apps.
-  - Services can be bound to the internet network and will be completely unreachable externally.
+  - Services can be bound to the internal network and will be completely unreachable externally.
   - Only your devices can send traffic
 - 🪄 Magic DNS with bring your own subdomain
   - IP to DNS names are managed by West. Communicate by device name.
