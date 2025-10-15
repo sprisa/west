@@ -1,6 +1,8 @@
-# west
+# West
 
 Global mesh networking for distributed datacenters.
+
+> ⚠️ West has not yet hit v1 and it's api shouldn't be considered stable
 
 ## Install
 
