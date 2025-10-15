@@ -36,6 +36,10 @@ var InstallCommand = &cli.Command{
 			Value: "10.10.10.1/24",
 			Usage: "Network IP cidr range",
 		},
+		&cli.StringFlag{
+			Name:  "domain-zone",
+			Usage: "Domain zone to control",
+		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
 		caPath := c.String("ca-crt")
@@ -49,6 +53,7 @@ var InstallCommand = &cli.Command{
 			return errutil.WrapError(err, "error reading ca-key at `%s`", caPath)
 		}
 		cidr := c.String("cidr")
+		domainZone := c.String("domain-zone")
 
 		client, err := db.OpenDB()
 		if err != nil {
@@ -97,6 +102,7 @@ var InstallCommand = &cli.Command{
 			SetLighthouseKey(lhCert.Key).
 			SetCidr(ipCidr).
 			SetPortOverlayIP(overlayIp).
+			SetDomainZone(domainZone).
 			Exec(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving settings")

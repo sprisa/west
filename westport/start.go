@@ -19,6 +19,7 @@ import (
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/dns"
 	"github.com/sprisa/west/westport/gql"
 	"github.com/urfave/cli/v3"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -74,7 +75,9 @@ func startWestPort(ctx context.Context) error {
 			handler,
 		)
 
-		l.Log.Info().Msgf("GQL Server up at: http://localhost%s", server.Addr)
+		l.Log.Info().
+			Str("addr", server.Addr).
+			Msg("Starting Graphql API Server")
 		go func() {
 			<-ctx.Done()
 			l.Log.Info().Msg("Shutting down gql server")
@@ -90,6 +93,11 @@ func startWestPort(ctx context.Context) error {
 			return nil
 		}
 		return err
+	})
+
+	// Start Compass DNS
+	group.Go(func() error {
+		return dns.StartCompassDNSServer(ctx, client, settings)
 	})
 
 	// Start Nebula
