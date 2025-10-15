@@ -52,6 +52,7 @@ var (
 		{Name: "lighthouse_crt", Type: field.TypeBytes},
 		{Name: "lighthouse_key", Type: field.TypeBytes},
 		{Name: "cidr", Type: field.TypeString},
+		{Name: "port_overlay_ip", Type: field.TypeUint32},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
 	SettingsTable = &schema.Table{

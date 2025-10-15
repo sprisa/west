@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -93,6 +94,12 @@ func LighthouseKey(v helpers.EncryptedBytes) predicate.Settings {
 // Cidr applies equality check predicate on the "cidr" field. It's identical to CidrEQ.
 func Cidr(v helpers.IpCidr) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCidr, v))
+}
+
+// PortOverlayIP applies equality check predicate on the "port_overlay_ip" field. It's identical to PortOverlayIPEQ.
+func PortOverlayIP(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldEQ(FieldPortOverlayIP, vc))
 }
 
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
@@ -468,6 +475,60 @@ func CidrEqualFold(v helpers.IpCidr) predicate.Settings {
 func CidrContainsFold(v helpers.IpCidr) predicate.Settings {
 	vc := v.String()
 	return predicate.Settings(sql.FieldContainsFold(FieldCidr, vc))
+}
+
+// PortOverlayIPEQ applies the EQ predicate on the "port_overlay_ip" field.
+func PortOverlayIPEQ(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldEQ(FieldPortOverlayIP, vc))
+}
+
+// PortOverlayIPNEQ applies the NEQ predicate on the "port_overlay_ip" field.
+func PortOverlayIPNEQ(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldNEQ(FieldPortOverlayIP, vc))
+}
+
+// PortOverlayIPIn applies the In predicate on the "port_overlay_ip" field.
+func PortOverlayIPIn(vs ...ipconv.IP) predicate.Settings {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = uint32(vs[i])
+	}
+	return predicate.Settings(sql.FieldIn(FieldPortOverlayIP, v...))
+}
+
+// PortOverlayIPNotIn applies the NotIn predicate on the "port_overlay_ip" field.
+func PortOverlayIPNotIn(vs ...ipconv.IP) predicate.Settings {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = uint32(vs[i])
+	}
+	return predicate.Settings(sql.FieldNotIn(FieldPortOverlayIP, v...))
+}
+
+// PortOverlayIPGT applies the GT predicate on the "port_overlay_ip" field.
+func PortOverlayIPGT(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldGT(FieldPortOverlayIP, vc))
+}
+
+// PortOverlayIPGTE applies the GTE predicate on the "port_overlay_ip" field.
+func PortOverlayIPGTE(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldGTE(FieldPortOverlayIP, vc))
+}
+
+// PortOverlayIPLT applies the LT predicate on the "port_overlay_ip" field.
+func PortOverlayIPLT(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldLT(FieldPortOverlayIP, vc))
+}
+
+// PortOverlayIPLTE applies the LTE predicate on the "port_overlay_ip" field.
+func PortOverlayIPLTE(v ipconv.IP) predicate.Settings {
+	vc := uint32(v)
+	return predicate.Settings(sql.FieldLTE(FieldPortOverlayIP, vc))
 }
 
 // And groups predicates with the AND operator between them.

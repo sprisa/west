@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
@@ -87,6 +88,27 @@ func (_u *SettingsUpdate) SetNillableCidr(v *helpers.IpCidr) *SettingsUpdate {
 	return _u
 }
 
+// SetPortOverlayIP sets the "port_overlay_ip" field.
+func (_u *SettingsUpdate) SetPortOverlayIP(v ipconv.IP) *SettingsUpdate {
+	_u.mutation.ResetPortOverlayIP()
+	_u.mutation.SetPortOverlayIP(v)
+	return _u
+}
+
+// SetNillablePortOverlayIP sets the "port_overlay_ip" field if the given value is not nil.
+func (_u *SettingsUpdate) SetNillablePortOverlayIP(v *ipconv.IP) *SettingsUpdate {
+	if v != nil {
+		_u.SetPortOverlayIP(*v)
+	}
+	return _u
+}
+
+// AddPortOverlayIP adds value to the "port_overlay_ip" field.
+func (_u *SettingsUpdate) AddPortOverlayIP(v ipconv.IP) *SettingsUpdate {
+	_u.mutation.AddPortOverlayIP(v)
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdate) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -157,6 +179,12 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Cidr(); ok {
 		_spec.SetField(settings.FieldCidr, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PortOverlayIP(); ok {
+		_spec.SetField(settings.FieldPortOverlayIP, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedPortOverlayIP(); ok {
+		_spec.AddField(settings.FieldPortOverlayIP, field.TypeUint32, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -233,6 +261,27 @@ func (_u *SettingsUpdateOne) SetNillableCidr(v *helpers.IpCidr) *SettingsUpdateO
 	if v != nil {
 		_u.SetCidr(*v)
 	}
+	return _u
+}
+
+// SetPortOverlayIP sets the "port_overlay_ip" field.
+func (_u *SettingsUpdateOne) SetPortOverlayIP(v ipconv.IP) *SettingsUpdateOne {
+	_u.mutation.ResetPortOverlayIP()
+	_u.mutation.SetPortOverlayIP(v)
+	return _u
+}
+
+// SetNillablePortOverlayIP sets the "port_overlay_ip" field if the given value is not nil.
+func (_u *SettingsUpdateOne) SetNillablePortOverlayIP(v *ipconv.IP) *SettingsUpdateOne {
+	if v != nil {
+		_u.SetPortOverlayIP(*v)
+	}
+	return _u
+}
+
+// AddPortOverlayIP adds value to the "port_overlay_ip" field.
+func (_u *SettingsUpdateOne) AddPortOverlayIP(v ipconv.IP) *SettingsUpdateOne {
+	_u.mutation.AddPortOverlayIP(v)
 	return _u
 }
 
@@ -336,6 +385,12 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if value, ok := _u.mutation.Cidr(); ok {
 		_spec.SetField(settings.FieldCidr, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PortOverlayIP(); ok {
+		_spec.SetField(settings.FieldPortOverlayIP, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.AddedPortOverlayIP(); ok {
+		_spec.AddField(settings.FieldPortOverlayIP, field.TypeUint32, value)
 	}
 	_node = &Settings{config: _u.config}
 	_spec.Assign = _node.assignValues

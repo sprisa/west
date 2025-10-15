@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -50,11 +52,16 @@ var StartCommand = &cli.Command{
 		if token == "" {
 			return errors.New("No token supplied. Pass via flag or stdin.")
 		}
+
 		endpoint := os.Getenv("WEST_ENDPOINT")
+		url, err := url.Parse(endpoint)
+		if err != nil {
+			return errutil.WrapError(err, "error parsing endpoint")
+		}
 
 		parser := jwt.NewParser()
 		claims := &auth.TokenClaims{}
-		_, _, err := parser.ParseUnverified(token, claims)
+		_, _, err = parser.ParseUnverified(token, claims)
 		if err != nil {
 			return fmt.Errorf("error parsing token: %w", err)
 		}
@@ -87,8 +94,15 @@ var StartCommand = &cli.Command{
 					Cert: dvc.Cert,
 					Key:  dvc.Key,
 				},
+				StaticHostMap: config.StaticHostMap{
+					claims.PortIP: []string{
+						net.JoinHostPort(url.Hostname(), "4242"),
+					},
+				},
 				Lighthouse: config.Lighthouse{
-					Hosts: []string{},
+					Hosts: []string{
+						claims.PortIP,
+					},
 				},
 				Tun: config.Tun{
 					Disabled: true,

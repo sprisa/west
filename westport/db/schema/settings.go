@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
 )
@@ -32,6 +33,9 @@ func (Settings) Fields() []ent.Field {
 			GoType(helpers.EncryptedBytes{}),
 		field.String("cidr").
 			GoType(helpers.IpCidr{}).
+			Comment("Network cidr range"),
+		field.Uint32("port_overlay_ip").
+			GoType(ipconv.IP(0)).
 			Comment("Network cidr range"),
 		// field.Bytes("hmac").
 		// 	Sensitive().

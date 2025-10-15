@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -93,6 +94,12 @@ func (_c *SettingsCreate) SetCidr(v helpers.IpCidr) *SettingsCreate {
 	return _c
 }
 
+// SetPortOverlayIP sets the "port_overlay_ip" field.
+func (_c *SettingsCreate) SetPortOverlayIP(v ipconv.IP) *SettingsCreate {
+	_c.mutation.SetPortOverlayIP(v)
+	return _c
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_c *SettingsCreate) Mutation() *SettingsMutation {
 	return _c.mutation
@@ -168,6 +175,9 @@ func (_c *SettingsCreate) check() error {
 	if _, ok := _c.mutation.Cidr(); !ok {
 		return &ValidationError{Name: "cidr", err: errors.New(`ent: missing required field "Settings.cidr"`)}
 	}
+	if _, ok := _c.mutation.PortOverlayIP(); !ok {
+		return &ValidationError{Name: "port_overlay_ip", err: errors.New(`ent: missing required field "Settings.port_overlay_ip"`)}
+	}
 	return nil
 }
 
@@ -225,6 +235,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Cidr(); ok {
 		_spec.SetField(settings.FieldCidr, field.TypeString, value)
 		_node.Cidr = value
+	}
+	if value, ok := _c.mutation.PortOverlayIP(); ok {
+		_spec.SetField(settings.FieldPortOverlayIP, field.TypeUint32, value)
+		_node.PortOverlayIP = value
 	}
 	return _node, _spec
 }

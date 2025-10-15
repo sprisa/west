@@ -29,6 +29,8 @@ const (
 	FieldLighthouseKey = "lighthouse_key"
 	// FieldCidr holds the string denoting the cidr field in the database.
 	FieldCidr = "cidr"
+	// FieldPortOverlayIP holds the string denoting the port_overlay_ip field in the database.
+	FieldPortOverlayIP = "port_overlay_ip"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
 )
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldLighthouseCrt,
 	FieldLighthouseKey,
 	FieldCidr,
+	FieldPortOverlayIP,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -93,4 +96,9 @@ func ByCipher(opts ...sql.OrderTermOption) OrderOption {
 // ByCidr orders the results by the cidr field.
 func ByCidr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCidr, opts...).ToFunc()
+}
+
+// ByPortOverlayIP orders the results by the port_overlay_ip field.
+func ByPortOverlayIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPortOverlayIP, opts...).ToFunc()
 }

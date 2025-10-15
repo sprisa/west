@@ -53,6 +53,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			settings.FieldLighthouseCrt: {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
 			settings.FieldLighthouseKey: {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
 			settings.FieldCidr:          {Type: field.TypeString, Column: settings.FieldCidr},
+			settings.FieldPortOverlayIP: {Type: field.TypeUint32, Column: settings.FieldPortOverlayIP},
 		},
 	}
 	return graph
@@ -212,4 +213,9 @@ func (f *SettingsFilter) WhereLighthouseKey(p entql.BytesP) {
 // WhereCidr applies the entql string predicate on the cidr field.
 func (f *SettingsFilter) WhereCidr(p entql.StringP) {
 	f.Where(p.Field(settings.FieldCidr))
+}
+
+// WherePortOverlayIP applies the entql uint32 predicate on the port_overlay_ip field.
+func (f *SettingsFilter) WherePortOverlayIP(p entql.Uint32P) {
+	f.Where(p.Field(settings.FieldPortOverlayIP))
 }

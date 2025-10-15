@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -33,8 +34,10 @@ type Settings struct {
 	// LighthouseKey holds the value of the "lighthouse_key" field.
 	LighthouseKey helpers.EncryptedBytes `json:"-"`
 	// Network cidr range
-	Cidr         helpers.IpCidr `json:"cidr,omitempty"`
-	selectValues sql.SelectValues
+	Cidr helpers.IpCidr `json:"cidr,omitempty"`
+	// Network cidr range
+	PortOverlayIP ipconv.IP `json:"port_overlay_ip,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -46,7 +49,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldCidr:
 			values[i] = new(helpers.IpCidr)
-		case settings.FieldID:
+		case settings.FieldID, settings.FieldPortOverlayIP:
 			values[i] = new(sql.NullInt64)
 		case settings.FieldCipher:
 			values[i] = new(sql.NullString)
@@ -121,6 +124,12 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.Cidr = *value
 			}
+		case settings.FieldPortOverlayIP:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field port_overlay_ip", values[i])
+			} else if value.Valid {
+				_m.PortOverlayIP = ipconv.IP(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -177,6 +186,9 @@ func (_m *Settings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("cidr=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Cidr))
+	builder.WriteString(", ")
+	builder.WriteString("port_overlay_ip=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PortOverlayIP))
 	builder.WriteByte(')')
 	return builder.String()
 }

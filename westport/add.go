@@ -79,6 +79,7 @@ var AddCommand = &cli.Command{
 			Endpoint: "https://api.priv.sh",
 			IP:       nebulaIp.String(),
 			Ca:       string(settings.CaCrt),
+			PortIP:   settings.PortOverlayIP.ToIPV4().String(),
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(
 					// 1 year

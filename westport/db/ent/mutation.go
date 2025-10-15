@@ -688,21 +688,23 @@ func (m *DeviceMutation) ResetEdge(name string) error {
 // SettingsMutation represents an operation that mutates the Settings nodes in the graph.
 type SettingsMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	created_time   *time.Time
-	updated_time   *time.Time
-	cipher         *string
-	ca_crt         *helpers.EncryptedBytes
-	ca_key         *helpers.EncryptedBytes
-	lighthouse_crt *helpers.EncryptedBytes
-	lighthouse_key *helpers.EncryptedBytes
-	cidr           *helpers.IpCidr
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*Settings, error)
-	predicates     []predicate.Settings
+	op                 Op
+	typ                string
+	id                 *int
+	created_time       *time.Time
+	updated_time       *time.Time
+	cipher             *string
+	ca_crt             *helpers.EncryptedBytes
+	ca_key             *helpers.EncryptedBytes
+	lighthouse_crt     *helpers.EncryptedBytes
+	lighthouse_key     *helpers.EncryptedBytes
+	cidr               *helpers.IpCidr
+	port_overlay_ip    *ipconv.IP
+	addport_overlay_ip *ipconv.IP
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*Settings, error)
+	predicates         []predicate.Settings
 }
 
 var _ ent.Mutation = (*SettingsMutation)(nil)
@@ -1091,6 +1093,62 @@ func (m *SettingsMutation) ResetCidr() {
 	m.cidr = nil
 }
 
+// SetPortOverlayIP sets the "port_overlay_ip" field.
+func (m *SettingsMutation) SetPortOverlayIP(i ipconv.IP) {
+	m.port_overlay_ip = &i
+	m.addport_overlay_ip = nil
+}
+
+// PortOverlayIP returns the value of the "port_overlay_ip" field in the mutation.
+func (m *SettingsMutation) PortOverlayIP() (r ipconv.IP, exists bool) {
+	v := m.port_overlay_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPortOverlayIP returns the old "port_overlay_ip" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldPortOverlayIP(ctx context.Context) (v ipconv.IP, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPortOverlayIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPortOverlayIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPortOverlayIP: %w", err)
+	}
+	return oldValue.PortOverlayIP, nil
+}
+
+// AddPortOverlayIP adds i to the "port_overlay_ip" field.
+func (m *SettingsMutation) AddPortOverlayIP(i ipconv.IP) {
+	if m.addport_overlay_ip != nil {
+		*m.addport_overlay_ip += i
+	} else {
+		m.addport_overlay_ip = &i
+	}
+}
+
+// AddedPortOverlayIP returns the value that was added to the "port_overlay_ip" field in this mutation.
+func (m *SettingsMutation) AddedPortOverlayIP() (r ipconv.IP, exists bool) {
+	v := m.addport_overlay_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPortOverlayIP resets all changes to the "port_overlay_ip" field.
+func (m *SettingsMutation) ResetPortOverlayIP() {
+	m.port_overlay_ip = nil
+	m.addport_overlay_ip = nil
+}
+
 // Where appends a list predicates to the SettingsMutation builder.
 func (m *SettingsMutation) Where(ps ...predicate.Settings) {
 	m.predicates = append(m.predicates, ps...)
@@ -1125,7 +1183,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -1149,6 +1207,9 @@ func (m *SettingsMutation) Fields() []string {
 	}
 	if m.cidr != nil {
 		fields = append(fields, settings.FieldCidr)
+	}
+	if m.port_overlay_ip != nil {
+		fields = append(fields, settings.FieldPortOverlayIP)
 	}
 	return fields
 }
@@ -1174,6 +1235,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.LighthouseKey()
 	case settings.FieldCidr:
 		return m.Cidr()
+	case settings.FieldPortOverlayIP:
+		return m.PortOverlayIP()
 	}
 	return nil, false
 }
@@ -1199,6 +1262,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldLighthouseKey(ctx)
 	case settings.FieldCidr:
 		return m.OldCidr(ctx)
+	case settings.FieldPortOverlayIP:
+		return m.OldPortOverlayIP(ctx)
 	}
 	return nil, fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1264,6 +1329,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCidr(v)
 		return nil
+	case settings.FieldPortOverlayIP:
+		v, ok := value.(ipconv.IP)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPortOverlayIP(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1271,13 +1343,21 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SettingsMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addport_overlay_ip != nil {
+		fields = append(fields, settings.FieldPortOverlayIP)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SettingsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case settings.FieldPortOverlayIP:
+		return m.AddedPortOverlayIP()
+	}
 	return nil, false
 }
 
@@ -1286,6 +1366,13 @@ func (m *SettingsMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *SettingsMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case settings.FieldPortOverlayIP:
+		v, ok := value.(ipconv.IP)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPortOverlayIP(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Settings numeric field %s", name)
 }
@@ -1336,6 +1423,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldCidr:
 		m.ResetCidr()
+		return nil
+	case settings.FieldPortOverlayIP:
+		m.ResetPortOverlayIP()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)

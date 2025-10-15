@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/sprisa/west/util/errutil"
+	"github.com/sprisa/west/util/ipconv"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/db"
@@ -78,6 +79,10 @@ var InstallCommand = &cli.Command{
 		if err != nil {
 			return errutil.WrapError(err, "error parsing cidr")
 		}
+		overlayIp, err := ipconv.FromIPAddr(ipCidr.Addr())
+		if err != nil {
+			return err
+		}
 
 		l.Log.Info().Msg("Create a encryption a password")
 		err = promptEncryptionPassword()
@@ -91,12 +96,13 @@ var InstallCommand = &cli.Command{
 			SetLighthouseCrt(lhCert.Cert).
 			SetLighthouseKey(lhCert.Key).
 			SetCidr(ipCidr).
+			SetPortOverlayIP(overlayIp).
 			Exec(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving settings")
 		}
 
-		l.Log.Info().Msg("Done! Use `west-port start` to run")
+		l.Log.Info().Msg("Done! Use `west port start` to run")
 		return nil
 	},
 }
