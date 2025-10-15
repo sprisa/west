@@ -3,18 +3,31 @@ package db
 import (
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
+	"os"
 
 	"entgo.io/ent/dialect"
 	"github.com/sprisa/west/util/errutil"
+	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db/ent"
 	_ "github.com/sprisa/west/westport/db/ent/runtime"
 	"modernc.org/sqlite"
 )
 
+var DBFilePath string = "westdb"
+
 func OpenDB() (*ent.Client, error) {
 	sql.Register("sqlite3", &sqliteDriver{})
-	// TODO: Change this to the common dir on snap
-	return ent.Open(dialect.SQLite, "file:westdb?mode=rwc&cache=shared&_fk=1")
+	l.Log.Debug().Msgf("DB Open: %s", DBFilePath)
+	_, err := os.Stat(DBFilePath)
+	if err != nil && os.IsNotExist(err) == false {
+		return nil, err
+	}
+
+	return ent.Open(
+		dialect.SQLite,
+		fmt.Sprintf("file:%s?mode=rwc&cache=shared&_fk=1", DBFilePath),
+	)
 }
 
 type sqliteDriver struct {
