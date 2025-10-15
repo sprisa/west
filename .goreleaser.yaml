@@ -35,22 +35,22 @@ builds:
     goos:
       - linux
       # - windows
-      # - darwin
+      - darwin
 
-# archives:
-#   - formats: [tar.gz]
-#     # this name template makes the OS and Arch compatible with the results of `uname`.
-#     name_template: >-
-#       {{ .ProjectName }}_
-#       {{- title .Os }}_
-#       {{- if eq .Arch "amd64" }}x86_64
-#       {{- else if eq .Arch "386" }}i386
-#       {{- else }}{{ .Arch }}{{ end }}
-#       {{- if .Arm }}v{{ .Arm }}{{ end }}
-#     # use zip for windows archives
-#     format_overrides:
-#       - goos: windows
-#         formats: [zip]
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: [zip]
 
 snapcrafts:
   - #
@@ -84,13 +84,13 @@ snapcrafts:
 
     # Single-line elevator pitch for your amazing snap.
     # 79 char long at most.
-    summary: Global mesh networking
+    summary: Global mesh networking for distributed datacenters.
 
     # This the description of your snap. You have a paragraph or two to tell the
     # most important story about your snap. Keep it under 100 words though,
     # we live in tweetspace and your description wants to look good in the snap
     # store.
-    description: Global mesh networking
+    description: Global mesh networking for distributed datacenters. Includes DNS + DHCP, built on Nebula. Connect together AWS, GCP, Azure, and any custom provider including your homelab.
 
     # Disable this configuration.
     #
@@ -158,3 +158,50 @@ snapcrafts:
           - network
           - network-bind
           - network-control
+
+
+brews:
+  -
+    name: west
+
+    # NOTE: make sure the url_template, the token and given repo (github or
+    # gitlab) owner and name are from the same kind.
+    # We will probably unify this in the next major version like it is
+    # done with scoop.
+
+    # URL which is determined by the given Token (github, gitlab or gitea).
+    #
+    # Default depends on the client.
+    # Templates: allowed.
+    url_template: "https://github.com/sprisa/west/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+
+    # Directory inside the repository to put the formula.
+    directory: .
+
+    # Your app's homepage.
+    #
+    # Default: inferred from global metadata.
+    homepage: "https://github.com/sprisa/west"
+
+    # Your app's description.
+    #
+    # Templates: allowed.
+    # Default: inferred from global metadata.
+    description: "Global mesh networking for distributed datacenters. Includes DNS + DHCP, built on Nebula. Connect together AWS, GCP, Azure, and any custom provider including your homelab."
+
+    # SPDX identifier of your app's license.
+    #
+    # Default: inferred from global metadata.
+    license: "MPL-2.0"
+
+    # Setting this will prevent goreleaser to actually try to commit the updated
+    # formula - instead, the formula file will be stored on the dist directory
+    # only, leaving the responsibility of publishing it to the user.
+    # If set to auto, the release will not be uploaded to the homebrew tap
+    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
+    #
+    # Templates: allowed.
+    skip_upload: true
+
+    repository:
+      name: x
