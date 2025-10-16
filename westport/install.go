@@ -10,6 +10,7 @@ import (
 	"github.com/sprisa/west/util/ipconv"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/pki"
+	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
@@ -41,6 +42,14 @@ var InstallCommand = &cli.Command{
 			Name:  "domain-zone",
 			Usage: "Domain zone to control",
 		},
+		&cli.StringFlag{
+			Name:  "letsencrypt-email",
+			Usage: "Email for letsencrypt registration. Required for automated HTTPS certificates",
+		},
+		&cli.BoolFlag{
+			Name:  "letsencrypt-accept-tos",
+			Usage: "Accept the letsencrypt terms of service. Required for automated HTTPS certificates",
+		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
 		caPath := c.String("ca-crt")
@@ -55,6 +64,14 @@ var InstallCommand = &cli.Command{
 		}
 		cidr := c.String("cidr")
 		domainZone := strings.ToLower(c.String("domain-zone"))
+		letsencryptEmail := c.String("letsencrypt-email")
+		letsencryptTOSAccepted := c.Bool("letsencrypt-accept-tos")
+		if letsencryptEmail != "" && letsencryptTOSAccepted == false {
+			return errors.New("Required to accept Let's Encrypt terms of service (--letsencrypt-accept-tos)")
+		}
+		if letsencryptEmail != "" && domainZone == "" {
+			return errors.New("Domain zone must be specified in order to use Let's Encrypt certificates (--domain-zone)")
+		}
 
 		client, err := db.OpenDB()
 		if err != nil {
@@ -90,6 +107,23 @@ var InstallCommand = &cli.Command{
 			return err
 		}
 
+		var acmeRegistration []byte
+		if letsencryptEmail != "" {
+			acmeUser, err := acme.NewUserRegistration(letsencryptEmail)
+			if err != nil {
+				return errutil.WrapError(err, "error creating new lets encrypt user")
+			}
+
+			acmeRegistration, err = acmeUser.ToBytes()
+			if err != nil {
+				return errutil.WrapError(err, "error serializing acme registration")
+			}
+
+			l.Log.Info().
+				Str("email", letsencryptEmail).
+				Msg("Registered with Let's Encrypt")
+		}
+
 		l.Log.Info().Msg("Create a encryption a password")
 		err = readEncryptionPassword()
 		if err != nil {
@@ -106,6 +140,7 @@ var InstallCommand = &cli.Command{
 			SetCidr(ipCidr).
 			SetPortOverlayIP(overlayIp).
 			SetDomainZone(domainZone).
+			SetLetsencryptRegistration(acmeRegistration).
 			Exec(ctx)
 		if err != nil {
 			return errutil.WrapError(err, "error saving settings")

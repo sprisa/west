@@ -112,14 +112,15 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	// HTTPS
 	if httpsServer != nil {
 		group.Go(func() error {
-			domain := settings.DomainZone
+			// domain := settings.DomainZone
 			// TODO: Move this Ent
-			certDir := "./certs"
+			// certDir := "./certs"
 			// TODO: Make this configurable. User should also accept letsencrypt tos
-			email := "admin@" + settings.DomainZone
+			// email := "admin@" + settings.DomainZone
 
-			certManager := acme.NewCertManager(domain, email, certDir, httpProvider, nil)
-			cert, err := certManager.GetOrObtainCertificate()
+			// certManager := acme.NewCertManager(domain, email, certDir, httpProvider, nil)
+			// cert, err := certManager.GetOrObtainCertificate()
+			cert, err := acme.GetCertificate(ctx, settings, httpProvider, nil)
 			if err != nil {
 				l.Log.Err(err).Msg("Failed to obtain certificate, HTTPS disabled")
 				return nil
@@ -133,7 +134,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 
 			l.Log.Info().
 				Str("addr", httpsServer.Addr).
-				Str("domain", domain).
+				Str("domain", settings.DomainZone).
 				Msg("Starting Graphql API Server (HTTPS)")
 
 			err = httpsServer.ListenAndServeTLS("", "")
