@@ -42,7 +42,9 @@ type Settings struct {
 	// LetsencryptRegistration holds the value of the "letsencrypt_registration" field.
 	LetsencryptRegistration helpers.EncryptedBytes `json:"-"`
 	// TLSCert holds the value of the "tls_cert" field.
-	TLSCert      *helpers.EncryptedBytes `json:"-"`
+	TLSCert *helpers.EncryptedBytes `json:"-"`
+	// TLSCertKey holds the value of the "tls_cert_key" field.
+	TLSCertKey   *helpers.EncryptedBytes `json:"-"`
 	selectValues sql.SelectValues
 }
 
@@ -51,7 +53,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case settings.FieldTLSCert:
+		case settings.FieldTLSCert, settings.FieldTLSCertKey:
 			values[i] = &sql.NullScanner{S: new(helpers.EncryptedBytes)}
 		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey, settings.FieldLetsencryptRegistration:
 			values[i] = new(helpers.EncryptedBytes)
@@ -157,6 +159,13 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 				_m.TLSCert = new(helpers.EncryptedBytes)
 				*_m.TLSCert = *value.S.(*helpers.EncryptedBytes)
 			}
+		case settings.FieldTLSCertKey:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field tls_cert_key", values[i])
+			} else if value.Valid {
+				_m.TLSCertKey = new(helpers.EncryptedBytes)
+				*_m.TLSCertKey = *value.S.(*helpers.EncryptedBytes)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -223,6 +232,8 @@ func (_m *Settings) String() string {
 	builder.WriteString("letsencrypt_registration=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("tls_cert=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("tls_cert_key=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

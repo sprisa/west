@@ -704,6 +704,7 @@ type SettingsMutation struct {
 	addport_overlay_ip       *ipconv.IP
 	letsencrypt_registration *helpers.EncryptedBytes
 	tls_cert                 *helpers.EncryptedBytes
+	tls_cert_key             *helpers.EncryptedBytes
 	clearedFields            map[string]struct{}
 	done                     bool
 	oldValue                 func(context.Context) (*Settings, error)
@@ -1299,6 +1300,55 @@ func (m *SettingsMutation) ResetTLSCert() {
 	delete(m.clearedFields, settings.FieldTLSCert)
 }
 
+// SetTLSCertKey sets the "tls_cert_key" field.
+func (m *SettingsMutation) SetTLSCertKey(hb helpers.EncryptedBytes) {
+	m.tls_cert_key = &hb
+}
+
+// TLSCertKey returns the value of the "tls_cert_key" field in the mutation.
+func (m *SettingsMutation) TLSCertKey() (r helpers.EncryptedBytes, exists bool) {
+	v := m.tls_cert_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTLSCertKey returns the old "tls_cert_key" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldTLSCertKey(ctx context.Context) (v *helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTLSCertKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTLSCertKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTLSCertKey: %w", err)
+	}
+	return oldValue.TLSCertKey, nil
+}
+
+// ClearTLSCertKey clears the value of the "tls_cert_key" field.
+func (m *SettingsMutation) ClearTLSCertKey() {
+	m.tls_cert_key = nil
+	m.clearedFields[settings.FieldTLSCertKey] = struct{}{}
+}
+
+// TLSCertKeyCleared returns if the "tls_cert_key" field was cleared in this mutation.
+func (m *SettingsMutation) TLSCertKeyCleared() bool {
+	_, ok := m.clearedFields[settings.FieldTLSCertKey]
+	return ok
+}
+
+// ResetTLSCertKey resets all changes to the "tls_cert_key" field.
+func (m *SettingsMutation) ResetTLSCertKey() {
+	m.tls_cert_key = nil
+	delete(m.clearedFields, settings.FieldTLSCertKey)
+}
+
 // Where appends a list predicates to the SettingsMutation builder.
 func (m *SettingsMutation) Where(ps ...predicate.Settings) {
 	m.predicates = append(m.predicates, ps...)
@@ -1333,7 +1383,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -1370,6 +1420,9 @@ func (m *SettingsMutation) Fields() []string {
 	if m.tls_cert != nil {
 		fields = append(fields, settings.FieldTLSCert)
 	}
+	if m.tls_cert_key != nil {
+		fields = append(fields, settings.FieldTLSCertKey)
+	}
 	return fields
 }
 
@@ -1402,6 +1455,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.LetsencryptRegistration()
 	case settings.FieldTLSCert:
 		return m.TLSCert()
+	case settings.FieldTLSCertKey:
+		return m.TLSCertKey()
 	}
 	return nil, false
 }
@@ -1435,6 +1490,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldLetsencryptRegistration(ctx)
 	case settings.FieldTLSCert:
 		return m.OldTLSCert(ctx)
+	case settings.FieldTLSCertKey:
+		return m.OldTLSCertKey(ctx)
 	}
 	return nil, fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1528,6 +1585,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTLSCert(v)
 		return nil
+	case settings.FieldTLSCertKey:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTLSCertKey(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1582,6 +1646,9 @@ func (m *SettingsMutation) ClearedFields() []string {
 	if m.FieldCleared(settings.FieldTLSCert) {
 		fields = append(fields, settings.FieldTLSCert)
 	}
+	if m.FieldCleared(settings.FieldTLSCertKey) {
+		fields = append(fields, settings.FieldTLSCertKey)
+	}
 	return fields
 }
 
@@ -1604,6 +1671,9 @@ func (m *SettingsMutation) ClearField(name string) error {
 		return nil
 	case settings.FieldTLSCert:
 		m.ClearTLSCert()
+		return nil
+	case settings.FieldTLSCertKey:
+		m.ClearTLSCertKey()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings nullable field %s", name)
@@ -1648,6 +1718,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldTLSCert:
 		m.ResetTLSCert()
+		return nil
+	case settings.FieldTLSCertKey:
+		m.ResetTLSCertKey()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)

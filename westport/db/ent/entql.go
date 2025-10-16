@@ -57,6 +57,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			settings.FieldPortOverlayIP:           {Type: field.TypeUint32, Column: settings.FieldPortOverlayIP},
 			settings.FieldLetsencryptRegistration: {Type: field.TypeBytes, Column: settings.FieldLetsencryptRegistration},
 			settings.FieldTLSCert:                 {Type: field.TypeBytes, Column: settings.FieldTLSCert},
+			settings.FieldTLSCertKey:              {Type: field.TypeBytes, Column: settings.FieldTLSCertKey},
 		},
 	}
 	return graph
@@ -236,4 +237,9 @@ func (f *SettingsFilter) WhereLetsencryptRegistration(p entql.BytesP) {
 // WhereTLSCert applies the entql []byte predicate on the tls_cert field.
 func (f *SettingsFilter) WhereTLSCert(p entql.BytesP) {
 	f.Where(p.Field(settings.FieldTLSCert))
+}
+
+// WhereTLSCertKey applies the entql []byte predicate on the tls_cert_key field.
+func (f *SettingsFilter) WhereTLSCertKey(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldTLSCertKey))
 }

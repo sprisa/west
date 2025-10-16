@@ -126,6 +126,12 @@ func (_c *SettingsCreate) SetTLSCert(v helpers.EncryptedBytes) *SettingsCreate {
 	return _c
 }
 
+// SetTLSCertKey sets the "tls_cert_key" field.
+func (_c *SettingsCreate) SetTLSCertKey(v helpers.EncryptedBytes) *SettingsCreate {
+	_c.mutation.SetTLSCertKey(v)
+	return _c
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_c *SettingsCreate) Mutation() *SettingsMutation {
 	return _c.mutation
@@ -277,6 +283,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.TLSCert(); ok {
 		_spec.SetField(settings.FieldTLSCert, field.TypeBytes, value)
 		_node.TLSCert = &value
+	}
+	if value, ok := _c.mutation.TLSCertKey(); ok {
+		_spec.SetField(settings.FieldTLSCertKey, field.TypeBytes, value)
+		_node.TLSCertKey = &value
 	}
 	return _node, _spec
 }

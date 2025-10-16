@@ -153,6 +153,18 @@ func (_u *SettingsUpdate) ClearTLSCert() *SettingsUpdate {
 	return _u
 }
 
+// SetTLSCertKey sets the "tls_cert_key" field.
+func (_u *SettingsUpdate) SetTLSCertKey(v helpers.EncryptedBytes) *SettingsUpdate {
+	_u.mutation.SetTLSCertKey(v)
+	return _u
+}
+
+// ClearTLSCertKey clears the value of the "tls_cert_key" field.
+func (_u *SettingsUpdate) ClearTLSCertKey() *SettingsUpdate {
+	_u.mutation.ClearTLSCertKey()
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdate) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -247,6 +259,12 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TLSCertCleared() {
 		_spec.ClearField(settings.FieldTLSCert, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.TLSCertKey(); ok {
+		_spec.SetField(settings.FieldTLSCertKey, field.TypeBytes, value)
+	}
+	if _u.mutation.TLSCertKeyCleared() {
+		_spec.ClearField(settings.FieldTLSCertKey, field.TypeBytes)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -391,6 +409,18 @@ func (_u *SettingsUpdateOne) ClearTLSCert() *SettingsUpdateOne {
 	return _u
 }
 
+// SetTLSCertKey sets the "tls_cert_key" field.
+func (_u *SettingsUpdateOne) SetTLSCertKey(v helpers.EncryptedBytes) *SettingsUpdateOne {
+	_u.mutation.SetTLSCertKey(v)
+	return _u
+}
+
+// ClearTLSCertKey clears the value of the "tls_cert_key" field.
+func (_u *SettingsUpdateOne) ClearTLSCertKey() *SettingsUpdateOne {
+	_u.mutation.ClearTLSCertKey()
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdateOne) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -515,6 +545,12 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if _u.mutation.TLSCertCleared() {
 		_spec.ClearField(settings.FieldTLSCert, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.TLSCertKey(); ok {
+		_spec.SetField(settings.FieldTLSCertKey, field.TypeBytes, value)
+	}
+	if _u.mutation.TLSCertKeyCleared() {
+		_spec.ClearField(settings.FieldTLSCertKey, field.TypeBytes)
 	}
 	_node = &Settings{config: _u.config}
 	_spec.Assign = _node.assignValues
