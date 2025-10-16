@@ -1,4 +1,4 @@
-package dns
+package acme
 
 import (
 	"crypto"
@@ -46,10 +46,10 @@ type CertManager struct {
 	email        string
 	certDir      string
 	httpProvider *HTTPProvider
-	dnsProvider  *ACMEProvider
+	dnsProvider  *DNSProvider
 }
 
-func NewCertManager(domain, email, certDir string, httpProvider *HTTPProvider, dnsProvider *ACMEProvider) *CertManager {
+func NewCertManager(domain, email, certDir string, httpProvider *HTTPProvider, dnsProvider *DNSProvider) *CertManager {
 	return &CertManager{
 		domain:       domain,
 		email:        email,

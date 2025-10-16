@@ -1,4 +1,4 @@
-package dns
+package acme
 
 import (
 	"net/http"
@@ -36,14 +36,9 @@ func (p *HTTPProvider) Present(domain, token, keyAuth string) error {
 
 // CleanUp removes the challenge response
 func (p *HTTPProvider) CleanUp(domain, token, keyAuth string) error {
-	l.Log.Info().
-		Str("domain", domain).
-		Str("token", token).
-		Msg("HTTP challenge cleanup")
-
 	p.mu.Lock()
-	defer p.mu.Unlock()
 	delete(p.tokens, token)
+	p.mu.Unlock()
 
 	return nil
 }
@@ -55,11 +50,9 @@ func (p *HTTPProvider) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	l.Log.Info().
 		Str("token", token).
-		Str("path", r.URL.Path).
 		Msg("HTTP challenge request")
 
 	p.mu.RLock()
-	// l.Log.Info().Msgf("token: %+v", p.tokens)
 	keyAuth, ok := p.tokens[token]
 	p.mu.RUnlock()
 
@@ -74,8 +67,4 @@ func (p *HTTPProvider) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(keyAuth))
-
-	l.Log.Info().
-		Str("token", token).
-		Msg("HTTP challenge response sent")
 }

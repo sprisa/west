@@ -9,6 +9,7 @@ import (
 	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/info"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/ent/device"
 )
@@ -20,7 +21,7 @@ func StartCompassDNSServer(
 	addr string,
 	client *ent.Client,
 	settings *ent.Settings,
-	acme *ACMEProvider,
+	acme *acme.DNSProvider,
 ) error {
 	if settings.DomainZone == "" {
 		l.Log.Warn().Msg("No domain zone configured. Compass DNS server disabled.")
@@ -60,7 +61,7 @@ func handleDnsRequest(
 	msg *dns.Msg,
 	client *ent.Client,
 	settings *ent.Settings,
-	acme *ACMEProvider,
+	acme *acme.DNSProvider,
 ) {
 	m := new(dns.Msg)
 	m.SetReply(msg)
@@ -79,7 +80,7 @@ func parseQuery(
 	msg *dns.Msg,
 	client *ent.Client,
 	settings *ent.Settings,
-	acme *ACMEProvider,
+	acme *acme.DNSProvider,
 ) {
 	for _, q := range msg.Question {
 		qName := strings.ToLower(q.Name)

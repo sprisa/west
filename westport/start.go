@@ -18,6 +18,7 @@ import (
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
@@ -76,11 +77,8 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 
 	l.Log.Debug().Msgf("settings: %+v", settings)
 
-	// Initialize HTTP challenge provider
-	httpProvider := dns.NewHTTPProvider()
-
-	// Initialize ACME provider for DNS challenges
-	dnsProvider := dns.NewACMEProvider()
+	httpProvider := acme.NewHTTPProvider()
+	dnsProvider := acme.NewDNSProvider()
 
 	group, ctx := errgroup.WithContext(ctx)
 
@@ -120,7 +118,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 			// TODO: Make this configurable. User should also accept letsencrypt tos
 			email := "admin@" + settings.DomainZone
 
-			certManager := dns.NewCertManager(domain, email, certDir, httpProvider, nil)
+			certManager := acme.NewCertManager(domain, email, certDir, httpProvider, nil)
 			cert, err := certManager.GetOrObtainCertificate()
 			if err != nil {
 				l.Log.Err(err).Msg("Failed to obtain certificate, HTTPS disabled")

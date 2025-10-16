@@ -1,4 +1,4 @@
-package dns
+package acme
 
 import (
 	"sync"
@@ -7,20 +7,20 @@ import (
 	l "github.com/sprisa/west/util/log"
 )
 
-// ACMEProvider implements the challenge.Provider interface for DNS-01 challenges
-type ACMEProvider struct {
+// DNSProvider implements the challenge.Provider interface for DNS-01 challenges
+type DNSProvider struct {
 	mu      sync.RWMutex
 	records map[string]string // maps FQDN to TXT record value
 }
 
-func NewACMEProvider() *ACMEProvider {
-	return &ACMEProvider{
+func NewDNSProvider() *DNSProvider {
+	return &DNSProvider{
 		records: make(map[string]string),
 	}
 }
 
 // Present creates a TXT record for the ACME challenge
-func (p *ACMEProvider) Present(domain, token, keyAuth string) error {
+func (p *DNSProvider) Present(domain, token, keyAuth string) error {
 	info := dns01.GetChallengeInfo(domain, keyAuth)
 	l.Log.Info().
 		Str("domain", domain).
@@ -36,7 +36,7 @@ func (p *ACMEProvider) Present(domain, token, keyAuth string) error {
 }
 
 // CleanUp removes the TXT record after challenge completion
-func (p *ACMEProvider) CleanUp(domain, token, keyAuth string) error {
+func (p *DNSProvider) CleanUp(domain, token, keyAuth string) error {
 	fqdn, _ := dns01.GetRecord(domain, keyAuth)
 
 	p.mu.Lock()
@@ -47,9 +47,9 @@ func (p *ACMEProvider) CleanUp(domain, token, keyAuth string) error {
 }
 
 // GetTXTRecord retrieves a TXT record for ACME challenges
-func (p *ACMEProvider) GetTXTRecord(fqdn string) (string, bool) {
+func (p *DNSProvider) GetTXTRecord(fqdn string) (string, bool) {
 	p.mu.RLock()
-	defer p.mu.RUnlock()
 	value, ok := p.records[fqdn]
+	p.mu.RUnlock()
 	return value, ok
 }
