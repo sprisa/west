@@ -228,3 +228,4 @@ ssh api.net.mycompany.dev
 - [Wireguard](https://github.com/wireguard) for TUN driver work on Windows
 - [EntGo](https://github.com/ent/ent) for database engine. Big credit to original Facebook team for building Ent (internal Hack / PHP version) a seamless layer for Storage, API, and Query client harmony.
 - [SQLite](https://github.com/sqlite/sqlite) for building the portable database we use.
+- [LetsEncrypt](https://github.com/letsencrypt) for free https certificates for all
