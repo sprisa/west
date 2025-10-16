@@ -4,8 +4,9 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	l "reship/util/logger/v2"
 	"syscall"
+
+	l "github.com/sprisa/west/util/log"
 )
 
 // ShutdownListener will listen for and block on term and

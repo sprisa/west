@@ -11,8 +11,6 @@ import (
 	"os"
 	"time"
 
-	"reship/util/print"
-
 	"github.com/Khan/genqlient/graphql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west"
@@ -83,7 +81,7 @@ var StartCommand = &cli.Command{
 			endpoint = claims.Endpoint
 		}
 
-		print.PrettyPrint(claims)
+		l.Log.Debug().Msgf("claims: %+v", claims)
 
 		client := graphql.NewClient(endpoint, http.DefaultClient)
 		data, err := gql.ProvisionDevice(ctx, client, gql.ProvisionDeviceInput{

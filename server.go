@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/rs/zerolog"
 	"github.com/sprisa/west/config"
+	l "github.com/sprisa/west/util/log"
 
 	"github.com/sirupsen/logrus"
 	"github.com/slackhq/nebula"
@@ -100,8 +102,10 @@ func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConf
 		return nil, err
 	}
 	nebulaYamlStr := string(nebulaYaml)
-	println("CONFIG")
-	println(nebulaYamlStr)
+	if l.Log.GetLevel() == zerolog.DebugLevel {
+		println("CONFIG")
+		println(nebulaYamlStr)
+	}
 
 	c := nebulaCfg.NewC(log)
 	// Can use ReloadConfigString to handle static-host-map changes
@@ -114,33 +118,6 @@ func CreateNebulaConfigCtrl(cfg *config.Config, log *logrus.Logger) (*NebulaConf
 	}
 
 	return c, nil
-}
-
-// TODO: Not sure if I want this and instead just use a JWT to provision
-func NewServerWithYamlConfig(args *ServerOpts, yamlCfg []byte) (*Server, error) {
-	if args.Log == nil {
-		args.Log = logrus.StandardLogger()
-	}
-	c := nebulaCfg.NewC(args.Log)
-	// TODO: Just run yaml unmarshel to the any map and set in Settings
-	err := c.LoadString(string(yamlCfg))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load nebula config: %w", err)
-	}
-
-	ctrl, err := nebula.Main(c, false, Build, args.Log, args.deviceFactory, nil)
-	if err != nil {
-		switch v := err.(type) {
-		case *util.ContextualError:
-			v.Log(args.Log)
-			return nil, v.Unwrap()
-		default:
-			return nil, err
-		}
-	}
-
-	// TODO: Use mergo and merge west config from the yaml version
-	return &Server{Ctrl: ctrl, opts: args}, nil
 }
 
 func (s *Server) Listen(ctx context.Context) error {

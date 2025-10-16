@@ -76,7 +76,8 @@ var AddCommand = &cli.Command{
 		nebulaIp := netip.PrefixFrom(ip, settings.Cidr.Bits())
 
 		claims := &auth.TokenClaims{
-			Endpoint: "https://api.priv.sh",
+			// TODO: Use the real endpoint
+			Endpoint: "",
 			IP:       nebulaIp.String(),
 			Ca:       string(settings.CaCrt),
 			PortIP:   settings.PortOverlayIP.ToIPV4().String(),
