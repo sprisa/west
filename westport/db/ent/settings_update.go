@@ -129,6 +129,18 @@ func (_u *SettingsUpdate) AddPortOverlayIP(v ipconv.IP) *SettingsUpdate {
 	return _u
 }
 
+// SetLetsencryptRegistration sets the "letsencrypt_registration" field.
+func (_u *SettingsUpdate) SetLetsencryptRegistration(v helpers.EncryptedBytes) *SettingsUpdate {
+	_u.mutation.SetLetsencryptRegistration(v)
+	return _u
+}
+
+// ClearLetsencryptRegistration clears the value of the "letsencrypt_registration" field.
+func (_u *SettingsUpdate) ClearLetsencryptRegistration() *SettingsUpdate {
+	_u.mutation.ClearLetsencryptRegistration()
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdate) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -211,6 +223,12 @@ func (_u *SettingsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedPortOverlayIP(); ok {
 		_spec.AddField(settings.FieldPortOverlayIP, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.LetsencryptRegistration(); ok {
+		_spec.SetField(settings.FieldLetsencryptRegistration, field.TypeBytes, value)
+	}
+	if _u.mutation.LetsencryptRegistrationCleared() {
+		_spec.ClearField(settings.FieldLetsencryptRegistration, field.TypeBytes)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -331,6 +349,18 @@ func (_u *SettingsUpdateOne) AddPortOverlayIP(v ipconv.IP) *SettingsUpdateOne {
 	return _u
 }
 
+// SetLetsencryptRegistration sets the "letsencrypt_registration" field.
+func (_u *SettingsUpdateOne) SetLetsencryptRegistration(v helpers.EncryptedBytes) *SettingsUpdateOne {
+	_u.mutation.SetLetsencryptRegistration(v)
+	return _u
+}
+
+// ClearLetsencryptRegistration clears the value of the "letsencrypt_registration" field.
+func (_u *SettingsUpdateOne) ClearLetsencryptRegistration() *SettingsUpdateOne {
+	_u.mutation.ClearLetsencryptRegistration()
+	return _u
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_u *SettingsUpdateOne) Mutation() *SettingsMutation {
 	return _u.mutation
@@ -443,6 +473,12 @@ func (_u *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err 
 	}
 	if value, ok := _u.mutation.AddedPortOverlayIP(); ok {
 		_spec.AddField(settings.FieldPortOverlayIP, field.TypeUint32, value)
+	}
+	if value, ok := _u.mutation.LetsencryptRegistration(); ok {
+		_spec.SetField(settings.FieldLetsencryptRegistration, field.TypeBytes, value)
+	}
+	if _u.mutation.LetsencryptRegistrationCleared() {
+		_spec.ClearField(settings.FieldLetsencryptRegistration, field.TypeBytes)
 	}
 	_node = &Settings{config: _u.config}
 	_spec.Assign = _node.assignValues

@@ -33,6 +33,8 @@ const (
 	FieldCidr = "cidr"
 	// FieldPortOverlayIP holds the string denoting the port_overlay_ip field in the database.
 	FieldPortOverlayIP = "port_overlay_ip"
+	// FieldLetsencryptRegistration holds the string denoting the letsencrypt_registration field in the database.
+	FieldLetsencryptRegistration = "letsencrypt_registration"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
 )
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldLighthouseKey,
 	FieldCidr,
 	FieldPortOverlayIP,
+	FieldLetsencryptRegistration,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -45,16 +45,17 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Settings",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			settings.FieldCreatedTime:   {Type: field.TypeTime, Column: settings.FieldCreatedTime},
-			settings.FieldUpdatedTime:   {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
-			settings.FieldDomainZone:    {Type: field.TypeString, Column: settings.FieldDomainZone},
-			settings.FieldCipher:        {Type: field.TypeString, Column: settings.FieldCipher},
-			settings.FieldCaCrt:         {Type: field.TypeBytes, Column: settings.FieldCaCrt},
-			settings.FieldCaKey:         {Type: field.TypeBytes, Column: settings.FieldCaKey},
-			settings.FieldLighthouseCrt: {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
-			settings.FieldLighthouseKey: {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
-			settings.FieldCidr:          {Type: field.TypeString, Column: settings.FieldCidr},
-			settings.FieldPortOverlayIP: {Type: field.TypeUint32, Column: settings.FieldPortOverlayIP},
+			settings.FieldCreatedTime:             {Type: field.TypeTime, Column: settings.FieldCreatedTime},
+			settings.FieldUpdatedTime:             {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
+			settings.FieldDomainZone:              {Type: field.TypeString, Column: settings.FieldDomainZone},
+			settings.FieldCipher:                  {Type: field.TypeString, Column: settings.FieldCipher},
+			settings.FieldCaCrt:                   {Type: field.TypeBytes, Column: settings.FieldCaCrt},
+			settings.FieldCaKey:                   {Type: field.TypeBytes, Column: settings.FieldCaKey},
+			settings.FieldLighthouseCrt:           {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
+			settings.FieldLighthouseKey:           {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
+			settings.FieldCidr:                    {Type: field.TypeString, Column: settings.FieldCidr},
+			settings.FieldPortOverlayIP:           {Type: field.TypeUint32, Column: settings.FieldPortOverlayIP},
+			settings.FieldLetsencryptRegistration: {Type: field.TypeBytes, Column: settings.FieldLetsencryptRegistration},
 		},
 	}
 	return graph
@@ -224,4 +225,9 @@ func (f *SettingsFilter) WhereCidr(p entql.StringP) {
 // WherePortOverlayIP applies the entql uint32 predicate on the port_overlay_ip field.
 func (f *SettingsFilter) WherePortOverlayIP(p entql.Uint32P) {
 	f.Where(p.Field(settings.FieldPortOverlayIP))
+}
+
+// WhereLetsencryptRegistration applies the entql []byte predicate on the letsencrypt_registration field.
+func (f *SettingsFilter) WhereLetsencryptRegistration(p entql.BytesP) {
+	f.Where(p.Field(settings.FieldLetsencryptRegistration))
 }

@@ -107,6 +107,11 @@ func PortOverlayIP(v ipconv.IP) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldPortOverlayIP, vc))
 }
 
+// LetsencryptRegistration applies equality check predicate on the "letsencrypt_registration" field. It's identical to LetsencryptRegistrationEQ.
+func LetsencryptRegistration(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLetsencryptRegistration, v))
+}
+
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
 func CreatedTimeEQ(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCreatedTime, v))
@@ -609,6 +614,56 @@ func PortOverlayIPLT(v ipconv.IP) predicate.Settings {
 func PortOverlayIPLTE(v ipconv.IP) predicate.Settings {
 	vc := uint32(v)
 	return predicate.Settings(sql.FieldLTE(FieldPortOverlayIP, vc))
+}
+
+// LetsencryptRegistrationEQ applies the EQ predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationNEQ applies the NEQ predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationIn applies the In predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldLetsencryptRegistration, vs...))
+}
+
+// LetsencryptRegistrationNotIn applies the NotIn predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldLetsencryptRegistration, vs...))
+}
+
+// LetsencryptRegistrationGT applies the GT predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationGTE applies the GTE predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationLT applies the LT predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationLTE applies the LTE predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldLetsencryptRegistration, v))
+}
+
+// LetsencryptRegistrationIsNil applies the IsNil predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationIsNil() predicate.Settings {
+	return predicate.Settings(sql.FieldIsNull(FieldLetsencryptRegistration))
+}
+
+// LetsencryptRegistrationNotNil applies the NotNil predicate on the "letsencrypt_registration" field.
+func LetsencryptRegistrationNotNil() predicate.Settings {
+	return predicate.Settings(sql.FieldNotNull(FieldLetsencryptRegistration))
 }
 
 // And groups predicates with the AND operator between them.

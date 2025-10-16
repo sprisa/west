@@ -114,6 +114,12 @@ func (_c *SettingsCreate) SetPortOverlayIP(v ipconv.IP) *SettingsCreate {
 	return _c
 }
 
+// SetLetsencryptRegistration sets the "letsencrypt_registration" field.
+func (_c *SettingsCreate) SetLetsencryptRegistration(v helpers.EncryptedBytes) *SettingsCreate {
+	_c.mutation.SetLetsencryptRegistration(v)
+	return _c
+}
+
 // Mutation returns the SettingsMutation object of the builder.
 func (_c *SettingsCreate) Mutation() *SettingsMutation {
 	return _c.mutation
@@ -257,6 +263,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PortOverlayIP(); ok {
 		_spec.SetField(settings.FieldPortOverlayIP, field.TypeUint32, value)
 		_node.PortOverlayIP = value
+	}
+	if value, ok := _c.mutation.LetsencryptRegistration(); ok {
+		_spec.SetField(settings.FieldLetsencryptRegistration, field.TypeBytes, value)
+		_node.LetsencryptRegistration = value
 	}
 	return _node, _spec
 }

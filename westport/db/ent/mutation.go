@@ -688,24 +688,25 @@ func (m *DeviceMutation) ResetEdge(name string) error {
 // SettingsMutation represents an operation that mutates the Settings nodes in the graph.
 type SettingsMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	created_time       *time.Time
-	updated_time       *time.Time
-	domain_zone        *string
-	cipher             *string
-	ca_crt             *helpers.EncryptedBytes
-	ca_key             *helpers.EncryptedBytes
-	lighthouse_crt     *helpers.EncryptedBytes
-	lighthouse_key     *helpers.EncryptedBytes
-	cidr               *helpers.IpCidr
-	port_overlay_ip    *ipconv.IP
-	addport_overlay_ip *ipconv.IP
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*Settings, error)
-	predicates         []predicate.Settings
+	op                       Op
+	typ                      string
+	id                       *int
+	created_time             *time.Time
+	updated_time             *time.Time
+	domain_zone              *string
+	cipher                   *string
+	ca_crt                   *helpers.EncryptedBytes
+	ca_key                   *helpers.EncryptedBytes
+	lighthouse_crt           *helpers.EncryptedBytes
+	lighthouse_key           *helpers.EncryptedBytes
+	cidr                     *helpers.IpCidr
+	port_overlay_ip          *ipconv.IP
+	addport_overlay_ip       *ipconv.IP
+	letsencrypt_registration *helpers.EncryptedBytes
+	clearedFields            map[string]struct{}
+	done                     bool
+	oldValue                 func(context.Context) (*Settings, error)
+	predicates               []predicate.Settings
 }
 
 var _ ent.Mutation = (*SettingsMutation)(nil)
@@ -1199,6 +1200,55 @@ func (m *SettingsMutation) ResetPortOverlayIP() {
 	m.addport_overlay_ip = nil
 }
 
+// SetLetsencryptRegistration sets the "letsencrypt_registration" field.
+func (m *SettingsMutation) SetLetsencryptRegistration(hb helpers.EncryptedBytes) {
+	m.letsencrypt_registration = &hb
+}
+
+// LetsencryptRegistration returns the value of the "letsencrypt_registration" field in the mutation.
+func (m *SettingsMutation) LetsencryptRegistration() (r helpers.EncryptedBytes, exists bool) {
+	v := m.letsencrypt_registration
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLetsencryptRegistration returns the old "letsencrypt_registration" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldLetsencryptRegistration(ctx context.Context) (v helpers.EncryptedBytes, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLetsencryptRegistration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLetsencryptRegistration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLetsencryptRegistration: %w", err)
+	}
+	return oldValue.LetsencryptRegistration, nil
+}
+
+// ClearLetsencryptRegistration clears the value of the "letsencrypt_registration" field.
+func (m *SettingsMutation) ClearLetsencryptRegistration() {
+	m.letsencrypt_registration = nil
+	m.clearedFields[settings.FieldLetsencryptRegistration] = struct{}{}
+}
+
+// LetsencryptRegistrationCleared returns if the "letsencrypt_registration" field was cleared in this mutation.
+func (m *SettingsMutation) LetsencryptRegistrationCleared() bool {
+	_, ok := m.clearedFields[settings.FieldLetsencryptRegistration]
+	return ok
+}
+
+// ResetLetsencryptRegistration resets all changes to the "letsencrypt_registration" field.
+func (m *SettingsMutation) ResetLetsencryptRegistration() {
+	m.letsencrypt_registration = nil
+	delete(m.clearedFields, settings.FieldLetsencryptRegistration)
+}
+
 // Where appends a list predicates to the SettingsMutation builder.
 func (m *SettingsMutation) Where(ps ...predicate.Settings) {
 	m.predicates = append(m.predicates, ps...)
@@ -1233,7 +1283,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
@@ -1264,6 +1314,9 @@ func (m *SettingsMutation) Fields() []string {
 	if m.port_overlay_ip != nil {
 		fields = append(fields, settings.FieldPortOverlayIP)
 	}
+	if m.letsencrypt_registration != nil {
+		fields = append(fields, settings.FieldLetsencryptRegistration)
+	}
 	return fields
 }
 
@@ -1292,6 +1345,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.Cidr()
 	case settings.FieldPortOverlayIP:
 		return m.PortOverlayIP()
+	case settings.FieldLetsencryptRegistration:
+		return m.LetsencryptRegistration()
 	}
 	return nil, false
 }
@@ -1321,6 +1376,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCidr(ctx)
 	case settings.FieldPortOverlayIP:
 		return m.OldPortOverlayIP(ctx)
+	case settings.FieldLetsencryptRegistration:
+		return m.OldLetsencryptRegistration(ctx)
 	}
 	return nil, fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1400,6 +1457,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPortOverlayIP(v)
 		return nil
+	case settings.FieldLetsencryptRegistration:
+		v, ok := value.(helpers.EncryptedBytes)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLetsencryptRegistration(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)
 }
@@ -1448,6 +1512,9 @@ func (m *SettingsMutation) ClearedFields() []string {
 	if m.FieldCleared(settings.FieldDomainZone) {
 		fields = append(fields, settings.FieldDomainZone)
 	}
+	if m.FieldCleared(settings.FieldLetsencryptRegistration) {
+		fields = append(fields, settings.FieldLetsencryptRegistration)
+	}
 	return fields
 }
 
@@ -1464,6 +1531,9 @@ func (m *SettingsMutation) ClearField(name string) error {
 	switch name {
 	case settings.FieldDomainZone:
 		m.ClearDomainZone()
+		return nil
+	case settings.FieldLetsencryptRegistration:
+		m.ClearLetsencryptRegistration()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings nullable field %s", name)
@@ -1502,6 +1572,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldPortOverlayIP:
 		m.ResetPortOverlayIP()
+		return nil
+	case settings.FieldLetsencryptRegistration:
+		m.ResetLetsencryptRegistration()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)

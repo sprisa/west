@@ -39,7 +39,9 @@ type Settings struct {
 	Cidr helpers.IpCidr `json:"cidr,omitempty"`
 	// Network cidr range
 	PortOverlayIP ipconv.IP `json:"port_overlay_ip,omitempty"`
-	selectValues  sql.SelectValues
+	// LetsencryptRegistration holds the value of the "letsencrypt_registration" field.
+	LetsencryptRegistration helpers.EncryptedBytes `json:"-"`
+	selectValues            sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -47,7 +49,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey:
+		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey, settings.FieldLetsencryptRegistration:
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldCidr:
 			values[i] = new(helpers.IpCidr)
@@ -138,6 +140,12 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PortOverlayIP = ipconv.IP(value.Int64)
 			}
+		case settings.FieldLetsencryptRegistration:
+			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
+				return fmt.Errorf("unexpected type %T for field letsencrypt_registration", values[i])
+			} else if value != nil {
+				_m.LetsencryptRegistration = *value
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -200,6 +208,8 @@ func (_m *Settings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("port_overlay_ip=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PortOverlayIP))
+	builder.WriteString(", ")
+	builder.WriteString("letsencrypt_registration=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }
