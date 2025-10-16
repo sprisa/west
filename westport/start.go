@@ -73,7 +73,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		return errutil.WrapError(err, "error initializing settings")
 	}
 
-	l.Log.Info().Msgf("settings: %+v", settings)
+	l.Log.Debug().Msgf("settings: %+v", settings)
 
 	group, ctx := errgroup.WithContext(ctx)
 
