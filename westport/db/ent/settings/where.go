@@ -112,6 +112,11 @@ func LetsencryptRegistration(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldLetsencryptRegistration, v))
 }
 
+// TLSCert applies equality check predicate on the "tls_cert" field. It's identical to TLSCertEQ.
+func TLSCert(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldTLSCert, v))
+}
+
 // CreatedTimeEQ applies the EQ predicate on the "created_time" field.
 func CreatedTimeEQ(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCreatedTime, v))
@@ -664,6 +669,56 @@ func LetsencryptRegistrationIsNil() predicate.Settings {
 // LetsencryptRegistrationNotNil applies the NotNil predicate on the "letsencrypt_registration" field.
 func LetsencryptRegistrationNotNil() predicate.Settings {
 	return predicate.Settings(sql.FieldNotNull(FieldLetsencryptRegistration))
+}
+
+// TLSCertEQ applies the EQ predicate on the "tls_cert" field.
+func TLSCertEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldTLSCert, v))
+}
+
+// TLSCertNEQ applies the NEQ predicate on the "tls_cert" field.
+func TLSCertNEQ(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldTLSCert, v))
+}
+
+// TLSCertIn applies the In predicate on the "tls_cert" field.
+func TLSCertIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldTLSCert, vs...))
+}
+
+// TLSCertNotIn applies the NotIn predicate on the "tls_cert" field.
+func TLSCertNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldTLSCert, vs...))
+}
+
+// TLSCertGT applies the GT predicate on the "tls_cert" field.
+func TLSCertGT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldTLSCert, v))
+}
+
+// TLSCertGTE applies the GTE predicate on the "tls_cert" field.
+func TLSCertGTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldTLSCert, v))
+}
+
+// TLSCertLT applies the LT predicate on the "tls_cert" field.
+func TLSCertLT(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldTLSCert, v))
+}
+
+// TLSCertLTE applies the LTE predicate on the "tls_cert" field.
+func TLSCertLTE(v helpers.EncryptedBytes) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldTLSCert, v))
+}
+
+// TLSCertIsNil applies the IsNil predicate on the "tls_cert" field.
+func TLSCertIsNil() predicate.Settings {
+	return predicate.Settings(sql.FieldIsNull(FieldTLSCert))
+}
+
+// TLSCertNotNil applies the NotNil predicate on the "tls_cert" field.
+func TLSCertNotNil() predicate.Settings {
+	return predicate.Settings(sql.FieldNotNull(FieldTLSCert))
 }
 
 // And groups predicates with the AND operator between them.

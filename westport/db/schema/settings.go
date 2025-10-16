@@ -44,6 +44,11 @@ func (Settings) Fields() []ent.Field {
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}).
 			Optional(),
+		field.Bytes("tls_cert").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}).
+			Optional().
+			Nillable(),
 		// field.Bytes("hmac").
 		// 	Sensitive().
 		// 	GoType(helpers.EncryptedBytes{}).

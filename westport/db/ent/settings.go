@@ -41,7 +41,9 @@ type Settings struct {
 	PortOverlayIP ipconv.IP `json:"port_overlay_ip,omitempty"`
 	// LetsencryptRegistration holds the value of the "letsencrypt_registration" field.
 	LetsencryptRegistration helpers.EncryptedBytes `json:"-"`
-	selectValues            sql.SelectValues
+	// TLSCert holds the value of the "tls_cert" field.
+	TLSCert      *helpers.EncryptedBytes `json:"-"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,6 +51,8 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case settings.FieldTLSCert:
+			values[i] = &sql.NullScanner{S: new(helpers.EncryptedBytes)}
 		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey, settings.FieldLetsencryptRegistration:
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldCidr:
@@ -146,6 +150,13 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.LetsencryptRegistration = *value
 			}
+		case settings.FieldTLSCert:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field tls_cert", values[i])
+			} else if value.Valid {
+				_m.TLSCert = new(helpers.EncryptedBytes)
+				*_m.TLSCert = *value.S.(*helpers.EncryptedBytes)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -210,6 +221,8 @@ func (_m *Settings) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.PortOverlayIP))
 	builder.WriteString(", ")
 	builder.WriteString("letsencrypt_registration=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("tls_cert=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

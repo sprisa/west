@@ -35,6 +35,8 @@ const (
 	FieldPortOverlayIP = "port_overlay_ip"
 	// FieldLetsencryptRegistration holds the string denoting the letsencrypt_registration field in the database.
 	FieldLetsencryptRegistration = "letsencrypt_registration"
+	// FieldTLSCert holds the string denoting the tls_cert field in the database.
+	FieldTLSCert = "tls_cert"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
 )
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldCidr,
 	FieldPortOverlayIP,
 	FieldLetsencryptRegistration,
+	FieldTLSCert,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
