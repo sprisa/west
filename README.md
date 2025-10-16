@@ -121,7 +121,10 @@ Let's install our server configuration for our domain name.
 You will be prompted for a encryption password. Remember this or better yet store it in your secret management service.
 
 ```sh
-west port install --domain-zone net.mycompany.dev    # domain-zone can be excluded if you prefer no dns support.
+west port install \
+  --domain-zone net.mycompany.dev \        # domain-zone can be excluded if you prefer no dns support.
+  --letsencrypt-email hi@mycompany.dev \   # For automatic tls certs with Let's Encrypt
+  --letsencrypt-accept-tos                 # You must accept the Let's Encrypt terms and conditions to use automated tls certs.
 ```
 
 Now let's start the server.  
