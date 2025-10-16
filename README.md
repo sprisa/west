@@ -20,8 +20,6 @@ Global mesh networking for distributed datacenters.
 
 ## Install
 
-TODO: Add Docker install method. Npm could be cool too.
-
 **Snap / Ubuntu (auto updates)**
 
 ```sh
@@ -45,6 +43,11 @@ go install github.com/sprisa/west/cmd/west@v0.0.2   # Install specific version
 west help
 # Or binary directly if go bin is not in PATH
 ~/go/bin/west help
+```
+
+**Docker**
+```sh
+TODO
 ```
 
 **Manual Install**  
@@ -181,9 +184,6 @@ Make sure to save the secret tokens outputted from these two commands. These wil
 Adding our two devices will complete the mesh network.
 
 On each device, `home` and `api` in our case, run `west start` and pass in that secret token you saved.
-
-TODO: Fix the api url in the jwt
-TODO: Also need certs / cert-manager for securing the api with https
 
 ```sh
 # Less secure as your shell will save you private token in history

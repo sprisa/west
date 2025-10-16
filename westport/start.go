@@ -112,14 +112,6 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	// HTTPS
 	if httpsServer != nil {
 		group.Go(func() error {
-			// domain := settings.DomainZone
-			// TODO: Move this Ent
-			// certDir := "./certs"
-			// TODO: Make this configurable. User should also accept letsencrypt tos
-			// email := "admin@" + settings.DomainZone
-
-			// certManager := acme.NewCertManager(domain, email, certDir, httpProvider, nil)
-			// cert, err := certManager.GetOrObtainCertificate()
 			cert, err := acme.GetCertificate(ctx, settings, httpProvider, nil)
 			if err != nil {
 				l.Log.Err(err).Msg("Failed to obtain certificate, HTTPS disabled")
