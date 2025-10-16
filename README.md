@@ -79,14 +79,14 @@ home (my home laptop)
 api  (my api server)
 ```
 
-Let's install. For example, we are using ubuntu on my server and api:
+Let's install. For example, we are using ubuntu on our server and api:
 
 ```sh
 sudo snap install west
 sudo snap connect west:network-control
 ```
 
-And using MacOS on my home device:
+And using MacOS on our home device:
 
 ```sh
 brew install sprisa/tap/west
@@ -96,7 +96,7 @@ brew install sprisa/tap/west
 
 > 💡 This will probably be moved into west for convenience
 
-West using Nebula to sign certificates. We can generate ca certs using the [nebula-cert command](https://nebula.defined.net/docs/guides/quick-start/#creating-your-first-certificate-authority).
+West uses Nebula to sign certificates. We can generate ca certs using the [nebula-cert command](https://nebula.defined.net/docs/guides/quick-start/#creating-your-first-certificate-authority).
 
 With golang installed:
 
@@ -139,13 +139,16 @@ infisical secrets get WEST_PORT_PASSWORD | sudo west port start
 
 > 💡 On ubuntu, you may need to [disable the default dns server](https://unix.stackexchange.com/q/676942) so port 53 is freed.
 
-You should see Nebula, the API, and DNS server all running ✨
+You should see Nebula, the API, and DNS server all running ✨  
+
+The `ca.crt` and `ca.key` files have been imported into West and encrypted with your password. These files are now safe to delete.  
 
 ### 3) Configure your Subdomain NS records
 
-In order the DNS resolver to work so we can communicate with `home.net.mycompany.dev`, we need to setup some DNS record. This looks a bit different depending on what domain provider you use.
+In order the DNS resolver to work so we can communicate with `home.net.mycompany.dev`, we need to setup some DNS records. This looks a bit different depending on what domain provider you use.
 
 **First**, configure an `A` record pointing at your west-port server.  
+
 For example: `westport.mycompany.dev` and using Cloudflare DNS. Do not use Cloudflare proxying.  
 ![cloudflare-dns](./docs/dns1.png)
 
@@ -160,7 +163,7 @@ NS record takes some time to propagate. Make sure west port is running otherwise
 ### 4) Register your West Devices
 
 Let's add some devices and starting building our network!  
-In our example we need to add both `home`, and `api`
+In our example we need to add both `home` and `api`
 
 Each device will need a unique name and ip.
 
@@ -212,7 +215,7 @@ PING 10.10.10.3 (10.10.10.3): 56 data bytes
 64 bytes from 10.10.10.3: icmp_seq=2 ttl=64 time=79.014 ms
 ```
 
-Or we can turn off externally accessible ssh into our api server and just tunnel through west:
+We can turn off externally accessible ssh into our api server and just tunnel through west:
 
 ```sh
 ssh api.net.mycompany.dev
