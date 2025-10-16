@@ -2,6 +2,7 @@ package westport
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/errutil"
 	l "github.com/sprisa/west/util/log"
+	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
@@ -50,7 +52,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	privateDns := c.Bool("private-dns")
 	disableTun := c.Bool("disable-tun")
 
-	err := promptEncryptionPassword()
+	err := readEncryptionPassword()
 	if err != nil {
 		return err
 	}
@@ -73,40 +75,81 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		return errutil.WrapError(err, "error initializing settings")
 	}
 
-	l.Log.Info().Msgf("settings: %+v", settings)
+	l.Log.Debug().Msgf("settings: %+v", settings)
+
+	httpProvider := acme.NewHTTPProvider()
+	dnsProvider := acme.NewDNSProvider()
 
 	group, ctx := errgroup.WithContext(ctx)
 
 	// Start Graphql API Server
+	handler := NewGQLServer(gql.NewSchema(client), client)
+	mux := http.NewServeMux()
+	mux.Handle("/.well-known/acme-challenge/", httpProvider)
+	mux.Handle(
+		"/api",
+		handler,
+	)
+	server := &http.Server{Addr: ":80", Handler: mux}
+	var httpsServer *http.Server
+	if settings.DomainZone != "" {
+		httpsServer = &http.Server{
+			Addr:    ":443",
+			Handler: mux,
+		}
+	}
+	// HTTP
 	group.Go(func() error {
-		handler := NewGQLServer(gql.NewSchema(client), client)
-		address := ":3003"
-		mux := http.NewServeMux()
-		server := &http.Server{Addr: address, Handler: mux}
-		mux.Handle(
-			"/",
-			handler,
-		)
-
 		l.Log.Info().
 			Str("addr", server.Addr).
-			Msg("Starting Graphql API Server")
-		go func() {
-			<-ctx.Done()
-			l.Log.Info().Msg("Shutting down gql server")
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-			defer cancel()
-			err := server.Shutdown(ctx)
-			if err != nil && errors.Is(err, http.ErrServerClosed) == false {
-				l.Log.Err(err).Msg("gql server shutdown")
-			}
-		}()
+			Msg("Starting Graphql API Server (HTTP)")
 		err := server.ListenAndServe()
 		if errors.Is(err, http.ErrServerClosed) {
 			return nil
 		}
 		return err
 	})
+	// HTTPS
+	if httpsServer != nil {
+		group.Go(func() error {
+			cert, err := acme.GetCertificate(ctx, settings, httpProvider, nil)
+			if err != nil {
+				l.Log.Err(err).Msg("Failed to obtain certificate, HTTPS disabled")
+				return nil
+			}
+
+			tlsConfig := &tls.Config{
+				Certificates: []tls.Certificate{*cert},
+			}
+
+			httpsServer.TLSConfig = tlsConfig
+
+			l.Log.Info().
+				Str("addr", httpsServer.Addr).
+				Str("domain", settings.DomainZone).
+				Msg("Starting Graphql API Server (HTTPS)")
+
+			err = httpsServer.ListenAndServeTLS("", "")
+			if errors.Is(err, http.ErrServerClosed) {
+				return nil
+			}
+			return err
+		})
+	}
+	// Shutdown handler
+	go func() {
+		<-ctx.Done()
+		l.Log.Info().Msg("Shutting down gql server")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+		defer cancel()
+		err := errors.Join(
+			server.Shutdown(ctx),
+			httpsServer.Shutdown(ctx),
+		)
+		if err != nil && errors.Is(err, http.ErrServerClosed) == false {
+			l.Log.Err(err).Msg("gql server shutdown")
+		}
+	}()
 
 	// Depends on Nebula interface
 	var onNebulaStart = func(ctrl *west.Control) {
@@ -119,7 +162,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 				}
 				addr = net.JoinHostPort(settings.PortOverlayIP.ToIpAddr().String(), "53")
 			}
-			return dns.StartCompassDNSServer(ctx, addr, client, settings)
+			return dns.StartCompassDNSServer(ctx, addr, client, settings, dnsProvider)
 		})
 	}
 

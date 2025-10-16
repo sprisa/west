@@ -45,6 +45,11 @@ west help
 ~/go/bin/west help
 ```
 
+**Docker**
+```sh
+TODO
+```
+
 **Manual Install**  
 Grab a release asset for your machine specific build from [Github](https://github.com/sprisa/west/releases/latest).
 

@@ -3,3 +3,4 @@ westdb
 *.crt
 *.key
 dist/
+cmd/west/west

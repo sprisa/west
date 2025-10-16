@@ -40,6 +40,20 @@ func (Settings) Fields() []ent.Field {
 		field.Uint32("port_overlay_ip").
 			GoType(ipconv.IP(0)).
 			Comment("Network cidr range"),
+		field.Bytes("letsencrypt_registration").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}).
+			Optional(),
+		field.Bytes("tls_cert").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}).
+			Optional().
+			Nillable(),
+		field.Bytes("tls_cert_key").
+			Sensitive().
+			GoType(helpers.EncryptedBytes{}).
+			Optional().
+			Nillable(),
 		// field.Bytes("hmac").
 		// 	Sensitive().
 		// 	GoType(helpers.EncryptedBytes{}).

@@ -1,6 +1,7 @@
 package west
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,8 +11,6 @@ import (
 	"net/url"
 	"os"
 	"time"
-
-	"reship/util/print"
 
 	"github.com/Khan/genqlient/graphql"
 	"github.com/golang-jwt/jwt/v5"
@@ -57,7 +56,7 @@ var StartCommand = &cli.Command{
 				if err != nil {
 					return err
 				}
-				token = string(tokenBytes)
+				token = string(bytes.TrimSpace(tokenBytes))
 			}
 		}
 		if token == "" {
@@ -83,7 +82,7 @@ var StartCommand = &cli.Command{
 			endpoint = claims.Endpoint
 		}
 
-		print.PrettyPrint(claims)
+		l.Log.Debug().Msgf("claims: %+v", claims)
 
 		client := graphql.NewClient(endpoint, http.DefaultClient)
 		data, err := gql.ProvisionDevice(ctx, client, gql.ProvisionDeviceInput{
