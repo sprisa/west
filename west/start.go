@@ -1,6 +1,7 @@
 package west
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -55,7 +56,7 @@ var StartCommand = &cli.Command{
 				if err != nil {
 					return err
 				}
-				token = string(tokenBytes)
+				token = string(bytes.TrimSpace(tokenBytes))
 			}
 		}
 		if token == "" {

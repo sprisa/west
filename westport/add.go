@@ -56,7 +56,7 @@ var AddCommand = &cli.Command{
 			return errutil.WrapError(err, "error migrating db")
 		}
 
-		err = promptEncryptionPassword()
+		err = readEncryptionPassword()
 		if err != nil {
 			return err
 		}

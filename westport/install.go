@@ -90,7 +90,7 @@ var InstallCommand = &cli.Command{
 		}
 
 		l.Log.Info().Msg("Create a encryption a password")
-		err = promptEncryptionPassword()
+		err = readEncryptionPassword()
 		if err != nil {
 			return err
 		}

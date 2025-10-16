@@ -134,7 +134,6 @@ You'll need that same encryption password.
 sudo west port start
 # West can also read the password from stdin.
 # Useful for piping in from your secrets store (infisical in this case).
-# TODO: Add support for stdin
 infisical secrets get WEST_PORT_PASSWORD | sudo west port start
 ```
 

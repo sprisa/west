@@ -50,7 +50,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	privateDns := c.Bool("private-dns")
 	disableTun := c.Bool("disable-tun")
 
-	err := promptEncryptionPassword()
+	err := readEncryptionPassword()
 	if err != nil {
 		return err
 	}
