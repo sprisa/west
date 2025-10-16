@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/ipconv"
@@ -53,7 +54,7 @@ var InstallCommand = &cli.Command{
 			return errutil.WrapError(err, "error reading ca-key at `%s`", caPath)
 		}
 		cidr := c.String("cidr")
-		domainZone := c.String("domain-zone")
+		domainZone := strings.ToLower(c.String("domain-zone"))
 
 		client, err := db.OpenDB()
 		if err != nil {

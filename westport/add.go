@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
+	"net/url"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west/util/auth"
 	"github.com/sprisa/west/util/errutil"
+	"github.com/sprisa/west/util/info"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
@@ -75,9 +77,27 @@ var AddCommand = &cli.Command{
 
 		nebulaIp := netip.PrefixFrom(ip, settings.Cidr.Bits())
 
+		var endpoint url.URL
+		if settings.DomainZone != "" {
+			endpoint = url.URL{
+				Scheme: "https",
+				Host:   settings.DomainZone,
+				Path:   "api",
+			}
+		} else {
+			publicIp, err := info.GetPublicIP()
+			if err != nil {
+				return errutil.WrapError(err, "error getting public ip")
+			}
+			endpoint = url.URL{
+				Scheme: "http",
+				Host:   publicIp.String(),
+				Path:   "api",
+			}
+		}
+
 		claims := &auth.TokenClaims{
-			// TODO: Use the real endpoint
-			Endpoint: "",
+			Endpoint: endpoint.String(),
 			IP:       nebulaIp.String(),
 			Ca:       string(settings.CaCrt),
 			PortIP:   settings.PortOverlayIP.ToIPV4().String(),
