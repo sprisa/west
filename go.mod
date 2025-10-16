@@ -14,9 +14,10 @@ require (
 	github.com/Khan/genqlient v0.8.1
 	github.com/anandvarma/namegen v1.1.1
 	github.com/cqroot/prompt v0.9.4
+	github.com/go-acme/lego/v4 v4.26.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/miekg/dns v1.1.61
+	github.com/miekg/dns v1.1.68
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.52.0
 	github.com/sirupsen/logrus v1.9.3
@@ -46,6 +47,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charmbracelet/bubbles v0.16.1 // indirect
 	github.com/charmbracelet/bubbletea v0.24.2 // indirect
@@ -58,10 +60,11 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/flynn/noise v1.1.0 // indirect
 	github.com/gaissmai/bart v0.11.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
