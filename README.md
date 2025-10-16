@@ -220,3 +220,11 @@ We can turn off externally accessible ssh into our api server and just tunnel th
 ```sh
 ssh api.net.mycompany.dev
 ```
+
+
+# Acknowledgments
+
+- [Nebula](https://github.com/slackhq/nebula) for the underlying mesh. Big thanks to Slack and [Defined.net](https://www.defined.net/) team!
+- [Wireguard](https://github.com/wireguard) for TUN driver work on Windows
+- [EntGo](https://github.com/ent/ent) for database engine. Big credit to original Facebook team for building Ent (internal Hack / PHP version) a seamless layer for Storage, API, and Query client harmony.
+- [SQLite](https://github.com/sqlite/sqlite) for building the portable database we use.
