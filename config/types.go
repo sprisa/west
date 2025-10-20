@@ -331,7 +331,7 @@ type Tunnels struct {
 // Setting this above 1 will set IFF_MULTI_QUEUE on the tun device and SO_REUSEPORT on the UDP socket to allow multiple queues.
 // The maximum recommended setting is half of the available CPU cores.
 // It's recommended to set this to a lower value still, to avoid resource starvation.
-type Routines uint8
+type Routines = uint8
 
 // Config for Nebula
 //
