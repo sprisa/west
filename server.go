@@ -41,7 +41,7 @@ type ServerOpts struct {
 	// Hook called before Nebula shuts down.
 	// Will block until function returns.
 	OnShutdown    func()
-	deviceFactory overlay.DeviceFactory
+	DeviceFactory overlay.DeviceFactory
 }
 
 type Server struct {
@@ -77,10 +77,7 @@ func NewServerWithConfigCtrl(opts *ServerOpts, c *NebulaConfigCtrl) (*Server, er
 	}
 
 	port := nebulaConfig.Listen.Port
-
-	// TODO: Ensure mknod is still upstream
-
-	ctrl, err := nebula.Main(c, false, Build, opts.Log, opts.deviceFactory, nil)
+	ctrl, err := nebula.Main(c, false, Build, opts.Log, opts.DeviceFactory, nil)
 
 	if err != nil {
 		switch v := err.(type) {
