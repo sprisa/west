@@ -182,7 +182,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 					Key:  string(settings.LighthouseKey),
 				},
 				Lighthouse: config.Lighthouse{
-					Am_lighthouse: true,
+					AmLighthouse: true,
 				},
 				Tun: config.Tun{
 					Disabled: disableTun,
@@ -191,8 +191,8 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 					Host: "::",
 					Port: 4242,
 				},
-				Preferred_ranges: config.DefaultPreferredRanges,
-				Cipher:           cipher,
+				PreferredRanges: config.DefaultPreferredRanges,
+				Cipher:          cipher,
 				Firewall: config.Firewall{
 					Inbound: []config.FirewallRule{
 						{

@@ -128,8 +128,8 @@ var StartCommand = &cli.Command{
 					Host: "::",
 					Port: port,
 				},
-				Preferred_ranges: config.DefaultPreferredRanges,
-				Cipher:           config.Cipher(dvc.NetworkCipher),
+				PreferredRanges: config.DefaultPreferredRanges,
+				Cipher:          config.Cipher(dvc.NetworkCipher),
 				Firewall: config.Firewall{
 					Inbound: []config.FirewallRule{
 						{

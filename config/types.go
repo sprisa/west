@@ -60,12 +60,12 @@ type LightHouseDns struct {
 type Lighthouse struct {
 	// am_lighthouse is used to enable lighthouse functionality for a node.
 	// This should ONLY be true on nodes you have configured to be lighthouses in your network.
-	Am_lighthouse bool `yaml:"am_lighthouse"`
+	AmLighthouse bool `yaml:"am_lighthouse"`
 	// serve_dns optionally starts a DNS listener that responds to A and TXT queries and can even be delegated to for name resolution by external DNS hosts.
 	// The DNS listener can only respond to requests about hosts it's aware of. For this reason, it can only be enabled on Lighthouses.
 	// A records contain the Nebula IP for a host name and can be queried by any host that can reach the DNS listener, regardless of whether it is communicating over the Nebula network.
 	// TXT records can only be queried over the Nebula network, and contain certificate information for the requested host IP address.
-	Serve_dns bool `yaml:"serve_dns"`
+	ServeDns bool `yaml:"serve_dns"`
 	// dns is used to configure the address (host) and port (port) the DNS server should listen on.
 	// By listening on the host's Nebula IP, you can make the DNS server accessible only on the Nebula network.
 	// Alternatively, listening on 0.0.0.0 will allow anyone that can reach the host to make queries.
@@ -84,14 +84,14 @@ type Lighthouse struct {
 	// The most specific CIDR rule applies to each remote. If all rules are "allow", the default will be "deny", and vice-versa.
 	// If both "allow" and "deny" rules are present, then you MUST set a rule for "0.0.0.0/0" as the default.
 	// Similarly if both "allow" and "deny" IPv6 rules are present, then you MUST set a rule for "::/0" as the default.
-	Remote_allow_list map[string]bool `yaml:"remote_allow_list,omitempty"`
+	RemoteAllowList map[string]bool `yaml:"remote_allow_list,omitempty"`
 	// local_allow_list allows you to filter which local IP addresses we advertise to the lighthouses.
 	// This uses the same logic as remote_allow_list, but additionally, you can specify an interfaces map of regular expressions to match against interface names.
 	// The regexp must match the entire name. All interface rules must be either true or false (and the default will be the inverse).
 	// CIDR rules are matched after interface name rules. Default is all local IP addresses.
 	//
 	// TODO: Need to allow "interfaces" sub object
-	Local_allow_list map[string]bool `yaml:"local_allow_list,omitempty"`
+	LocalAllowList map[string]bool `yaml:"local_allow_list,omitempty"`
 }
 
 // listen sets the UDP port Nebula will use for sending/receiving traffic and for handshakes.
@@ -108,14 +108,14 @@ type Listen struct {
 	// Using 0 on lighthouses and relay hosts will likely lead to connectivity issues.
 	Port int `yaml:"port,omitempty"`
 	// Sets the max number of packets to pull from the kernel for each syscall (under systems that support recvmmsg).
-	Batch        int `yaml:"batch,omitempty"`
-	Read_buffer  int `yaml:"read_buffer,omitempty"`
-	Write_buffer int `yaml:"write_buffer,omitempty"`
+	Batch       int `yaml:"batch,omitempty"`
+	ReadBuffer  int `yaml:"read_buffer,omitempty"`
+	WriteBuffer int `yaml:"write_buffer,omitempty"`
 	// The so_sock option is a Linux-specific feature that allows all outgoing Nebula packets to be tagged with a specific identifier.
 	// This tagging enables IP rule-based filtering. For example, it supports 0.0.0.0/0 unsafe_routes,
 	// allowing for more precise routing decisions based on the packet tags. Default is 0 meaning no mark is set.
 	// This setting is reloadable.
-	So_Mark int `yaml:"so_mark,omitempty"`
+	SoMark int `yaml:"so_mark,omitempty"`
 }
 
 // punchy configures the sending of inbound/outbound packets at a
@@ -159,7 +159,7 @@ const (
 // preferred_ranges accepts a list of CIDR ranges admitted as a set of preferred ranges of IP addresses.
 //
 // See: https://nebula.defined.net/docs/config/preferred-ranges/
-type Preferred_ranges = []string
+type PreferredRanges = []string
 
 // See: https://nebula.defined.net/docs/config/relay/
 type Relay struct {
@@ -167,9 +167,9 @@ type Relay struct {
 	// IPs in this list must have am_relay set to true in their configs, otherwise they will reject relay requests.
 	Relays []string `yaml:"relays,omitempty"`
 	// Set am_relay to true to permit other hosts to list my IP in their relays config. The default is false.
-	Am_relay bool `yaml:"am_relay"`
+	AmRelay bool `yaml:"am_relay"`
 	// Set use_relays to false to prevent this instance from attempting to establish connections through relays. The default is true.
-	Use_relays bool `yaml:"use_relays,omitempty"`
+	UseRelays bool `yaml:"use_relays,omitempty"`
 }
 
 type TunRoute struct {
@@ -194,18 +194,18 @@ type Tun struct {
 	// For macOS: Not required. If set, must be in the form utun[0-9]+. For FreeBSD: Required to be set, must be in the form tun[0-9]+.
 	Dev string `yaml:"dev,omitempty"`
 	// Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
-	Drop_local_broadcast bool `yaml:"drop_local_broadcast"`
+	DropLocalBroadcast bool `yaml:"drop_local_broadcast"`
 	// Toggles forwarding of multicast packets
-	Drop_multicast bool `yaml:"drop_multicast"`
+	DropMulticast bool `yaml:"drop_multicast"`
 	// Sets the transmit queue length, if you notice lots of transmit drops on the tun it may help to raise this number. Default is 500.
-	Tx_queue int `yaml:"tx_queue,omitempty"`
+	TxQueue int `yaml:"tx_queue,omitempty"`
 	// Default MTU for every packet, safe setting is (and the default) 1300 for internet routed packets.
 	Mtu int `yaml:"mtu,omitempty"`
 	// Route based MTU overrides. If you have known VPN IP paths that can support larger MTUs you can increase/decrease them here.
 	Routes []TunRoute `yaml:"routes,omitempty"`
 	// Unsafe routes allows you to route traffic over nebula to non-nebula nodes.
 	// Unsafe routes should be avoided unless you have hosts/services that cannot run nebula.
-	Unsafe_routes []TunUnsafeRoute `yaml:"unsafe_routes,omitempty"`
+	UnsafeRoutes []TunUnsafeRoute `yaml:"unsafe_routes,omitempty"`
 }
 
 type NebulaLogLevel = string
@@ -233,9 +233,9 @@ type Logging struct {
 	// Controls the logging format. The options are json or text
 	Format NebulaLogFormat `yaml:"format,omitempty"`
 	// Disables timestamp logging. Useful when output is redirected to logging system that already adds timestamps.
-	Disable_timestamp bool `yaml:"disable_timestamp"`
+	DisableTimestamp bool `yaml:"disable_timestamp"`
 	// timestamp_format is specified in Go time format, see: https://golang.org/pkg/time/#pkg-constants.
-	Timestamp_format string `yaml:"timestamp_format,omitempty"`
+	TimestampFormat string `yaml:"timestamp_format,omitempty"`
 }
 
 type Proto string
@@ -260,9 +260,9 @@ type FirewallRule struct {
 	// One of any, tcp, udp, or icmp
 	Proto Proto `yaml:"proto"`
 	// An issuing CA name
-	Ca_name string `yaml:"ca_name,omitempty"`
+	CaName string `yaml:"ca_name,omitempty"`
 	// An issuing CA shasum
-	Ca_sha string `yaml:"ca_sha,omitempty"`
+	CaSha string `yaml:"ca_sha,omitempty"`
 	// Can be any or a literal hostname, ie test-host
 	Host string `yaml:"host,omitempty"`
 	// Can be any or a literal group name, ie default-group
@@ -275,9 +275,9 @@ type FirewallRule struct {
 }
 
 type FirewallConntrack struct {
-	Tcp_timeout     string `yaml:"tcp_timeout,omitempty"`
-	Udp_timeout     string `yaml:"udp_timeout,omitempty"`
-	Default_timeout string `yaml:"default_timeout,omitempty"`
+	TcpTimeout     string `yaml:"tcp_timeout,omitempty"`
+	UdpTimeout     string `yaml:"udp_timeout,omitempty"`
+	DefaultTimeout string `yaml:"default_timeout,omitempty"`
 }
 
 // The default state of the Nebula interface host firewall is deny all for all inbound and outbound traffic.
@@ -337,20 +337,20 @@ type Routines = uint8
 //
 // See: https://nebula.defined.net/docs/config/
 type Config struct {
-	Pki              Pki              `yaml:"pki"`
-	StaticHostMap    StaticHostMap    `yaml:"static_host_map,omitempty"`
-	StaticMap        StaticMap        `yaml:"static_map,omitempty"`
-	Lighthouse       Lighthouse       `yaml:"lighthouse,omitempty"`
-	Listen           Listen           `yaml:"listen,omitempty"`
-	Punchy           Punchy           `yaml:"punchy,omitempty"`
-	Cipher           Cipher           `yaml:"cipher,omitempty"`
-	Preferred_ranges Preferred_ranges `yaml:"preferred_ranges,omitempty"`
-	Relay            Relay            `yaml:"relay,omitempty"`
-	Tun              Tun              `yaml:"tun,omitempty"`
-	Logging          Logging          `yaml:"logging,omitempty"`
-	Firewall         Firewall         `yaml:"firewall,omitempty"`
-	Handshakes       Handshakes       `yaml:"handshakes,omitempty"`
-	Tunnels          Tunnels          `yaml:"tunnels,omitempty"`
-	Routines         Routines         `yaml:"routines,omitempty"`
+	Pki             Pki             `yaml:"pki"`
+	StaticHostMap   StaticHostMap   `yaml:"static_host_map,omitempty"`
+	StaticMap       StaticMap       `yaml:"static_map,omitempty"`
+	Lighthouse      Lighthouse      `yaml:"lighthouse,omitempty"`
+	Listen          Listen          `yaml:"listen,omitempty"`
+	Punchy          Punchy          `yaml:"punchy,omitempty"`
+	Cipher          Cipher          `yaml:"cipher,omitempty"`
+	PreferredRanges PreferredRanges `yaml:"preferred_ranges,omitempty"`
+	Relay           Relay           `yaml:"relay,omitempty"`
+	Tun             Tun             `yaml:"tun,omitempty"`
+	Logging         Logging         `yaml:"logging,omitempty"`
+	Firewall        Firewall        `yaml:"firewall,omitempty"`
+	Handshakes      Handshakes      `yaml:"handshakes,omitempty"`
+	Tunnels         Tunnels         `yaml:"tunnels,omitempty"`
+	Routines        Routines        `yaml:"routines,omitempty"`
 	// TODO: Add sshd, stats
 }
