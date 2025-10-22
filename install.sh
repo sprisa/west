@@ -89,4 +89,4 @@ else
 fi
 
 echo "✓ West ${VERSION} installed successfully!"
-echo "Run 'west --version' to verify the installation"
+echo "Run 'west --help' to verify the installation"
