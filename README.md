@@ -20,11 +20,10 @@ Global mesh networking for distributed datacenters.
 
 ## Install
 
-**Snap / Ubuntu (auto updates)**
-
+**Linux Install Script**
 ```sh
-snap install west
-sudo snap connect west:network-control   # Snap requires manual connection for vpn creation
+curl https://raw.githubusercontent.com/sprisa/west/main/install.sh | sh                          # Install latest
+curl https://raw.githubusercontent.com/sprisa/west/main/install.sh | sh -s -- --version v0.0.5   # Install specific version
 ```
 
 **Homebrew (auto updates)**
@@ -43,6 +42,15 @@ go install github.com/sprisa/west/cmd/west@v0.0.2   # Install specific version
 west help
 # Or binary directly if go bin is not in PATH
 ~/go/bin/west help
+```
+
+**Snap / Ubuntu (auto updates)**
+
+> ⚠️ Snap has issues interfacing with systemd for daemons
+
+```sh
+snap install west
+sudo snap connect west:network-control   # Snap requires manual connection for vpn creation
 ```
 
 **Docker**
