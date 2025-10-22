@@ -7,14 +7,14 @@ import (
 
 	"github.com/cqroot/prompt"
 	"github.com/cqroot/prompt/input"
+	"github.com/sprisa/west/util/ioutil"
 	"github.com/sprisa/west/westport/db/helpers"
 )
 
-func readEncryptionPassword() error {
+func readEncryptionPassword() (err error) {
 	var pswd string
 	// Read from stdin if available
-	stat, err := os.Stdin.Stat()
-	if err == nil && stat.Size() > 0 {
+	if ioutil.StdinAvailable() {
 		b, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			return err

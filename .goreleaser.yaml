@@ -130,7 +130,7 @@ snapcrafts:
     # * bare - Empty base snap;
     # * core - Ubuntu Core 16;
     # * core18 - Ubuntu Core 18.
-    base: core20
+    base: core24
 
     # Each binary built by GoReleaser is an app inside the snap. In this section
     # you can declare extra details for those binaries. It is optional.

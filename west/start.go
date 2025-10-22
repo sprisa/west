@@ -18,6 +18,7 @@ import (
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/auth"
 	"github.com/sprisa/west/util/errutil"
+	"github.com/sprisa/west/util/ioutil"
 	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/west/gql"
 	"github.com/urfave/cli/v3"
@@ -49,15 +50,12 @@ var StartCommand = &cli.Command{
 		disableTun := c.Bool("disable-tun")
 		token := c.String("token")
 		// Read via stdin if available
-		if token == "" {
-			stat, err := os.Stdin.Stat()
-			if err == nil && stat.Size() > 0 {
-				tokenBytes, err := io.ReadAll(os.Stdin)
-				if err != nil {
-					return err
-				}
-				token = string(bytes.TrimSpace(tokenBytes))
+		if token == "" && ioutil.StdinAvailable() {
+			tokenBytes, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				return err
 			}
+			token = string(bytes.TrimSpace(tokenBytes))
 		}
 		if token == "" {
 			return errors.New("No token supplied. Pass via flag or stdin.")
