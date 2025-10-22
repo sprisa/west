@@ -20,7 +20,7 @@ Global mesh networking for distributed datacenters.
 
 ## Install
 
-**Linux Install Script**
+**[Linux Install Script](install.sh)**
 ```sh
 curl https://raw.githubusercontent.com/sprisa/west/main/install.sh | sh                          # Install latest
 curl https://raw.githubusercontent.com/sprisa/west/main/install.sh | sh -s -- --version v0.0.5   # Install specific version
