@@ -61,23 +61,23 @@ var StartCommand = &cli.Command{
 			return errors.New("No token supplied. Pass via flag or stdin.")
 		}
 
-		endpoint := os.Getenv("WEST_ENDPOINT")
-		url, err := url.Parse(endpoint)
-		if err != nil {
-			return errutil.WrapError(err, "error parsing endpoint")
-		}
-
 		parser := jwt.NewParser()
 		claims := &auth.TokenClaims{}
-		_, _, err = parser.ParseUnverified(token, claims)
+		_, _, err := parser.ParseUnverified(token, claims)
 		if err != nil {
 			return fmt.Errorf("error parsing token: %w", err)
 		}
 		if claims.ExpiresAt.Before(time.Now()) {
 			return errors.New("token expired")
 		}
+
+		endpoint := os.Getenv("WEST_ENDPOINT")
 		if endpoint == "" {
 			endpoint = claims.Endpoint
+		}
+		url, err := url.Parse(endpoint)
+		if err != nil {
+			return errutil.WrapError(err, "error parsing endpoint")
 		}
 
 		l.Log.Debug().Msgf("claims: %+v", claims)

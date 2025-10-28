@@ -15,9 +15,7 @@ func init() {
 		if err != nil {
 			Log.Err(err).Msg("invalid LOG_LEVEL")
 		} else {
-			zerolog.SetGlobalLevel(level)
+			Log = Log.Level(level)
 		}
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 }
