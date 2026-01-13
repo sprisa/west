@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
-	"github.com/sprisa/west/util/errutil"
+	"github.com/sprisa/x/errutil"
 )
 
 type UserRegistration struct {
@@ -58,7 +58,7 @@ func (s *UserRegistrationKey) GobDecode(data []byte) error {
 func NewUserRegistration(email string) (*UserRegistration, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return nil, errutil.WrapError(err, "failed to generate private key")
+		return nil, errutil.WrapErr(err, "failed to generate private key")
 	}
 
 	user := &UserRegistration{
@@ -71,14 +71,14 @@ func NewUserRegistration(email string) (*UserRegistration, error) {
 	config := lego.NewConfig(user)
 	client, err := lego.NewClient(config)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error creating acme client")
+		return nil, errutil.WrapErr(err, "error creating acme client")
 	}
 
 	reg, err := client.Registration.Register(registration.RegisterOptions{
 		TermsOfServiceAgreed: true,
 	})
 	if err != nil {
-		return nil, errutil.WrapError(err, "error registering acme")
+		return nil, errutil.WrapErr(err, "error registering acme")
 	}
 	user.Registration = *reg
 

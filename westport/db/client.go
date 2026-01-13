@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"entgo.io/ent/dialect"
-	"github.com/sprisa/west/util/errutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db/ent"
 	_ "github.com/sprisa/west/westport/db/ent/runtime"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 	"modernc.org/sqlite"
 )
 
@@ -45,7 +45,7 @@ func (d sqliteDriver) Open(name string) (driver.Conn, error) {
 	})
 	if _, err := c.Exec("PRAGMA foreign_keys = on;", nil); err != nil {
 		conn.Close()
-		return nil, errutil.WrapError(err, "error enabled foreign_keys")
+		return nil, errutil.WrapErr(err, "error enabled foreign_keys")
 	}
 	return conn, nil
 }

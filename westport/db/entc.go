@@ -9,7 +9,7 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	l "github.com/sprisa/west/util/log"
+	l "github.com/sprisa/x/log"
 	// _ "github.com/hedwigz/entviz"
 )
 

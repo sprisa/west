@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	l "github.com/sprisa/west/util/log"
-	"github.com/sprisa/west/util/sig"
 	"github.com/sprisa/west/westport"
+	l "github.com/sprisa/x/log"
+	"github.com/sprisa/x/sig"
 	"github.com/urfave/cli/v3"
 )
 

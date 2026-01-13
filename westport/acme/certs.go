@@ -9,9 +9,9 @@ import (
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/go-acme/lego/v4/lego"
-	"github.com/sprisa/west/util/errutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db/ent"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 )
 
 func GetCertificate(
@@ -27,13 +27,13 @@ func GetCertificate(
 
 		cert, err := tls.X509KeyPair(tlsCert, tlsCertKey)
 		if err != nil {
-			return nil, errutil.WrapError(err, "error parsing cert")
+			return nil, errutil.WrapErr(err, "error parsing cert")
 		}
 
 		// Parse certificate to check expiry
 		x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
 		if err != nil {
-			return nil, errutil.WrapError(err, "error parsing x509 cert")
+			return nil, errutil.WrapErr(err, "error parsing x509 cert")
 		}
 
 		// Check if certificate needs renewal (30 days before expiry)
@@ -55,14 +55,14 @@ func GetCertificate(
 	// config.CADirURL = lego.LEDirectoryStaging
 	client, err := lego.NewClient(config)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error creating acme client")
+		return nil, errutil.WrapErr(err, "error creating acme client")
 	}
 
 	// Set HTTP-01 challenge provider
 	if httpProvider != nil {
 		err = client.Challenge.SetHTTP01Provider(httpProvider)
 		if err != nil {
-			return nil, errutil.WrapError(err, "failed to set HTTP provider")
+			return nil, errutil.WrapErr(err, "failed to set HTTP provider")
 		}
 	}
 
@@ -73,7 +73,7 @@ func GetCertificate(
 			dns01.DisableAuthoritativeNssPropagationRequirement(),
 		)
 		if err != nil {
-			return nil, errutil.WrapError(err, "failed to set DNS provider")
+			return nil, errutil.WrapErr(err, "failed to set DNS provider")
 		}
 	}
 
@@ -85,12 +85,12 @@ func GetCertificate(
 
 	certs, err := client.Certificate.Obtain(request)
 	if err != nil {
-		return nil, errutil.WrapError(err, "failed to obtain certificate")
+		return nil, errutil.WrapErr(err, "failed to obtain certificate")
 	}
 
 	cert, err := tls.X509KeyPair(certs.Certificate, certs.PrivateKey)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error parsing cert")
+		return nil, errutil.WrapErr(err, "error parsing cert")
 	}
 
 	err = settings.Update().
@@ -98,7 +98,7 @@ func GetCertificate(
 		SetTLSCertKey(certs.PrivateKey).
 		Exec(ctx)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error saving tls cert")
+		return nil, errutil.WrapErr(err, "error saving tls cert")
 	}
 
 	return &cert, nil

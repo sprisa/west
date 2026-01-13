@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	l "github.com/sprisa/west/util/log"
+	l "github.com/sprisa/x/log"
 )
 
 // HTTPProvider implements the challenge.Provider interface for HTTP-01 challenges

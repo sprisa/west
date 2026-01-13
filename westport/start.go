@@ -16,14 +16,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
-	"github.com/sprisa/west/util/errutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
 	"github.com/sprisa/west/westport/dns"
 	"github.com/sprisa/west/westport/gql"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/sync/errgroup"
@@ -59,12 +59,12 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 
 	client, err := db.OpenDB()
 	if err != nil {
-		return errutil.WrapError(err, "error opening db")
+		return errutil.WrapErr(err, "error opening db")
 	}
 	defer client.Close()
 	err = migrate.MigrateClient(ctx, client)
 	if err != nil {
-		return errutil.WrapError(err, "error migrating db")
+		return errutil.WrapErr(err, "error migrating db")
 	}
 
 	settings, err := client.Settings.Query().Only(ctx)
@@ -72,7 +72,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		if ent.IsNotFound(err) {
 			return errors.New("error finding settings. Trying installing first.")
 		}
-		return errutil.WrapError(err, "error initializing settings")
+		return errutil.WrapErr(err, "error initializing settings")
 	}
 
 	l.Log.Debug().Msgf("settings: %+v", settings)
@@ -213,7 +213,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		}
 		srv, err := west.NewServer(opts)
 		if err != nil {
-			return errutil.WrapError(err, "error creating nebula server")
+			return errutil.WrapErr(err, "error creating nebula server")
 		}
 
 		return srv.Listen(ctx)
@@ -221,7 +221,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 
 	err = group.Wait()
 	if err != nil {
-		return errutil.WrapError(err, "server error")
+		return errutil.WrapErr(err, "server error")
 	}
 	l.Log.Info().Msg("Goodbye")
 	return nil

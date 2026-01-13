@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/go-acme/lego/v4/challenge/dns01"
-	l "github.com/sprisa/west/util/log"
+	l "github.com/sprisa/x/log"
 )
 
 // DNSProvider implements the challenge.Provider interface for DNS-01 challenges

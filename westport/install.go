@@ -6,15 +6,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/ipconv"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
 )
 
@@ -56,11 +56,11 @@ var InstallCommand = &cli.Command{
 		caKeyPath := c.String("ca-key")
 		ca, err := os.ReadFile(caPath)
 		if err != nil {
-			return errutil.WrapError(err, "error reading ca at `%s`", caPath)
+			return errutil.WrapErr(err, "error reading ca at `%s`", caPath)
 		}
 		caKey, err := os.ReadFile(caKeyPath)
 		if err != nil {
-			return errutil.WrapError(err, "error reading ca-key at `%s`", caPath)
+			return errutil.WrapErr(err, "error reading ca-key at `%s`", caPath)
 		}
 		cidr := c.String("cidr")
 		domainZone := strings.ToLower(c.String("domain-zone"))
@@ -75,12 +75,12 @@ var InstallCommand = &cli.Command{
 
 		client, err := db.OpenDB()
 		if err != nil {
-			return errutil.WrapError(err, "error opening db")
+			return errutil.WrapErr(err, "error opening db")
 		}
 		defer client.Close()
 		err = migrate.MigrateClient(ctx, client)
 		if err != nil {
-			return errutil.WrapError(err, "error migrating db")
+			return errutil.WrapErr(err, "error migrating db")
 		}
 
 		_, err = client.Settings.Query().First(ctx)
@@ -95,12 +95,12 @@ var InstallCommand = &cli.Command{
 			Ip:    cidr,
 		})
 		if err != nil {
-			return errutil.WrapError(err, "error generating west-port cert")
+			return errutil.WrapErr(err, "error generating west-port cert")
 		}
 
 		ipCidr, err := helpers.NewIpCidr(cidr)
 		if err != nil {
-			return errutil.WrapError(err, "error parsing cidr")
+			return errutil.WrapErr(err, "error parsing cidr")
 		}
 		overlayIp, err := ipconv.FromIPAddr(ipCidr.Addr())
 		if err != nil {
@@ -111,12 +111,12 @@ var InstallCommand = &cli.Command{
 		if letsencryptEmail != "" {
 			acmeUser, err := acme.NewUserRegistration(letsencryptEmail)
 			if err != nil {
-				return errutil.WrapError(err, "error creating new lets encrypt user")
+				return errutil.WrapErr(err, "error creating new lets encrypt user")
 			}
 
 			acmeRegistration, err = acmeUser.ToBytes()
 			if err != nil {
-				return errutil.WrapError(err, "error serializing acme registration")
+				return errutil.WrapErr(err, "error serializing acme registration")
 			}
 
 			l.Log.Info().
@@ -143,7 +143,7 @@ var InstallCommand = &cli.Command{
 			SetLetsencryptRegistration(acmeRegistration).
 			Exec(ctx)
 		if err != nil {
-			return errutil.WrapError(err, "error saving settings")
+			return errutil.WrapErr(err, "error saving settings")
 		}
 
 		l.Log.Info().Msg("Done! Use `west port start` to run")

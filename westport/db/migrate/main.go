@@ -4,8 +4,8 @@
 package main
 
 import (
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/db/migrate"
+	l "github.com/sprisa/x/log"
 )
 
 func main() {

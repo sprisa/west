@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/miekg/dns"
-	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/info"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 )
 
 var publicIp net.IP
@@ -50,7 +50,7 @@ func StartCompassDNSServer(
 	l.Log.Info().Str("addr", dnsServer.Addr).Msg("Starting Compass DNS Server")
 	err = dnsServer.ListenAndServe()
 	if err != nil {
-		return errutil.WrapError(err, "failed to start Compass DNS Server")
+		return errutil.WrapErr(err, "failed to start Compass DNS Server")
 	}
 	return closeError
 }

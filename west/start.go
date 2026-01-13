@@ -17,10 +17,10 @@ import (
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/auth"
-	"github.com/sprisa/west/util/errutil"
 	"github.com/sprisa/west/util/ioutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/west/gql"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
 )
 
@@ -77,7 +77,7 @@ var StartCommand = &cli.Command{
 		}
 		url, err := url.Parse(endpoint)
 		if err != nil {
-			return errutil.WrapError(err, "error parsing endpoint")
+			return errutil.WrapErr(err, "error parsing endpoint")
 		}
 
 		l.Log.Debug().Msgf("claims: %+v", claims)
@@ -87,7 +87,7 @@ var StartCommand = &cli.Command{
 			Token: token,
 		})
 		if err != nil {
-			return errutil.WrapError(err, "error provisioning device")
+			return errutil.WrapErr(err, "error provisioning device")
 		}
 		dvc := data.GetProvision_device()
 		l.Log.Info().
@@ -98,7 +98,7 @@ var StartCommand = &cli.Command{
 		if port == 0 {
 			port, err = getFreePort()
 			if err != nil {
-				return errutil.WrapError(err, "erroring find free port")
+				return errutil.WrapErr(err, "erroring find free port")
 			}
 		}
 

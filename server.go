@@ -7,7 +7,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/sprisa/west/config"
-	l "github.com/sprisa/west/util/log"
+	l "github.com/sprisa/x/log"
 
 	"github.com/sirupsen/logrus"
 	"github.com/slackhq/nebula"

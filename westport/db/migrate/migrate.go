@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sprisa/west/util/sig"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/ent/migrate"
+	"github.com/sprisa/x/sig"
 )
 
 func Migrate() error {

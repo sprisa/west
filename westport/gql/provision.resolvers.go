@@ -13,23 +13,23 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/samber/lo"
 	"github.com/sprisa/west/util/auth"
-	"github.com/sprisa/west/util/errutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 )
 
 // ProvisionDevice is the resolver for the provision_device field.
 func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionDeviceInput) (*ProvisionDeviceResponse, error) {
 	settings, err := r.client.Settings.Query().Only(ctx)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error fetching settings")
+		return nil, errutil.WrapErr(err, "error fetching settings")
 	}
 	dvcs, err := r.client.Device.Query().
 		All(ctx)
 	if err != nil {
-		return nil, errutil.WrapError(err, "error finding device")
+		return nil, errutil.WrapErr(err, "error finding device")
 	}
 	// for _, dvc := range dvcs {
 	// 	l.Log.Info().Msgf("%+v", dvc)
@@ -53,7 +53,7 @@ func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionD
 	// 	Where(device.Token(helpers.EncryptedBytes(encToken.([]byte)))).
 	// 	Only(ctx)
 	// if err != nil {
-	// 	return nil, errutil.WrapError(err, "error finding device")
+	// 	return nil, errutil.WrapErr(err, "error finding device")
 	// }
 
 	claims := &auth.TokenClaims{}
@@ -80,7 +80,7 @@ func (r *mutationResolver) ProvisionDevice(ctx context.Context, input ProvisionD
 		Ip:    nebulaIp.String(),
 	})
 	if err != nil {
-		return nil, errutil.WrapError(err, "error signing cert")
+		return nil, errutil.WrapErr(err, "error signing cert")
 	}
 
 	res := &ProvisionDeviceResponse{

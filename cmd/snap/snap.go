@@ -4,11 +4,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sprisa/west/util/env"
-	"github.com/sprisa/west/util/errutil"
-	l "github.com/sprisa/west/util/log"
 	"github.com/sprisa/west/west"
 	"github.com/sprisa/west/westport/db"
+	"github.com/sprisa/x/env"
+	"github.com/sprisa/x/errutil"
+	l "github.com/sprisa/x/log"
 )
 
 var isDaemon = env.Parse("WEST_SNAP_MODE", func(val string) bool {
@@ -32,12 +32,12 @@ func main() {
 		if os.IsNotExist(err) {
 			// Give permissions to all since `west port install` is ran with non root
 			err = os.Mkdir(configDirPath, 0777)
-			errutil.InvariantError(err, "error creating config dir")
+			errutil.InvariantErr(err, "error creating config dir")
 			// Need to set up again with chmod because Go using umask on Linux.
 			// This caused the permission in mkdir to be set incorrectly.
 			// https://stackoverflow.com/a/61645606/6635914
 			err = os.Chmod(configDirPath, 0777)
-			errutil.InvariantError(err, "error chmod config dir")
+			errutil.InvariantErr(err, "error chmod config dir")
 			l.Log.Info().Str("dir", configDirPath).Msg("Created common config dir")
 		}
 
@@ -45,9 +45,9 @@ func main() {
 		_, err = os.Stat(db.DBFilePath)
 		if os.IsNotExist(err) {
 			_, err = os.Create(db.DBFilePath)
-			errutil.InvariantError(err, "error creating db file")
+			errutil.InvariantErr(err, "error creating db file")
 			err = os.Chmod(db.DBFilePath, 0777)
-			errutil.InvariantError(err, "error chmod db file")
+			errutil.InvariantErr(err, "error chmod db file")
 			l.Log.Info().Str("path", db.DBFilePath).Msg("Created common db file")
 		}
 
