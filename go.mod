@@ -1,6 +1,6 @@
 module github.com/sprisa/west
 
-go 1.25.5
+go 1.25.6
 
 tool (
 	github.com/99designs/gqlgen
@@ -25,6 +25,7 @@ require (
 	github.com/sprisa/x/env v0.0.0-20260113165846-2f04fb60f2ef
 	github.com/sprisa/x/errutil v0.0.0-20260112164508-35cacfce2dc9
 	github.com/sprisa/x/log v0.0.0-20260112164508-35cacfce2dc9
+	github.com/sprisa/x/netutil v0.0.0-20260118111928-25d43d1e995a
 	github.com/sprisa/x/sig v0.0.0-20260112164508-35cacfce2dc9
 	github.com/urfave/cli/v3 v3.4.1
 	github.com/vektah/gqlparser/v2 v2.5.30

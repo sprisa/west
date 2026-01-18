@@ -271,6 +271,8 @@ github.com/sprisa/x/errutil v0.0.0-20260112164508-35cacfce2dc9 h1:WXqVRkRk5PWeIj
 github.com/sprisa/x/errutil v0.0.0-20260112164508-35cacfce2dc9/go.mod h1:s8ooa5H1DooBgyTRKcHBEm/IhBmrZkeVCMfDrExukYE=
 github.com/sprisa/x/log v0.0.0-20260112164508-35cacfce2dc9 h1:Ge4aYnLC8q8TSfyWfTfhkqliKVfHHBYZtrhznZhSdjM=
 github.com/sprisa/x/log v0.0.0-20260112164508-35cacfce2dc9/go.mod h1:nIFsyVCVv0/RHrZrQQfnZe4/iEqe1ckiUfqP9MDM/3o=
+github.com/sprisa/x/netutil v0.0.0-20260118111928-25d43d1e995a h1:NQp/VX/2es4tuEJf5X90+/SZP2dEpLg40Ritp7wNsgk=
+github.com/sprisa/x/netutil v0.0.0-20260118111928-25d43d1e995a/go.mod h1:jpVGNM4rdWMX19Bu2pMJaYC7bpNQ3cinhrcRZpvZzP4=
 github.com/sprisa/x/sig v0.0.0-20260112164508-35cacfce2dc9 h1:42ujMFqmj6N39H6WMn+CIM3X9AAZQID8j7PLWJUngos=
 github.com/sprisa/x/sig v0.0.0-20260112164508-35cacfce2dc9/go.mod h1:UIm3g45Mu6/PvB1rpjmmdcEyo19uUiSrvF94oK8DSzk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

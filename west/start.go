@@ -21,6 +21,7 @@ import (
 	"github.com/sprisa/west/west/gql"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
+	"github.com/sprisa/x/netutil"
 	"github.com/urfave/cli/v3"
 )
 
@@ -96,7 +97,7 @@ var StartCommand = &cli.Command{
 			Msg("Received provisioning")
 
 		if port == 0 {
-			port, err = getFreePort()
+			port, err = netutil.GetFreePort()
 			if err != nil {
 				return errutil.WrapErr(err, "erroring find free port")
 			}
@@ -152,18 +153,4 @@ var StartCommand = &cli.Command{
 
 		return srv.Listen(ctx)
 	},
-}
-
-func getFreePort() (port int, err error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	if err != nil {
-		return
-	}
-
-	l, err := net.ListenTCP("tcp", addr)
-	if err != nil {
-		return
-	}
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port, nil
 }
