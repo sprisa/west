@@ -49,6 +49,12 @@ case "$OS" in
   *)      echo "Unsupported OS: $OS"; exit 1 ;;
 esac
 
+case "$ARCH" in
+  x86_64|amd64) ARCH="x86_64" ;;
+  i386|i686) ARCH="i386" ;;
+  arm64|aarch64) ARCH="arm64" ;;
+esac
+
 # Get version (use --version flag if set, otherwise get latest)
 if [ -z "$VERSION" ]; then
   LATEST_URL="https://api.github.com/repos/$REPO/releases/latest"
