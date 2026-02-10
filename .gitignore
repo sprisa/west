@@ -4,3 +4,4 @@ westdb
 *.key
 dist/
 cmd/west/west
+tmp.yaml

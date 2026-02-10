@@ -89,9 +89,7 @@ type Lighthouse struct {
 	// This uses the same logic as remote_allow_list, but additionally, you can specify an interfaces map of regular expressions to match against interface names.
 	// The regexp must match the entire name. All interface rules must be either true or false (and the default will be the inverse).
 	// CIDR rules are matched after interface name rules. Default is all local IP addresses.
-	//
-	// TODO: Need to allow "interfaces" sub object
-	LocalAllowList map[string]bool `yaml:"local_allow_list,omitempty"`
+	LocalAllowList LocalAllowList `yaml:"local_allow_list,omitempty"`
 }
 
 // listen sets the UDP port Nebula will use for sending/receiving traffic and for handshakes.

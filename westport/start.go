@@ -16,6 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
+	"github.com/sprisa/west/util/merge"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
@@ -173,45 +174,52 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 			cipher = config.CipherChaChaPoly
 		}
 
-		opts := &west.ServerOpts{
-			OnStart: onNebulaStart,
-			Config: &config.Config{
-				Pki: config.Pki{
-					Ca:   string(settings.CaCrt),
-					Cert: string(settings.LighthouseCrt),
-					Key:  string(settings.LighthouseKey),
-				},
-				Lighthouse: config.Lighthouse{
-					AmLighthouse: true,
-				},
-				Tun: config.Tun{
-					Disabled: disableTun,
-				},
-				Listen: config.Listen{
-					Host: "::",
-					Port: 4242,
-				},
-				PreferredRanges: config.DefaultPreferredRanges,
-				Cipher:          cipher,
-				Firewall: config.Firewall{
-					Inbound: []config.FirewallRule{
-						{
-							Port:  config.PortAny,
-							Proto: config.ProtoAny,
-							Host:  config.HostAny,
-						},
+		cfg := &config.Config{
+			Pki: config.Pki{
+				Ca:   string(settings.CaCrt),
+				Cert: string(settings.LighthouseCrt),
+				Key:  string(settings.LighthouseKey),
+			},
+			Lighthouse: config.Lighthouse{
+				AmLighthouse: true,
+			},
+			Tun: config.Tun{
+				Disabled: disableTun,
+			},
+			Listen: config.Listen{
+				Host: "::",
+				Port: 4242,
+			},
+			PreferredRanges: config.DefaultPreferredRanges,
+			Cipher:          cipher,
+			Firewall: config.Firewall{
+				Inbound: []config.FirewallRule{
+					{
+						Port:  config.PortAny,
+						Proto: config.ProtoAny,
+						Host:  config.HostAny,
 					},
-					Outbound: []config.FirewallRule{
-						{
-							Port:  config.PortAny,
-							Proto: config.ProtoAny,
-							Host:  config.HostAny,
-						},
+				},
+				Outbound: []config.FirewallRule{
+					{
+						Port:  config.PortAny,
+						Proto: config.ProtoAny,
+						Host:  config.HostAny,
 					},
 				},
 			},
 		}
-		srv, err := west.NewServer(opts)
+
+		// Merge in custom Nebula config if exists
+		err = merge.MaybeMergeCustomNebulaCfg(cfg)
+		if err != nil {
+			return err
+		}
+
+		srv, err := west.NewServer(&west.ServerOpts{
+			OnStart: onNebulaStart,
+			Config:  cfg,
+		})
 		if err != nil {
 			return errutil.WrapErr(err, "error creating nebula server")
 		}

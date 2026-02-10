@@ -18,6 +18,7 @@ import (
 	"github.com/sprisa/west/config"
 	"github.com/sprisa/west/util/auth"
 	"github.com/sprisa/west/util/ioutil"
+	"github.com/sprisa/west/util/merge"
 	"github.com/sprisa/west/west/gql"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
@@ -103,49 +104,57 @@ var StartCommand = &cli.Command{
 			}
 		}
 
-		srv, err := west.NewServer(&west.ServerOpts{
-			Config: &config.Config{
-				Pki: config.Pki{
-					Ca:   dvc.Ca,
-					Cert: dvc.Cert,
-					Key:  dvc.Key,
+		cfg := &config.Config{
+			Pki: config.Pki{
+				Ca:   dvc.Ca,
+				Cert: dvc.Cert,
+				Key:  dvc.Key,
+			},
+			StaticHostMap: config.StaticHostMap{
+				claims.PortIP: []string{
+					net.JoinHostPort(url.Hostname(), "4242"),
 				},
-				StaticHostMap: config.StaticHostMap{
-					claims.PortIP: []string{
-						net.JoinHostPort(url.Hostname(), "4242"),
+			},
+			Lighthouse: config.Lighthouse{
+				Hosts: []string{
+					claims.PortIP,
+				},
+			},
+			Tun: config.Tun{
+				Disabled: disableTun,
+			},
+			Listen: config.Listen{
+				Host: "::",
+				Port: port,
+			},
+			PreferredRanges: config.DefaultPreferredRanges,
+			Cipher:          config.Cipher(dvc.NetworkCipher),
+			Firewall: config.Firewall{
+				Inbound: []config.FirewallRule{
+					{
+						Port:  config.PortAny,
+						Proto: config.ProtoAny,
+						Host:  config.HostAny,
 					},
 				},
-				Lighthouse: config.Lighthouse{
-					Hosts: []string{
-						claims.PortIP,
-					},
-				},
-				Tun: config.Tun{
-					Disabled: disableTun,
-				},
-				Listen: config.Listen{
-					Host: "::",
-					Port: port,
-				},
-				PreferredRanges: config.DefaultPreferredRanges,
-				Cipher:          config.Cipher(dvc.NetworkCipher),
-				Firewall: config.Firewall{
-					Inbound: []config.FirewallRule{
-						{
-							Port:  config.PortAny,
-							Proto: config.ProtoAny,
-							Host:  config.HostAny,
-						},
-					},
-					Outbound: []config.FirewallRule{
-						{
-							Port:  config.PortAny,
-							Proto: config.ProtoAny,
-							Host:  config.HostAny,
-						},
+				Outbound: []config.FirewallRule{
+					{
+						Port:  config.PortAny,
+						Proto: config.ProtoAny,
+						Host:  config.HostAny,
 					},
 				},
 			},
+		}
+
+		// Merge in custom Nebula config if exists
+		err = merge.MaybeMergeCustomNebulaCfg(cfg)
+		if err != nil {
+			return err
+		}
+
+		srv, err := west.NewServer(&west.ServerOpts{
+			Config: cfg,
 		})
 		if err != nil {
 			return err

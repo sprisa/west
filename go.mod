@@ -8,6 +8,7 @@ tool (
 )
 
 require (
+	dario.cat/mergo v1.0.0
 	entgo.io/contrib v0.7.0
 	entgo.io/ent v0.14.5
 	github.com/99designs/gqlgen v0.17.81
@@ -15,6 +16,7 @@ require (
 	github.com/anandvarma/namegen v1.1.1
 	github.com/cqroot/prompt v0.9.4
 	github.com/go-acme/lego/v4 v4.26.0
+	github.com/goccy/go-yaml v1.19.2
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/miekg/dns v1.1.68
@@ -37,7 +39,6 @@ require (
 
 require (
 	ariga.io/atlas v0.32.1-0.20250325101103-175b25e1c1b9 // indirect
-	dario.cat/mergo v1.0.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/alexflint/go-arg v1.5.1 // indirect
