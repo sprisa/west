@@ -148,7 +148,7 @@ You'll need that same encryption password.
 sudo west port start
 # West can also read the password from stdin.
 # Useful for piping in from your secrets store (infisical in this case).
-infisical secrets get WEST_PORT_PASSWORD | sudo west port start
+infisical secrets get WEST_PORT_PASSWORD --plain | sudo west port start
 ```
 
 > 💡 There is no built in daemon yet but you can build one with systemd
@@ -203,7 +203,7 @@ On each device, `home` and `api` in our case, run `west start` and pass in that 
 # Less secure as your shell will save you private token in history
 west start -t mylongtoken
 # Or pass the secret via stdin from your secret manager (Recommended)
-infisical secrets get HOME_DVC_TOKEN | west start
+infisical secrets get HOME_DVC_TOKEN --plain | west start
 ```
 
 🔥 Global Mesh Achieved 🔥  
