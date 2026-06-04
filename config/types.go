@@ -90,6 +90,11 @@ type Lighthouse struct {
 	// The regexp must match the entire name. All interface rules must be either true or false (and the default will be the inverse).
 	// CIDR rules are matched after interface name rules. Default is all local IP addresses.
 	LocalAllowList LocalAllowList `yaml:"local_allow_list,omitempty"`
+	// advertise_addrs are routable addresses that will be included along with discovered addresses to report to the lighthouse.
+	// The format is "ip:port". port can be 0, in which case the actual listening port will be used in its place, useful if listen.port is set to 0.
+	// This option is mainly useful when there are static IP addresses the host can be reached at that nebula can not typically discover on its own
+	// (e.g. when port forwarding or when the node has multiple paths to the internet.)
+	AdvertiseAddrs []string `yaml:"advertise_addrs,omitempty"`
 }
 
 // listen sets the UDP port Nebula will use for sending/receiving traffic and for handshakes.
