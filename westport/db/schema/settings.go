@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"github.com/sprisa/west/util/ipconv"
+	"entgo.io/ent/schema/index"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
 )
@@ -17,6 +17,9 @@ type Settings struct {
 
 func (Settings) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("network_id").
+			Default("default").
+			Immutable(),
 		field.String("domain_zone").
 			Optional().
 			Comment("Domain zone to use for nameserver"),
@@ -28,17 +31,8 @@ func (Settings) Fields() []ent.Field {
 		field.Bytes("ca_key").
 			Sensitive().
 			GoType(helpers.EncryptedBytes{}),
-		field.Bytes("lighthouse_crt").
-			Sensitive().
-			GoType(helpers.EncryptedBytes{}),
-		field.Bytes("lighthouse_key").
-			Sensitive().
-			GoType(helpers.EncryptedBytes{}),
 		field.String("cidr").
 			GoType(helpers.IpCidr{}).
-			Comment("Network cidr range"),
-		field.Uint32("port_overlay_ip").
-			GoType(ipconv.IP(0)).
 			Comment("Network cidr range"),
 		field.Bytes("letsencrypt_registration").
 			Sensitive().
@@ -73,7 +67,9 @@ func (Settings) Edges() []ent.Edge {
 }
 
 func (Settings) Indexes() []ent.Index {
-	return []ent.Index{}
+	return []ent.Index{
+		index.Fields("network_id").Unique(),
+	}
 }
 
 func (Settings) Annotations() []schema.Annotation {

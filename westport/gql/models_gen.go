@@ -2,15 +2,21 @@
 
 package gql
 
+type LighthouseConfig struct {
+	OverlayIP string `json:"overlayIp"`
+	Endpoint  string `json:"endpoint"`
+}
+
 type ProvisionDeviceInput struct {
 	Token string `json:"token"`
 }
 
 type ProvisionDeviceResponse struct {
-	Name          string `json:"name"`
-	Ca            string `json:"ca"`
-	Cert          string `json:"cert"`
-	Key           string `json:"key"`
-	AccessToken   string `json:"access_token"`
-	NetworkCipher string `json:"networkCipher"`
+	Name          string              `json:"name"`
+	Ca            string              `json:"ca"`
+	Cert          string              `json:"cert"`
+	Key           string              `json:"key"`
+	AccessToken   string              `json:"access_token"`
+	NetworkCipher string              `json:"networkCipher"`
+	Lighthouses   []*LighthouseConfig `json:"lighthouses"`
 }

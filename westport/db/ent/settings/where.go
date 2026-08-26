@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -66,6 +65,11 @@ func UpdatedTime(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldUpdatedTime, v))
 }
 
+// NetworkID applies equality check predicate on the "network_id" field. It's identical to NetworkIDEQ.
+func NetworkID(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldNetworkID, v))
+}
+
 // DomainZone applies equality check predicate on the "domain_zone" field. It's identical to DomainZoneEQ.
 func DomainZone(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldDomainZone, v))
@@ -86,25 +90,9 @@ func CaKey(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCaKey, v))
 }
 
-// LighthouseCrt applies equality check predicate on the "lighthouse_crt" field. It's identical to LighthouseCrtEQ.
-func LighthouseCrt(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldLighthouseCrt, v))
-}
-
-// LighthouseKey applies equality check predicate on the "lighthouse_key" field. It's identical to LighthouseKeyEQ.
-func LighthouseKey(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
-}
-
 // Cidr applies equality check predicate on the "cidr" field. It's identical to CidrEQ.
 func Cidr(v helpers.IpCidr) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCidr, v))
-}
-
-// PortOverlayIP applies equality check predicate on the "port_overlay_ip" field. It's identical to PortOverlayIPEQ.
-func PortOverlayIP(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldEQ(FieldPortOverlayIP, vc))
 }
 
 // LetsencryptRegistration applies equality check predicate on the "letsencrypt_registration" field. It's identical to LetsencryptRegistrationEQ.
@@ -200,6 +188,71 @@ func UpdatedTimeLT(v time.Time) predicate.Settings {
 // UpdatedTimeLTE applies the LTE predicate on the "updated_time" field.
 func UpdatedTimeLTE(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldUpdatedTime, v))
+}
+
+// NetworkIDEQ applies the EQ predicate on the "network_id" field.
+func NetworkIDEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldNetworkID, v))
+}
+
+// NetworkIDNEQ applies the NEQ predicate on the "network_id" field.
+func NetworkIDNEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldNetworkID, v))
+}
+
+// NetworkIDIn applies the In predicate on the "network_id" field.
+func NetworkIDIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldNetworkID, vs...))
+}
+
+// NetworkIDNotIn applies the NotIn predicate on the "network_id" field.
+func NetworkIDNotIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldNetworkID, vs...))
+}
+
+// NetworkIDGT applies the GT predicate on the "network_id" field.
+func NetworkIDGT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldNetworkID, v))
+}
+
+// NetworkIDGTE applies the GTE predicate on the "network_id" field.
+func NetworkIDGTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldNetworkID, v))
+}
+
+// NetworkIDLT applies the LT predicate on the "network_id" field.
+func NetworkIDLT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldNetworkID, v))
+}
+
+// NetworkIDLTE applies the LTE predicate on the "network_id" field.
+func NetworkIDLTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldNetworkID, v))
+}
+
+// NetworkIDContains applies the Contains predicate on the "network_id" field.
+func NetworkIDContains(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContains(FieldNetworkID, v))
+}
+
+// NetworkIDHasPrefix applies the HasPrefix predicate on the "network_id" field.
+func NetworkIDHasPrefix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasPrefix(FieldNetworkID, v))
+}
+
+// NetworkIDHasSuffix applies the HasSuffix predicate on the "network_id" field.
+func NetworkIDHasSuffix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasSuffix(FieldNetworkID, v))
+}
+
+// NetworkIDEqualFold applies the EqualFold predicate on the "network_id" field.
+func NetworkIDEqualFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEqualFold(FieldNetworkID, v))
+}
+
+// NetworkIDContainsFold applies the ContainsFold predicate on the "network_id" field.
+func NetworkIDContainsFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContainsFold(FieldNetworkID, v))
 }
 
 // DomainZoneEQ applies the EQ predicate on the "domain_zone" field.
@@ -422,86 +475,6 @@ func CaKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldCaKey, v))
 }
 
-// LighthouseCrtEQ applies the EQ predicate on the "lighthouse_crt" field.
-func LighthouseCrtEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldLighthouseCrt, v))
-}
-
-// LighthouseCrtNEQ applies the NEQ predicate on the "lighthouse_crt" field.
-func LighthouseCrtNEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNEQ(FieldLighthouseCrt, v))
-}
-
-// LighthouseCrtIn applies the In predicate on the "lighthouse_crt" field.
-func LighthouseCrtIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldIn(FieldLighthouseCrt, vs...))
-}
-
-// LighthouseCrtNotIn applies the NotIn predicate on the "lighthouse_crt" field.
-func LighthouseCrtNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNotIn(FieldLighthouseCrt, vs...))
-}
-
-// LighthouseCrtGT applies the GT predicate on the "lighthouse_crt" field.
-func LighthouseCrtGT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGT(FieldLighthouseCrt, v))
-}
-
-// LighthouseCrtGTE applies the GTE predicate on the "lighthouse_crt" field.
-func LighthouseCrtGTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGTE(FieldLighthouseCrt, v))
-}
-
-// LighthouseCrtLT applies the LT predicate on the "lighthouse_crt" field.
-func LighthouseCrtLT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLT(FieldLighthouseCrt, v))
-}
-
-// LighthouseCrtLTE applies the LTE predicate on the "lighthouse_crt" field.
-func LighthouseCrtLTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLTE(FieldLighthouseCrt, v))
-}
-
-// LighthouseKeyEQ applies the EQ predicate on the "lighthouse_key" field.
-func LighthouseKeyEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldEQ(FieldLighthouseKey, v))
-}
-
-// LighthouseKeyNEQ applies the NEQ predicate on the "lighthouse_key" field.
-func LighthouseKeyNEQ(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNEQ(FieldLighthouseKey, v))
-}
-
-// LighthouseKeyIn applies the In predicate on the "lighthouse_key" field.
-func LighthouseKeyIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldIn(FieldLighthouseKey, vs...))
-}
-
-// LighthouseKeyNotIn applies the NotIn predicate on the "lighthouse_key" field.
-func LighthouseKeyNotIn(vs ...helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldNotIn(FieldLighthouseKey, vs...))
-}
-
-// LighthouseKeyGT applies the GT predicate on the "lighthouse_key" field.
-func LighthouseKeyGT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGT(FieldLighthouseKey, v))
-}
-
-// LighthouseKeyGTE applies the GTE predicate on the "lighthouse_key" field.
-func LighthouseKeyGTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldGTE(FieldLighthouseKey, v))
-}
-
-// LighthouseKeyLT applies the LT predicate on the "lighthouse_key" field.
-func LighthouseKeyLT(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLT(FieldLighthouseKey, v))
-}
-
-// LighthouseKeyLTE applies the LTE predicate on the "lighthouse_key" field.
-func LighthouseKeyLTE(v helpers.EncryptedBytes) predicate.Settings {
-	return predicate.Settings(sql.FieldLTE(FieldLighthouseKey, v))
-}
-
 // CidrEQ applies the EQ predicate on the "cidr" field.
 func CidrEQ(v helpers.IpCidr) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldCidr, v))
@@ -570,60 +543,6 @@ func CidrEqualFold(v helpers.IpCidr) predicate.Settings {
 func CidrContainsFold(v helpers.IpCidr) predicate.Settings {
 	vc := v.String()
 	return predicate.Settings(sql.FieldContainsFold(FieldCidr, vc))
-}
-
-// PortOverlayIPEQ applies the EQ predicate on the "port_overlay_ip" field.
-func PortOverlayIPEQ(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldEQ(FieldPortOverlayIP, vc))
-}
-
-// PortOverlayIPNEQ applies the NEQ predicate on the "port_overlay_ip" field.
-func PortOverlayIPNEQ(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldNEQ(FieldPortOverlayIP, vc))
-}
-
-// PortOverlayIPIn applies the In predicate on the "port_overlay_ip" field.
-func PortOverlayIPIn(vs ...ipconv.IP) predicate.Settings {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = uint32(vs[i])
-	}
-	return predicate.Settings(sql.FieldIn(FieldPortOverlayIP, v...))
-}
-
-// PortOverlayIPNotIn applies the NotIn predicate on the "port_overlay_ip" field.
-func PortOverlayIPNotIn(vs ...ipconv.IP) predicate.Settings {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = uint32(vs[i])
-	}
-	return predicate.Settings(sql.FieldNotIn(FieldPortOverlayIP, v...))
-}
-
-// PortOverlayIPGT applies the GT predicate on the "port_overlay_ip" field.
-func PortOverlayIPGT(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldGT(FieldPortOverlayIP, vc))
-}
-
-// PortOverlayIPGTE applies the GTE predicate on the "port_overlay_ip" field.
-func PortOverlayIPGTE(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldGTE(FieldPortOverlayIP, vc))
-}
-
-// PortOverlayIPLT applies the LT predicate on the "port_overlay_ip" field.
-func PortOverlayIPLT(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldLT(FieldPortOverlayIP, vc))
-}
-
-// PortOverlayIPLTE applies the LTE predicate on the "port_overlay_ip" field.
-func PortOverlayIPLTE(v ipconv.IP) predicate.Settings {
-	vc := uint32(v)
-	return predicate.Settings(sql.FieldLTE(FieldPortOverlayIP, vc))
 }
 
 // LetsencryptRegistrationEQ applies the EQ predicate on the "letsencrypt_registration" field.

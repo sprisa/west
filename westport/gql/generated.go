@@ -58,6 +58,11 @@ type ComplexityRoot struct {
 		UpdatedTime func(childComplexity int) int
 	}
 
+	LighthouseConfig struct {
+		Endpoint  func(childComplexity int) int
+		OverlayIP func(childComplexity int) int
+	}
+
 	Mutation struct {
 		ProvisionDevice func(childComplexity int, input ProvisionDeviceInput) int
 	}
@@ -74,6 +79,7 @@ type ComplexityRoot struct {
 		Ca            func(childComplexity int) int
 		Cert          func(childComplexity int) int
 		Key           func(childComplexity int) int
+		Lighthouses   func(childComplexity int) int
 		Name          func(childComplexity int) int
 		NetworkCipher func(childComplexity int) int
 	}
@@ -145,6 +151,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Device.UpdatedTime(childComplexity), true
 
+	case "LighthouseConfig.endpoint":
+		if e.complexity.LighthouseConfig.Endpoint == nil {
+			break
+		}
+
+		return e.complexity.LighthouseConfig.Endpoint(childComplexity), true
+	case "LighthouseConfig.overlayIp":
+		if e.complexity.LighthouseConfig.OverlayIP == nil {
+			break
+		}
+
+		return e.complexity.LighthouseConfig.OverlayIP(childComplexity), true
+
 	case "Mutation.provision_device":
 		if e.complexity.Mutation.ProvisionDevice == nil {
 			break
@@ -206,6 +225,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ProvisionDeviceResponse.Key(childComplexity), true
+	case "ProvisionDeviceResponse.lighthouses":
+		if e.complexity.ProvisionDeviceResponse.Lighthouses == nil {
+			break
+		}
+
+		return e.complexity.ProvisionDeviceResponse.Lighthouses(childComplexity), true
 	case "ProvisionDeviceResponse.name":
 		if e.complexity.ProvisionDeviceResponse.Name == nil {
 			break
@@ -609,6 +634,64 @@ func (ec *executionContext) fieldContext_Device_ip(_ context.Context, field grap
 	return fc, nil
 }
 
+func (ec *executionContext) _LighthouseConfig_overlayIp(ctx context.Context, field graphql.CollectedField, obj *LighthouseConfig) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LighthouseConfig_overlayIp,
+		func(ctx context.Context) (any, error) {
+			return obj.OverlayIP, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LighthouseConfig_overlayIp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LighthouseConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LighthouseConfig_endpoint(ctx context.Context, field graphql.CollectedField, obj *LighthouseConfig) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LighthouseConfig_endpoint,
+		func(ctx context.Context) (any, error) {
+			return obj.Endpoint, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LighthouseConfig_endpoint(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LighthouseConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_provision_device(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -646,6 +729,8 @@ func (ec *executionContext) fieldContext_Mutation_provision_device(ctx context.C
 				return ec.fieldContext_ProvisionDeviceResponse_access_token(ctx, field)
 			case "networkCipher":
 				return ec.fieldContext_ProvisionDeviceResponse_networkCipher(ctx, field)
+			case "lighthouses":
+				return ec.fieldContext_ProvisionDeviceResponse_lighthouses(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProvisionDeviceResponse", field.Name)
 		},
@@ -949,6 +1034,41 @@ func (ec *executionContext) fieldContext_ProvisionDeviceResponse_networkCipher(_
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProvisionDeviceResponse_lighthouses(ctx context.Context, field graphql.CollectedField, obj *ProvisionDeviceResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProvisionDeviceResponse_lighthouses,
+		func(ctx context.Context) (any, error) {
+			return obj.Lighthouses, nil
+		},
+		nil,
+		ec.marshalNLighthouseConfig2ᚕᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐLighthouseConfigᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProvisionDeviceResponse_lighthouses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProvisionDeviceResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "overlayIp":
+				return ec.fieldContext_LighthouseConfig_overlayIp(ctx, field)
+			case "endpoint":
+				return ec.fieldContext_LighthouseConfig_endpoint(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LighthouseConfig", field.Name)
 		},
 	}
 	return fc, nil
@@ -2631,7 +2751,11 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 		}
 		return ec._Device(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Node must implement graphql.Marshaler", obj))
+		}
 	}
 }
 
@@ -2706,6 +2830,50 @@ func (ec *executionContext) _Device(ctx context.Context, sel ast.SelectionSet, o
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var lighthouseConfigImplementors = []string{"LighthouseConfig"}
+
+func (ec *executionContext) _LighthouseConfig(ctx context.Context, sel ast.SelectionSet, obj *LighthouseConfig) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, lighthouseConfigImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LighthouseConfig")
+		case "overlayIp":
+			out.Values[i] = ec._LighthouseConfig_overlayIp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "endpoint":
+			out.Values[i] = ec._LighthouseConfig_endpoint(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2864,6 +3032,11 @@ func (ec *executionContext) _ProvisionDeviceResponse(ctx context.Context, sel as
 			}
 		case "networkCipher":
 			out.Values[i] = ec._ProvisionDeviceResponse_networkCipher(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lighthouses":
+			out.Values[i] = ec._ProvisionDeviceResponse_lighthouses(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3326,7 +3499,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -3342,7 +3515,7 @@ func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.Selectio
 	res := graphql.MarshalIntID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -3388,10 +3561,64 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNLighthouseConfig2ᚕᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐLighthouseConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*LighthouseConfig) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLighthouseConfig2ᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐLighthouseConfig(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLighthouseConfig2ᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐLighthouseConfig(ctx context.Context, sel ast.SelectionSet, v *LighthouseConfig) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LighthouseConfig(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNNode2ᚕgithubᚗcomᚋsprisaᚋwestᚋwestportᚋdbᚋentᚐNoder(ctx context.Context, sel ast.SelectionSet, v []ent.Noder) graphql.Marshaler {
@@ -3444,7 +3671,7 @@ func (ec *executionContext) marshalNProvisionDeviceResponse2githubᚗcomᚋspris
 func (ec *executionContext) marshalNProvisionDeviceResponse2ᚖgithubᚗcomᚋsprisaᚋwestᚋwestportᚋgqlᚐProvisionDeviceResponse(ctx context.Context, sel ast.SelectionSet, v *ProvisionDeviceResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -3461,7 +3688,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -3477,7 +3704,7 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -3541,7 +3768,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -3713,7 +3940,7 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -3730,7 +3957,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res

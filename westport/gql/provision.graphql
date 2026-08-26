@@ -1,5 +1,12 @@
+scalar Time
+
 input ProvisionDeviceInput {
   token: String!
+}
+
+type LighthouseConfig {
+  overlayIp: String!
+  endpoint: String!
 }
 
 type ProvisionDeviceResponse {
@@ -9,6 +16,7 @@ type ProvisionDeviceResponse {
   key: String!
   access_token: String!
   networkCipher: String!
+  lighthouses: [LighthouseConfig!]!
 }
 
 

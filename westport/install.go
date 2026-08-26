@@ -3,16 +3,17 @@ package westport
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/sprisa/west/util/ipconv"
-	"github.com/sprisa/west/util/pki"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
@@ -21,8 +22,21 @@ import (
 var InstallCommand = &cli.Command{
 	Name:      "install",
 	Usage:     "Install west port",
-	UsageText: "west port install",
+	UsageText: "west port install --datastore <connection-string>",
 	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "datastore",
+			Usage:    "Datastore connection: sqlite, sqlite://<path>, postgres://, or mysql://",
+			Required: true,
+		},
+		&cli.StringFlag{
+			Name:  "add-lighthouse-ip",
+			Usage: "Add this lighthouse overlay IP to an existing external datastore",
+		},
+		&cli.StringFlag{
+			Name:  "port-endpoint",
+			Usage: "Public Nebula endpoint for this lighthouse (defaults to the detected public IP on port 4242)",
+		},
 		&cli.StringFlag{
 			Name:  "ca-crt",
 			Value: "ca.crt",
@@ -36,7 +50,7 @@ var InstallCommand = &cli.Command{
 		&cli.StringFlag{
 			Name:  "cidr",
 			Value: "10.10.10.1/24",
-			Usage: "Network IP cidr range",
+			Usage: "Network IP cidr range; its address is the first lighthouse IP",
 		},
 		&cli.StringFlag{
 			Name:  "domain-zone",
@@ -52,6 +66,50 @@ var InstallCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		if err := readEncryptionPassword(); err != nil {
+			return err
+		}
+
+		exists, err := localconfig.Exists()
+		if err != nil {
+			return errutil.WrapErr(err, "check local west-port installation")
+		}
+		if exists {
+			cfg, err := localconfig.Load()
+			if err != nil {
+				return fmt.Errorf("config at %s is unreadable: %w; remove it to reinstall", localconfig.FilePath, err)
+			}
+			l.Log.Info().Str("datastore", cfg.Datastore).Str("lighthouse", cfg.LighthouseIP).
+				Msg("West port is already installed on this node")
+			return nil
+		}
+
+		dataSource := c.String("datastore")
+		client, err := db.OpenDB(ctx, dataSource)
+		if err != nil {
+			return errutil.WrapErr(err, "error opening db")
+		}
+		defer client.Close()
+		if err := migrate.MigrateClient(ctx, client); err != nil {
+			return errutil.WrapErr(err, "error migrating db")
+		}
+
+		settings, err := client.Settings.Query().Only(ctx)
+		if err != nil && !ent.IsNotFound(err) {
+			return errutil.WrapErr(err, "error reading west-port settings")
+		}
+		addLighthouse, err := validateInstallRequest(
+			err == nil,
+			dataSource,
+			c.String("add-lighthouse-ip"),
+		)
+		if err != nil {
+			return err
+		}
+		if addLighthouse {
+			return installAdditionalLighthouse(ctx, c, client, settings, dataSource)
+		}
+
 		caPath := c.String("ca-crt")
 		caKeyPath := c.String("ca-key")
 		ca, err := os.ReadFile(caPath)
@@ -60,49 +118,30 @@ var InstallCommand = &cli.Command{
 		}
 		caKey, err := os.ReadFile(caKeyPath)
 		if err != nil {
-			return errutil.WrapErr(err, "error reading ca-key at `%s`", caPath)
+			return errutil.WrapErr(err, "error reading ca-key at `%s`", caKeyPath)
 		}
 		cidr := c.String("cidr")
 		domainZone := strings.ToLower(c.String("domain-zone"))
 		letsencryptEmail := c.String("letsencrypt-email")
-		letsencryptTOSAccepted := c.Bool("letsencrypt-accept-tos")
-		if letsencryptEmail != "" && letsencryptTOSAccepted == false {
-			return errors.New("Required to accept Let's Encrypt terms of service (--letsencrypt-accept-tos)")
+		if letsencryptEmail != "" && !c.Bool("letsencrypt-accept-tos") {
+			return errors.New("required to accept Let's Encrypt terms of service (--letsencrypt-accept-tos)")
 		}
 		if letsencryptEmail != "" && domainZone == "" {
-			return errors.New("Domain zone must be specified in order to use Let's Encrypt certificates (--domain-zone)")
-		}
-
-		client, err := db.OpenDB()
-		if err != nil {
-			return errutil.WrapErr(err, "error opening db")
-		}
-		defer client.Close()
-		err = migrate.MigrateClient(ctx, client)
-		if err != nil {
-			return errutil.WrapErr(err, "error migrating db")
-		}
-
-		_, err = client.Settings.Query().First(ctx)
-		if ent.IsNotFound(err) == false {
-			return errors.New("west port already installed with database present.")
-		}
-
-		lhCert, err := pki.SignCert(&pki.SignCertOptions{
-			CaCrt: ca,
-			CaKey: caKey,
-			Name:  "west-port-1",
-			Ip:    cidr,
-		})
-		if err != nil {
-			return errutil.WrapErr(err, "error generating west-port cert")
+			return errors.New("domain zone must be specified to use Let's Encrypt certificates (--domain-zone)")
 		}
 
 		ipCidr, err := helpers.NewIpCidr(cidr)
 		if err != nil {
 			return errutil.WrapErr(err, "error parsing cidr")
 		}
-		overlayIp, err := ipconv.FromIPAddr(ipCidr.Addr())
+		if !ipCidr.Addr().Is4() {
+			return errors.New("west currently requires an IPv4 network cidr")
+		}
+		endpoint, err := resolvePortEndpoint(c.String("port-endpoint"))
+		if err != nil {
+			return err
+		}
+		lighthouseCert, err := signLighthouseCertificate(ca, caKey, ipCidr.Addr(), ipCidr.Bits())
 		if err != nil {
 			return err
 		}
@@ -113,42 +152,61 @@ var InstallCommand = &cli.Command{
 			if err != nil {
 				return errutil.WrapErr(err, "error creating new lets encrypt user")
 			}
-
 			acmeRegistration, err = acmeUser.ToBytes()
 			if err != nil {
 				return errutil.WrapErr(err, "error serializing acme registration")
 			}
-
-			l.Log.Info().
-				Str("email", letsencryptEmail).
-				Msg("Registered with Let's Encrypt")
+			l.Log.Info().Str("email", letsencryptEmail).Msg("Registered with Let's Encrypt")
 		}
 
-		l.Log.Info().Msg("Create a encryption a password")
-		err = readEncryptionPassword()
+		hasHTTPS := len(acmeRegistration) > 0
+		apiEndpoint, err := resolveApiEndpoint(endpoint, hasHTTPS)
 		if err != nil {
 			return err
 		}
-
-		err = client.Settings.Create().
+		lighthouseIP, err := ipconv.FromIPAddr(ipCidr.Addr())
+		if err != nil {
+			return err
+		}
+		tx, err := client.Tx(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+		if err := tx.Settings.Create().
 			SetCaCrt(ca).
 			SetCaKey(caKey).
-			// TODO: Store info in a device so it get's all the
-			// DNS and uniqueness built in.
-			SetLighthouseCrt(lhCert.Cert).
-			SetLighthouseKey(lhCert.Key).
 			SetCidr(ipCidr).
-			SetPortOverlayIP(overlayIp).
 			SetDomainZone(domainZone).
 			SetLetsencryptRegistration(acmeRegistration).
-			Exec(ctx)
-		if err != nil {
+			Exec(ctx); err != nil {
+			if ent.IsConstraintError(err) {
+				return errors.New("datastore is already initialized; use --add-lighthouse-ip on a new node")
+			}
 			return errutil.WrapErr(err, "error saving settings")
+		}
+		host, err := tx.Host.Create().SetIP(lighthouseIP).Save(ctx)
+		if err != nil {
+			return errutil.WrapErr(err, "reserve overlay IP")
+		}
+		if err := tx.Lighthouse.Create().
+			SetIP(lighthouseIP).
+			SetEndpoint(endpoint).
+			SetAPIEndpoint(apiEndpoint).
+			SetCertificate(lighthouseCert.Cert).
+			SetKey(lighthouseCert.Key).
+			SetHostID(host.ID).
+			Exec(ctx); err != nil {
+			return errutil.WrapErr(err, "error saving first lighthouse")
+		}
+		if err := commitLocalInstallation(tx, localconfig.Config{
+			Datastore:    dataSource,
+			LighthouseIP: ipCidr.Addr().String(),
+		}); err != nil {
+			return err
 		}
 
 		l.Log.Info().Msg("Done! Use `west port start` to run")
-		// TODO: Show extra steps on snap mode
-		// sudo snap connect west:network-control
 		return nil
 	},
 }

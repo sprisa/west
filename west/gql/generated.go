@@ -17,11 +17,12 @@ func (v *ProvisionDeviceInput) GetToken() string { return v.Token }
 
 // ProvisionDeviceProvision_deviceProvisionDeviceResponse includes the requested fields of the GraphQL type ProvisionDeviceResponse.
 type ProvisionDeviceProvision_deviceProvisionDeviceResponse struct {
-	Name          string `json:"name"`
-	Ca            string `json:"ca"`
-	Cert          string `json:"cert"`
-	Key           string `json:"key"`
-	NetworkCipher string `json:"networkCipher"`
+	Name          string                                                                              `json:"name"`
+	Ca            string                                                                              `json:"ca"`
+	Cert          string                                                                              `json:"cert"`
+	Key           string                                                                              `json:"key"`
+	NetworkCipher string                                                                              `json:"networkCipher"`
+	Lighthouses   []ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig `json:"lighthouses"`
 }
 
 // GetName returns ProvisionDeviceProvision_deviceProvisionDeviceResponse.Name, and is useful for accessing the field via an interface.
@@ -39,6 +40,27 @@ func (v *ProvisionDeviceProvision_deviceProvisionDeviceResponse) GetKey() string
 // GetNetworkCipher returns ProvisionDeviceProvision_deviceProvisionDeviceResponse.NetworkCipher, and is useful for accessing the field via an interface.
 func (v *ProvisionDeviceProvision_deviceProvisionDeviceResponse) GetNetworkCipher() string {
 	return v.NetworkCipher
+}
+
+// GetLighthouses returns ProvisionDeviceProvision_deviceProvisionDeviceResponse.Lighthouses, and is useful for accessing the field via an interface.
+func (v *ProvisionDeviceProvision_deviceProvisionDeviceResponse) GetLighthouses() []ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig {
+	return v.Lighthouses
+}
+
+// ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig includes the requested fields of the GraphQL type LighthouseConfig.
+type ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig struct {
+	OverlayIp string `json:"overlayIp"`
+	Endpoint  string `json:"endpoint"`
+}
+
+// GetOverlayIp returns ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig.OverlayIp, and is useful for accessing the field via an interface.
+func (v *ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig) GetOverlayIp() string {
+	return v.OverlayIp
+}
+
+// GetEndpoint returns ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig.Endpoint, and is useful for accessing the field via an interface.
+func (v *ProvisionDeviceProvision_deviceProvisionDeviceResponseLighthousesLighthouseConfig) GetEndpoint() string {
+	return v.Endpoint
 }
 
 // ProvisionDeviceResponse is returned by ProvisionDevice on success.
@@ -68,6 +90,10 @@ mutation ProvisionDevice ($input: ProvisionDeviceInput!) {
 		cert
 		key
 		networkCipher
+		lighthouses {
+			overlayIp
+			endpoint
+		}
 	}
 }
 `

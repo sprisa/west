@@ -6,13 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"time"
 
-	"github.com/Khan/genqlient/graphql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
@@ -84,8 +81,7 @@ var StartCommand = &cli.Command{
 
 		l.Log.Debug().Msgf("claims: %+v", claims)
 
-		client := graphql.NewClient(endpoint, http.DefaultClient)
-		data, err := gql.ProvisionDevice(ctx, client, gql.ProvisionDeviceInput{
+		data, err := provisionWithFailover(ctx, url, claims.EndpointAddresses, gql.ProvisionDeviceInput{
 			Token: token,
 		})
 		if err != nil {
@@ -104,21 +100,25 @@ var StartCommand = &cli.Command{
 			}
 		}
 
+		staticHostMap := config.StaticHostMap{}
+		lighthouseHosts := make([]string, 0, len(dvc.Lighthouses))
+		for _, lighthouse := range dvc.Lighthouses {
+			staticHostMap[lighthouse.OverlayIp] = []string{lighthouse.Endpoint}
+			lighthouseHosts = append(lighthouseHosts, lighthouse.OverlayIp)
+		}
+		if len(lighthouseHosts) == 0 {
+			return errors.New("provisioning returned no lighthouses")
+		}
+
 		cfg := &config.Config{
 			Pki: config.Pki{
 				Ca:   dvc.Ca,
 				Cert: dvc.Cert,
 				Key:  dvc.Key,
 			},
-			StaticHostMap: config.StaticHostMap{
-				claims.PortIP: []string{
-					net.JoinHostPort(url.Hostname(), "4242"),
-				},
-			},
+			StaticHostMap: staticHostMap,
 			Lighthouse: config.Lighthouse{
-				Hosts: []string{
-					claims.PortIP,
-				},
+				Hosts: lighthouseHosts,
 			},
 			Tun: config.Tun{
 				Disabled: disableTun,

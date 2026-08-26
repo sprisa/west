@@ -18,7 +18,7 @@ func TestIPv4ToInt(t *testing.T) {
 	} {
 		got, err := IPv4ToInt(c.in)
 		if got != c.want || err != nil {
-			t.Errorf("IPv4ToInt(%q) == %q, want %q", c.in, got, c.want)
+			t.Errorf("IPv4ToInt(%q) == %v, want %v", c.in, got, c.want)
 		}
 	}
 }
@@ -32,7 +32,7 @@ func TestIPv4ToIntError(t *testing.T) {
 	} {
 		got, err := IPv4ToInt(c.in)
 		if err == nil {
-			t.Errorf("IPv4ToInt(%q) == %q, want %q", c.in, got, c.want)
+			t.Errorf("IPv4ToInt(%q) == %v, want %v", c.in, got, c.want)
 		}
 	}
 }
@@ -48,7 +48,7 @@ func TestIPv6ToInt(t *testing.T) {
 	} {
 		got, err := IPv6ToInt(c.in)
 		if got != c.want || err != nil {
-			t.Errorf("IPv6ToInt(%q) == %q, want %q", c.in.To16(), got, c.want)
+			t.Errorf("IPv6ToInt(%q) == %v, want %v", c.in.To16(), got, c.want)
 		}
 	}
 }
@@ -82,7 +82,7 @@ func TestIntToIPv4(t *testing.T) {
 	} {
 		got := IntToIPv4(c.in)
 		if !got.Equal(c.want) {
-			t.Errorf("IntToIPv4(%q) == %q, want %q", c.in, got, c.want)
+			t.Errorf("IntToIPv4(%v) == %q, want %q", c.in, got, c.want)
 		}
 	}
 }
@@ -101,7 +101,7 @@ func TestIntToIPv6(t *testing.T) {
 	} {
 		got := IntToIPv6(c.in[0], c.in[1])
 		if !got.Equal(c.want) {
-			t.Errorf("IntToIPv6(%q) == %q, want %q", c.in, got, c.want)
+			t.Errorf("IntToIPv6(%v) == %q, want %q", c.in, got, c.want)
 		}
 	}
 }

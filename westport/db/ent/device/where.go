@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/helpers"
@@ -399,6 +400,29 @@ func TokenLT(v helpers.EncryptedBytes) predicate.Device {
 // TokenLTE applies the LTE predicate on the "token" field.
 func TokenLTE(v helpers.EncryptedBytes) predicate.Device {
 	return predicate.Device(sql.FieldLTE(FieldToken, v))
+}
+
+// HasHost applies the HasEdge predicate on the "host" edge.
+func HasHost() predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, HostTable, HostColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHostWith applies the HasEdge predicate on the "host" edge with a given conditions (other predicates).
+func HasHostWith(preds ...predicate.Host) predicate.Device {
+	return predicate.Device(func(s *sql.Selector) {
+		step := newHostStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

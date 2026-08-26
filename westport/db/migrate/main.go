@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	err := migrate.Migrate()
+	err := migrate.Migrate("sqlite")
 	if err != nil {
 		l.Log.Err(err).Msg("error migrating")
 		return

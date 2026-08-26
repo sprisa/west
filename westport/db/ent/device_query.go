@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 )
 
@@ -22,6 +23,8 @@ type DeviceQuery struct {
 	order      []device.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Device
+	withHost   *HostQuery
+	withFKs    bool
 	modifiers  []func(*sql.Selector)
 	loadTotal  []func(context.Context, []*Device) error
 	// intermediate query (i.e. traversal path).
@@ -58,6 +61,28 @@ func (_q *DeviceQuery) Unique(unique bool) *DeviceQuery {
 func (_q *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryHost chains the current query on the "host" edge.
+func (_q *DeviceQuery) QueryHost() *HostQuery {
+	query := (&HostClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, selector),
+			sqlgraph.To(host.Table, host.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, device.HostTable, device.HostColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Device entity from the query.
@@ -252,10 +277,22 @@ func (_q *DeviceQuery) Clone() *DeviceQuery {
 		order:      append([]device.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
 		predicates: append([]predicate.Device{}, _q.predicates...),
+		withHost:   _q.withHost.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithHost tells the query-builder to eager-load the nodes that are connected to
+// the "host" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DeviceQuery) WithHost(opts ...func(*HostQuery)) *DeviceQuery {
+	query := (&HostClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withHost = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -334,15 +371,26 @@ func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Device, error) {
 	var (
-		nodes = []*Device{}
-		_spec = _q.querySpec()
+		nodes       = []*Device{}
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withHost != nil,
+		}
 	)
+	if _q.withHost != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Device).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Device{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -357,12 +405,51 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withHost; query != nil {
+		if err := _q.loadHost(ctx, query, nodes, nil,
+			func(n *Device, e *Host) { n.Edges.Host = e }); err != nil {
+			return nil, err
+		}
+	}
 	for i := range _q.loadTotal {
 		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
+}
+
+func (_q *DeviceQuery) loadHost(ctx context.Context, query *HostQuery, nodes []*Device, init func(*Device), assign func(*Device, *Host)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Device)
+	for i := range nodes {
+		if nodes[i].device_host == nil {
+			continue
+		}
+		fk := *nodes[i].device_host
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(host.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_host" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *DeviceQuery) sqlCount(ctx context.Context) (int, error) {

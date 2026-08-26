@@ -17,6 +17,8 @@ const (
 	FieldCreatedTime = "created_time"
 	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
 	FieldUpdatedTime = "updated_time"
+	// FieldNetworkID holds the string denoting the network_id field in the database.
+	FieldNetworkID = "network_id"
 	// FieldDomainZone holds the string denoting the domain_zone field in the database.
 	FieldDomainZone = "domain_zone"
 	// FieldCipher holds the string denoting the cipher field in the database.
@@ -25,14 +27,8 @@ const (
 	FieldCaCrt = "ca_crt"
 	// FieldCaKey holds the string denoting the ca_key field in the database.
 	FieldCaKey = "ca_key"
-	// FieldLighthouseCrt holds the string denoting the lighthouse_crt field in the database.
-	FieldLighthouseCrt = "lighthouse_crt"
-	// FieldLighthouseKey holds the string denoting the lighthouse_key field in the database.
-	FieldLighthouseKey = "lighthouse_key"
 	// FieldCidr holds the string denoting the cidr field in the database.
 	FieldCidr = "cidr"
-	// FieldPortOverlayIP holds the string denoting the port_overlay_ip field in the database.
-	FieldPortOverlayIP = "port_overlay_ip"
 	// FieldLetsencryptRegistration holds the string denoting the letsencrypt_registration field in the database.
 	FieldLetsencryptRegistration = "letsencrypt_registration"
 	// FieldTLSCert holds the string denoting the tls_cert field in the database.
@@ -48,14 +44,12 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedTime,
 	FieldUpdatedTime,
+	FieldNetworkID,
 	FieldDomainZone,
 	FieldCipher,
 	FieldCaCrt,
 	FieldCaKey,
-	FieldLighthouseCrt,
-	FieldLighthouseKey,
 	FieldCidr,
-	FieldPortOverlayIP,
 	FieldLetsencryptRegistration,
 	FieldTLSCert,
 	FieldTLSCertKey,
@@ -78,6 +72,8 @@ var (
 	DefaultUpdatedTime func() time.Time
 	// UpdateDefaultUpdatedTime holds the default value on update for the "updated_time" field.
 	UpdateDefaultUpdatedTime func() time.Time
+	// DefaultNetworkID holds the default value on creation for the "network_id" field.
+	DefaultNetworkID string
 	// DefaultCipher holds the default value on creation for the "cipher" field.
 	DefaultCipher string
 )
@@ -100,6 +96,11 @@ func ByUpdatedTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedTime, opts...).ToFunc()
 }
 
+// ByNetworkID orders the results by the network_id field.
+func ByNetworkID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNetworkID, opts...).ToFunc()
+}
+
 // ByDomainZone orders the results by the domain_zone field.
 func ByDomainZone(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomainZone, opts...).ToFunc()
@@ -113,9 +114,4 @@ func ByCipher(opts ...sql.OrderTermOption) OrderOption {
 // ByCidr orders the results by the cidr field.
 func ByCidr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCidr, opts...).ToFunc()
-}
-
-// ByPortOverlayIP orders the results by the port_overlay_ip field.
-func ByPortOverlayIP(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPortOverlayIP, opts...).ToFunc()
 }
