@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/netip"
 	"time"
 
 	"entgo.io/contrib/entgql"
@@ -16,13 +17,16 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/sprisa/west"
 	"github.com/sprisa/west/config"
+	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/util/merge"
 	"github.com/sprisa/west/westport/acme"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
+	"github.com/sprisa/west/westport/db/ent/lighthouse"
 	"github.com/sprisa/west/westport/db/migrate"
 	"github.com/sprisa/west/westport/dns"
 	"github.com/sprisa/west/westport/gql"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
@@ -58,7 +62,11 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	client, err := db.OpenDB()
+	localCfg, err := localconfig.Load()
+	if err != nil {
+		return errutil.WrapErr(err, "load local west-port config")
+	}
+	client, err := db.OpenDB(ctx, localCfg.Datastore)
 	if err != nil {
 		return errutil.WrapErr(err, "error opening db")
 	}
@@ -74,6 +82,18 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 			return errors.New("error finding settings. Trying installing first.")
 		}
 		return errutil.WrapErr(err, "error initializing settings")
+	}
+	portAddr, err := netip.ParseAddr(localCfg.LighthouseIP)
+	if err != nil {
+		return errutil.WrapErr(err, "parse configured port IP")
+	}
+	portIP, err := ipconv.FromIPAddr(portAddr)
+	if err != nil {
+		return err
+	}
+	westPort, err := client.Lighthouse.Query().Where(lighthouse.IP(portIP)).Only(ctx)
+	if err != nil {
+		return errutil.WrapErr(err, "load configured west port")
 	}
 
 	l.Log.Debug().Msgf("settings: %+v", settings)
@@ -93,7 +113,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	)
 	server := &http.Server{Addr: ":80", Handler: mux}
 	var httpsServer *http.Server
-	if settings.DomainZone != "" {
+	if settings.DomainZone != "" && len(settings.LetsencryptRegistration) > 0 {
 		httpsServer = &http.Server{
 			Addr:    ":443",
 			Handler: mux,
@@ -143,10 +163,10 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		l.Log.Info().Msg("Shutting down gql server")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
-		err := errors.Join(
-			server.Shutdown(ctx),
-			httpsServer.Shutdown(ctx),
-		)
+		err := server.Shutdown(ctx)
+		if httpsServer != nil {
+			err = errors.Join(err, httpsServer.Shutdown(ctx))
+		}
 		if err != nil && errors.Is(err, http.ErrServerClosed) == false {
 			l.Log.Err(err).Msg("gql server shutdown")
 		}
@@ -161,7 +181,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 				if disableTun {
 					return errors.New("private dns cannot be used with tun disabled")
 				}
-				addr = net.JoinHostPort(settings.PortOverlayIP.ToIpAddr().String(), "53")
+				addr = net.JoinHostPort(westPort.IP.ToIpAddr().String(), "53")
 			}
 			return dns.StartCompassDNSServer(ctx, addr, client, settings, dnsProvider)
 		})
@@ -177,8 +197,8 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		cfg := &config.Config{
 			Pki: config.Pki{
 				Ca:   string(settings.CaCrt),
-				Cert: string(settings.LighthouseCrt),
-				Key:  string(settings.LighthouseKey),
+				Cert: string(westPort.Certificate),
+				Key:  string(westPort.Key),
 			},
 			Lighthouse: config.Lighthouse{
 				AmLighthouse: true,

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -25,8 +26,17 @@ const (
 	FieldLeasedAccessToken = "leased_access_token"
 	// FieldToken holds the string denoting the token field in the database.
 	FieldToken = "token"
+	// EdgeHost holds the string denoting the host edge name in mutations.
+	EdgeHost = "host"
 	// Table holds the table name of the device in the database.
 	Table = "devices"
+	// HostTable is the table that holds the host relation/edge.
+	HostTable = "devices"
+	// HostInverseTable is the table name for the Host entity.
+	// It exists in this package in order to avoid circular dependency with the "host" package.
+	HostInverseTable = "hosts"
+	// HostColumn is the table column denoting the host relation/edge.
+	HostColumn = "device_host"
 )
 
 // Columns holds all SQL columns for device fields.
@@ -40,10 +50,21 @@ var Columns = []string{
 	FieldToken,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "devices"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"device_host",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -94,4 +115,18 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByLeasedAccessToken orders the results by the leased_access_token field.
 func ByLeasedAccessToken(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLeasedAccessToken, opts...).ToFunc()
+}
+
+// ByHostField orders the results by host field.
+func ByHostField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHostStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newHostStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HostInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, HostTable, HostColumn),
+	)
 }

@@ -5,5 +5,9 @@ mutation ProvisionDevice($input: ProvisionDeviceInput!) {
     cert
     key
     networkCipher
+    lighthouses {
+      overlayIp
+      endpoint
+    }
   }
 }

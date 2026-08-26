@@ -21,9 +21,14 @@ func (s *IpCidr) Scan(value any) error {
 		return nil
 	}
 
-	v, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("unexpected type for EncryptedString: %T", value)
+	var v string
+	switch value := value.(type) {
+	case string:
+		v = value
+	case []byte:
+		v = string(value)
+	default:
+		return fmt.Errorf("unexpected type for IpCidr: %T", value)
 	}
 
 	prefix, err := netip.ParsePrefix(v)

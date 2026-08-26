@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -46,6 +45,20 @@ func (_c *SettingsCreate) SetUpdatedTime(v time.Time) *SettingsCreate {
 func (_c *SettingsCreate) SetNillableUpdatedTime(v *time.Time) *SettingsCreate {
 	if v != nil {
 		_c.SetUpdatedTime(*v)
+	}
+	return _c
+}
+
+// SetNetworkID sets the "network_id" field.
+func (_c *SettingsCreate) SetNetworkID(v string) *SettingsCreate {
+	_c.mutation.SetNetworkID(v)
+	return _c
+}
+
+// SetNillableNetworkID sets the "network_id" field if the given value is not nil.
+func (_c *SettingsCreate) SetNillableNetworkID(v *string) *SettingsCreate {
+	if v != nil {
+		_c.SetNetworkID(*v)
 	}
 	return _c
 }
@@ -90,27 +103,9 @@ func (_c *SettingsCreate) SetCaKey(v helpers.EncryptedBytes) *SettingsCreate {
 	return _c
 }
 
-// SetLighthouseCrt sets the "lighthouse_crt" field.
-func (_c *SettingsCreate) SetLighthouseCrt(v helpers.EncryptedBytes) *SettingsCreate {
-	_c.mutation.SetLighthouseCrt(v)
-	return _c
-}
-
-// SetLighthouseKey sets the "lighthouse_key" field.
-func (_c *SettingsCreate) SetLighthouseKey(v helpers.EncryptedBytes) *SettingsCreate {
-	_c.mutation.SetLighthouseKey(v)
-	return _c
-}
-
 // SetCidr sets the "cidr" field.
 func (_c *SettingsCreate) SetCidr(v helpers.IpCidr) *SettingsCreate {
 	_c.mutation.SetCidr(v)
-	return _c
-}
-
-// SetPortOverlayIP sets the "port_overlay_ip" field.
-func (_c *SettingsCreate) SetPortOverlayIP(v ipconv.IP) *SettingsCreate {
-	_c.mutation.SetPortOverlayIP(v)
 	return _c
 }
 
@@ -175,6 +170,10 @@ func (_c *SettingsCreate) defaults() {
 		v := settings.DefaultUpdatedTime()
 		_c.mutation.SetUpdatedTime(v)
 	}
+	if _, ok := _c.mutation.NetworkID(); !ok {
+		v := settings.DefaultNetworkID
+		_c.mutation.SetNetworkID(v)
+	}
 	if _, ok := _c.mutation.Cipher(); !ok {
 		v := settings.DefaultCipher
 		_c.mutation.SetCipher(v)
@@ -189,6 +188,9 @@ func (_c *SettingsCreate) check() error {
 	if _, ok := _c.mutation.UpdatedTime(); !ok {
 		return &ValidationError{Name: "updated_time", err: errors.New(`ent: missing required field "Settings.updated_time"`)}
 	}
+	if _, ok := _c.mutation.NetworkID(); !ok {
+		return &ValidationError{Name: "network_id", err: errors.New(`ent: missing required field "Settings.network_id"`)}
+	}
 	if _, ok := _c.mutation.Cipher(); !ok {
 		return &ValidationError{Name: "cipher", err: errors.New(`ent: missing required field "Settings.cipher"`)}
 	}
@@ -198,17 +200,8 @@ func (_c *SettingsCreate) check() error {
 	if _, ok := _c.mutation.CaKey(); !ok {
 		return &ValidationError{Name: "ca_key", err: errors.New(`ent: missing required field "Settings.ca_key"`)}
 	}
-	if _, ok := _c.mutation.LighthouseCrt(); !ok {
-		return &ValidationError{Name: "lighthouse_crt", err: errors.New(`ent: missing required field "Settings.lighthouse_crt"`)}
-	}
-	if _, ok := _c.mutation.LighthouseKey(); !ok {
-		return &ValidationError{Name: "lighthouse_key", err: errors.New(`ent: missing required field "Settings.lighthouse_key"`)}
-	}
 	if _, ok := _c.mutation.Cidr(); !ok {
 		return &ValidationError{Name: "cidr", err: errors.New(`ent: missing required field "Settings.cidr"`)}
-	}
-	if _, ok := _c.mutation.PortOverlayIP(); !ok {
-		return &ValidationError{Name: "port_overlay_ip", err: errors.New(`ent: missing required field "Settings.port_overlay_ip"`)}
 	}
 	return nil
 }
@@ -244,6 +237,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 		_spec.SetField(settings.FieldUpdatedTime, field.TypeTime, value)
 		_node.UpdatedTime = value
 	}
+	if value, ok := _c.mutation.NetworkID(); ok {
+		_spec.SetField(settings.FieldNetworkID, field.TypeString, value)
+		_node.NetworkID = value
+	}
 	if value, ok := _c.mutation.DomainZone(); ok {
 		_spec.SetField(settings.FieldDomainZone, field.TypeString, value)
 		_node.DomainZone = value
@@ -260,21 +257,9 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 		_spec.SetField(settings.FieldCaKey, field.TypeBytes, value)
 		_node.CaKey = value
 	}
-	if value, ok := _c.mutation.LighthouseCrt(); ok {
-		_spec.SetField(settings.FieldLighthouseCrt, field.TypeBytes, value)
-		_node.LighthouseCrt = value
-	}
-	if value, ok := _c.mutation.LighthouseKey(); ok {
-		_spec.SetField(settings.FieldLighthouseKey, field.TypeBytes, value)
-		_node.LighthouseKey = value
-	}
 	if value, ok := _c.mutation.Cidr(); ok {
 		_spec.SetField(settings.FieldCidr, field.TypeString, value)
 		_node.Cidr = value
-	}
-	if value, ok := _c.mutation.PortOverlayIP(); ok {
-		_spec.SetField(settings.FieldPortOverlayIP, field.TypeUint32, value)
-		_node.PortOverlayIP = value
 	}
 	if value, ok := _c.mutation.LetsencryptRegistration(); ok {
 		_spec.SetField(settings.FieldLetsencryptRegistration, field.TypeBytes, value)

@@ -10,12 +10,13 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sprisa/west/util/auth"
-	"github.com/sprisa/west/util/info"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
+	"github.com/sprisa/west/westport/db/ent/lighthouse"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/errutil"
 	"github.com/urfave/cli/v3"
 )
@@ -48,7 +49,15 @@ var AddCommand = &cli.Command{
 			return errutil.WrapErr(err, "error parsing ip `%s`", ipStr)
 		}
 
-		client, err := db.OpenDB()
+		err = readEncryptionPassword()
+		if err != nil {
+			return err
+		}
+		localCfg, err := localconfig.Load()
+		if err != nil {
+			return errutil.WrapErr(err, "load local west-port config")
+		}
+		client, err := db.OpenDB(ctx, localCfg.Datastore)
 		if err != nil {
 			return errutil.WrapErr(err, "error opening db")
 		}
@@ -56,11 +65,6 @@ var AddCommand = &cli.Command{
 		err = migrate.MigrateClient(ctx, client)
 		if err != nil {
 			return errutil.WrapErr(err, "error migrating db")
-		}
-
-		err = readEncryptionPassword()
-		if err != nil {
-			return err
 		}
 
 		settings, err := client.Settings.Query().Only(ctx)
@@ -77,30 +81,42 @@ var AddCommand = &cli.Command{
 
 		nebulaIp := netip.PrefixFrom(ip, settings.Cidr.Bits())
 
+		ports, err := client.Lighthouse.Query().Order(ent.Asc(lighthouse.FieldIP)).All(ctx)
+		if err != nil {
+			return errutil.WrapErr(err, "error loading west ports")
+		}
+		if len(ports) == 0 {
+			return errors.New("no west ports are installed")
+		}
+
 		var endpoint url.URL
-		if settings.DomainZone != "" {
+		if settings.DomainZone != "" && len(settings.LetsencryptRegistration) > 0 {
 			endpoint = url.URL{
 				Scheme: "https",
 				Host:   settings.DomainZone,
 				Path:   "api",
 			}
 		} else {
-			publicIp, err := info.GetPublicIP()
-			if err != nil {
-				return errutil.WrapErr(err, "error getting public ip")
+			host := settings.DomainZone
+			if host == "" {
+				host = ports[0].APIEndpoint
 			}
 			endpoint = url.URL{
 				Scheme: "http",
-				Host:   publicIp.String(),
+				Host:   host,
 				Path:   "api",
 			}
 		}
+		endpointAddresses := make([]string, 0, len(ports))
+		for _, westPort := range ports {
+			endpointAddresses = append(endpointAddresses, westPort.APIEndpoint)
+		}
 
 		claims := &auth.TokenClaims{
-			Endpoint: endpoint.String(),
-			IP:       nebulaIp.String(),
-			Ca:       string(settings.CaCrt),
-			PortIP:   settings.PortOverlayIP.ToIPV4().String(),
+			Endpoint:          endpoint.String(),
+			EndpointAddresses: endpointAddresses,
+			IP:                nebulaIp.String(),
+			Ca:                string(settings.CaCrt),
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(
 					// 1 year
@@ -119,14 +135,28 @@ var AddCommand = &cli.Command{
 		if err != nil {
 			return errutil.WrapErr(err, "error converting ip")
 		}
-
-		_, err = client.Device.Create().
+		tx, err := client.Tx(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+		host, err := tx.Host.Create().SetIP(ipInt).Save(ctx)
+		if err != nil {
+			if ent.IsConstraintError(err) {
+				return fmt.Errorf("overlay IP %s is already in use", ip)
+			}
+			return errutil.WrapErr(err, "reserve overlay IP")
+		}
+		if _, err := tx.Device.Create().
 			SetName(name).
 			SetIP(ipInt).
 			SetToken(helpers.EncryptedBytes(token)).
-			Save(ctx)
-		if err != nil {
+			SetHostID(host.ID).
+			Save(ctx); err != nil {
 			return errutil.WrapErr(err, "error saving device")
+		}
+		if err := tx.Commit(); err != nil {
+			return err
 		}
 
 		println(token)

@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -23,6 +22,8 @@ type Settings struct {
 	CreatedTime time.Time `json:"created_time,omitempty"`
 	// Time ent was updated
 	UpdatedTime time.Time `json:"updated_time,omitempty"`
+	// NetworkID holds the value of the "network_id" field.
+	NetworkID string `json:"network_id,omitempty"`
 	// Domain zone to use for nameserver
 	DomainZone string `json:"domain_zone,omitempty"`
 	// Nebula cipher. aes or chachapoly
@@ -31,14 +32,8 @@ type Settings struct {
 	CaCrt helpers.EncryptedBytes `json:"ca_crt,omitempty"`
 	// CaKey holds the value of the "ca_key" field.
 	CaKey helpers.EncryptedBytes `json:"-"`
-	// LighthouseCrt holds the value of the "lighthouse_crt" field.
-	LighthouseCrt helpers.EncryptedBytes `json:"-"`
-	// LighthouseKey holds the value of the "lighthouse_key" field.
-	LighthouseKey helpers.EncryptedBytes `json:"-"`
 	// Network cidr range
 	Cidr helpers.IpCidr `json:"cidr,omitempty"`
-	// Network cidr range
-	PortOverlayIP ipconv.IP `json:"port_overlay_ip,omitempty"`
 	// LetsencryptRegistration holds the value of the "letsencrypt_registration" field.
 	LetsencryptRegistration helpers.EncryptedBytes `json:"-"`
 	// TLSCert holds the value of the "tls_cert" field.
@@ -55,13 +50,13 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case settings.FieldTLSCert, settings.FieldTLSCertKey:
 			values[i] = &sql.NullScanner{S: new(helpers.EncryptedBytes)}
-		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLighthouseCrt, settings.FieldLighthouseKey, settings.FieldLetsencryptRegistration:
+		case settings.FieldCaCrt, settings.FieldCaKey, settings.FieldLetsencryptRegistration:
 			values[i] = new(helpers.EncryptedBytes)
 		case settings.FieldCidr:
 			values[i] = new(helpers.IpCidr)
-		case settings.FieldID, settings.FieldPortOverlayIP:
+		case settings.FieldID:
 			values[i] = new(sql.NullInt64)
-		case settings.FieldDomainZone, settings.FieldCipher:
+		case settings.FieldNetworkID, settings.FieldDomainZone, settings.FieldCipher:
 			values[i] = new(sql.NullString)
 		case settings.FieldCreatedTime, settings.FieldUpdatedTime:
 			values[i] = new(sql.NullTime)
@@ -98,6 +93,12 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedTime = value.Time
 			}
+		case settings.FieldNetworkID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field network_id", values[i])
+			} else if value.Valid {
+				_m.NetworkID = value.String
+			}
 		case settings.FieldDomainZone:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field domain_zone", values[i])
@@ -122,29 +123,11 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.CaKey = *value
 			}
-		case settings.FieldLighthouseCrt:
-			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
-				return fmt.Errorf("unexpected type %T for field lighthouse_crt", values[i])
-			} else if value != nil {
-				_m.LighthouseCrt = *value
-			}
-		case settings.FieldLighthouseKey:
-			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
-				return fmt.Errorf("unexpected type %T for field lighthouse_key", values[i])
-			} else if value != nil {
-				_m.LighthouseKey = *value
-			}
 		case settings.FieldCidr:
 			if value, ok := values[i].(*helpers.IpCidr); !ok {
 				return fmt.Errorf("unexpected type %T for field cidr", values[i])
 			} else if value != nil {
 				_m.Cidr = *value
-			}
-		case settings.FieldPortOverlayIP:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field port_overlay_ip", values[i])
-			} else if value.Valid {
-				_m.PortOverlayIP = ipconv.IP(value.Int64)
 			}
 		case settings.FieldLetsencryptRegistration:
 			if value, ok := values[i].(*helpers.EncryptedBytes); !ok {
@@ -208,6 +191,9 @@ func (_m *Settings) String() string {
 	builder.WriteString("updated_time=")
 	builder.WriteString(_m.UpdatedTime.Format(time.ANSIC))
 	builder.WriteString(", ")
+	builder.WriteString("network_id=")
+	builder.WriteString(_m.NetworkID)
+	builder.WriteString(", ")
 	builder.WriteString("domain_zone=")
 	builder.WriteString(_m.DomainZone)
 	builder.WriteString(", ")
@@ -219,15 +205,8 @@ func (_m *Settings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ca_key=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("lighthouse_crt=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("lighthouse_key=<sensitive>")
-	builder.WriteString(", ")
 	builder.WriteString("cidr=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Cidr))
-	builder.WriteString(", ")
-	builder.WriteString("port_overlay_ip=")
-	builder.WriteString(fmt.Sprintf("%v", _m.PortOverlayIP))
 	builder.WriteString(", ")
 	builder.WriteString("letsencrypt_registration=<sensitive>")
 	builder.WriteString(", ")

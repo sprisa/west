@@ -6,12 +6,14 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/anandvarma/namegen"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type Device struct {
@@ -35,6 +37,15 @@ func (Device) Fields() []ent.Field {
 		field.Uint32("ip").
 			Immutable().
 			GoType(ipconv.IP(0)).
+			Annotations(entgql.Directives(entgql.Directive{
+				Name: "goField",
+				Arguments: ast.ArgumentList{
+					&ast.Argument{
+						Name:  "forceResolver",
+						Value: &ast.Value{Raw: "true", Kind: ast.BooleanValue},
+					},
+				},
+			})).
 			Validate(func(v uint32) error {
 				ip := ipconv.IP(v)
 				ipv4 := ip.ToIPV4()
@@ -59,7 +70,9 @@ func (Device) Fields() []ent.Field {
 }
 
 func (Device) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.To("host", Host.Type).Required().Unique(),
+	}
 }
 
 func (Device) Indexes() []ent.Index {
@@ -67,8 +80,6 @@ func (Device) Indexes() []ent.Index {
 		index.Fields("ip").
 			Unique(),
 		index.Fields("name").
-			Unique(),
-		index.Fields("token").
 			Unique(),
 	}
 }

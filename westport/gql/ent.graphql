@@ -22,7 +22,7 @@ type Device implements Node {
   """
   Overlay IPv4 of host
   """
-  ip: Int!
+  ip: Int! @goField(forceResolver: true)
 }
 """
 An object with an ID.
@@ -89,7 +89,3 @@ type Query {
     ids: [ID!]!
   ): [Node]!
 }
-"""
-The builtin Time type
-"""
-scalar Time

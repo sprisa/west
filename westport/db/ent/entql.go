@@ -4,6 +4,9 @@ package ent
 
 import (
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
+	"github.com/sprisa/west/westport/db/ent/lighthouse"
+	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/ent/settings"
 
 	"entgo.io/ent/dialect/sql"
@@ -14,7 +17,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 2)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 4)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   device.Table,
@@ -36,6 +39,42 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   host.Table,
+			Columns: host.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: host.FieldID,
+			},
+		},
+		Type: "Host",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			host.FieldCreatedTime: {Type: field.TypeTime, Column: host.FieldCreatedTime},
+			host.FieldUpdatedTime: {Type: field.TypeTime, Column: host.FieldUpdatedTime},
+			host.FieldIP:          {Type: field.TypeUint32, Column: host.FieldIP},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   lighthouse.Table,
+			Columns: lighthouse.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: lighthouse.FieldID,
+			},
+		},
+		Type: "Lighthouse",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			lighthouse.FieldCreatedTime: {Type: field.TypeTime, Column: lighthouse.FieldCreatedTime},
+			lighthouse.FieldUpdatedTime: {Type: field.TypeTime, Column: lighthouse.FieldUpdatedTime},
+			lighthouse.FieldIP:          {Type: field.TypeUint32, Column: lighthouse.FieldIP},
+			lighthouse.FieldEndpoint:    {Type: field.TypeString, Column: lighthouse.FieldEndpoint},
+			lighthouse.FieldCertificate: {Type: field.TypeBytes, Column: lighthouse.FieldCertificate},
+			lighthouse.FieldKey:         {Type: field.TypeBytes, Column: lighthouse.FieldKey},
+			lighthouse.FieldAPIEndpoint: {Type: field.TypeString, Column: lighthouse.FieldAPIEndpoint},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -47,19 +86,41 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Fields: map[string]*sqlgraph.FieldSpec{
 			settings.FieldCreatedTime:             {Type: field.TypeTime, Column: settings.FieldCreatedTime},
 			settings.FieldUpdatedTime:             {Type: field.TypeTime, Column: settings.FieldUpdatedTime},
+			settings.FieldNetworkID:               {Type: field.TypeString, Column: settings.FieldNetworkID},
 			settings.FieldDomainZone:              {Type: field.TypeString, Column: settings.FieldDomainZone},
 			settings.FieldCipher:                  {Type: field.TypeString, Column: settings.FieldCipher},
 			settings.FieldCaCrt:                   {Type: field.TypeBytes, Column: settings.FieldCaCrt},
 			settings.FieldCaKey:                   {Type: field.TypeBytes, Column: settings.FieldCaKey},
-			settings.FieldLighthouseCrt:           {Type: field.TypeBytes, Column: settings.FieldLighthouseCrt},
-			settings.FieldLighthouseKey:           {Type: field.TypeBytes, Column: settings.FieldLighthouseKey},
 			settings.FieldCidr:                    {Type: field.TypeString, Column: settings.FieldCidr},
-			settings.FieldPortOverlayIP:           {Type: field.TypeUint32, Column: settings.FieldPortOverlayIP},
 			settings.FieldLetsencryptRegistration: {Type: field.TypeBytes, Column: settings.FieldLetsencryptRegistration},
 			settings.FieldTLSCert:                 {Type: field.TypeBytes, Column: settings.FieldTLSCert},
 			settings.FieldTLSCertKey:              {Type: field.TypeBytes, Column: settings.FieldTLSCertKey},
 		},
 	}
+	graph.MustAddE(
+		"host",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+		},
+		"Device",
+		"Host",
+	)
+	graph.MustAddE(
+		"host",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   lighthouse.HostTable,
+			Columns: []string{lighthouse.HostColumn},
+			Bidi:    false,
+		},
+		"Lighthouse",
+		"Host",
+	)
 	return graph
 }()
 
@@ -139,6 +200,164 @@ func (f *DeviceFilter) WhereToken(p entql.BytesP) {
 	f.Where(p.Field(device.FieldToken))
 }
 
+// WhereHasHost applies a predicate to check if query has an edge host.
+func (f *DeviceFilter) WhereHasHost() {
+	f.Where(entql.HasEdge("host"))
+}
+
+// WhereHasHostWith applies a predicate to check if query has an edge host with a given conditions (other predicates).
+func (f *DeviceFilter) WhereHasHostWith(preds ...predicate.Host) {
+	f.Where(entql.HasEdgeWith("host", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *HostQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the HostQuery builder.
+func (_q *HostQuery) Filter() *HostFilter {
+	return &HostFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *HostMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the HostMutation builder.
+func (m *HostMutation) Filter() *HostFilter {
+	return &HostFilter{config: m.config, predicateAdder: m}
+}
+
+// HostFilter provides a generic filtering capability at runtime for HostQuery.
+type HostFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *HostFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *HostFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(host.FieldID))
+}
+
+// WhereCreatedTime applies the entql time.Time predicate on the created_time field.
+func (f *HostFilter) WhereCreatedTime(p entql.TimeP) {
+	f.Where(p.Field(host.FieldCreatedTime))
+}
+
+// WhereUpdatedTime applies the entql time.Time predicate on the updated_time field.
+func (f *HostFilter) WhereUpdatedTime(p entql.TimeP) {
+	f.Where(p.Field(host.FieldUpdatedTime))
+}
+
+// WhereIP applies the entql uint32 predicate on the ip field.
+func (f *HostFilter) WhereIP(p entql.Uint32P) {
+	f.Where(p.Field(host.FieldIP))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *LighthouseQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the LighthouseQuery builder.
+func (_q *LighthouseQuery) Filter() *LighthouseFilter {
+	return &LighthouseFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *LighthouseMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the LighthouseMutation builder.
+func (m *LighthouseMutation) Filter() *LighthouseFilter {
+	return &LighthouseFilter{config: m.config, predicateAdder: m}
+}
+
+// LighthouseFilter provides a generic filtering capability at runtime for LighthouseQuery.
+type LighthouseFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *LighthouseFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *LighthouseFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(lighthouse.FieldID))
+}
+
+// WhereCreatedTime applies the entql time.Time predicate on the created_time field.
+func (f *LighthouseFilter) WhereCreatedTime(p entql.TimeP) {
+	f.Where(p.Field(lighthouse.FieldCreatedTime))
+}
+
+// WhereUpdatedTime applies the entql time.Time predicate on the updated_time field.
+func (f *LighthouseFilter) WhereUpdatedTime(p entql.TimeP) {
+	f.Where(p.Field(lighthouse.FieldUpdatedTime))
+}
+
+// WhereIP applies the entql uint32 predicate on the ip field.
+func (f *LighthouseFilter) WhereIP(p entql.Uint32P) {
+	f.Where(p.Field(lighthouse.FieldIP))
+}
+
+// WhereEndpoint applies the entql string predicate on the endpoint field.
+func (f *LighthouseFilter) WhereEndpoint(p entql.StringP) {
+	f.Where(p.Field(lighthouse.FieldEndpoint))
+}
+
+// WhereCertificate applies the entql []byte predicate on the certificate field.
+func (f *LighthouseFilter) WhereCertificate(p entql.BytesP) {
+	f.Where(p.Field(lighthouse.FieldCertificate))
+}
+
+// WhereKey applies the entql []byte predicate on the key field.
+func (f *LighthouseFilter) WhereKey(p entql.BytesP) {
+	f.Where(p.Field(lighthouse.FieldKey))
+}
+
+// WhereAPIEndpoint applies the entql string predicate on the api_endpoint field.
+func (f *LighthouseFilter) WhereAPIEndpoint(p entql.StringP) {
+	f.Where(p.Field(lighthouse.FieldAPIEndpoint))
+}
+
+// WhereHasHost applies a predicate to check if query has an edge host.
+func (f *LighthouseFilter) WhereHasHost() {
+	f.Where(entql.HasEdge("host"))
+}
+
+// WhereHasHostWith applies a predicate to check if query has an edge host with a given conditions (other predicates).
+func (f *LighthouseFilter) WhereHasHostWith(preds ...predicate.Host) {
+	f.Where(entql.HasEdgeWith("host", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (_q *SettingsQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
@@ -168,7 +387,7 @@ type SettingsFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SettingsFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -187,6 +406,11 @@ func (f *SettingsFilter) WhereCreatedTime(p entql.TimeP) {
 // WhereUpdatedTime applies the entql time.Time predicate on the updated_time field.
 func (f *SettingsFilter) WhereUpdatedTime(p entql.TimeP) {
 	f.Where(p.Field(settings.FieldUpdatedTime))
+}
+
+// WhereNetworkID applies the entql string predicate on the network_id field.
+func (f *SettingsFilter) WhereNetworkID(p entql.StringP) {
+	f.Where(p.Field(settings.FieldNetworkID))
 }
 
 // WhereDomainZone applies the entql string predicate on the domain_zone field.
@@ -209,24 +433,9 @@ func (f *SettingsFilter) WhereCaKey(p entql.BytesP) {
 	f.Where(p.Field(settings.FieldCaKey))
 }
 
-// WhereLighthouseCrt applies the entql []byte predicate on the lighthouse_crt field.
-func (f *SettingsFilter) WhereLighthouseCrt(p entql.BytesP) {
-	f.Where(p.Field(settings.FieldLighthouseCrt))
-}
-
-// WhereLighthouseKey applies the entql []byte predicate on the lighthouse_key field.
-func (f *SettingsFilter) WhereLighthouseKey(p entql.BytesP) {
-	f.Where(p.Field(settings.FieldLighthouseKey))
-}
-
 // WhereCidr applies the entql string predicate on the cidr field.
 func (f *SettingsFilter) WhereCidr(p entql.StringP) {
 	f.Where(p.Field(settings.FieldCidr))
-}
-
-// WherePortOverlayIP applies the entql uint32 predicate on the port_overlay_ip field.
-func (f *SettingsFilter) WherePortOverlayIP(p entql.Uint32P) {
-	f.Where(p.Field(settings.FieldPortOverlayIP))
 }
 
 // WhereLetsencryptRegistration applies the entql []byte predicate on the letsencrypt_registration field.

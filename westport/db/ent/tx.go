@@ -14,6 +14,10 @@ type Tx struct {
 	config
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// Host is the client for interacting with the Host builders.
+	Host *HostClient
+	// Lighthouse is the client for interacting with the Lighthouse builders.
+	Lighthouse *LighthouseClient
 	// Settings is the client for interacting with the Settings builders.
 	Settings *SettingsClient
 
@@ -148,6 +152,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Device = NewDeviceClient(tx.config)
+	tx.Host = NewHostClient(tx.config)
+	tx.Lighthouse = NewLighthouseClient(tx.config)
 	tx.Settings = NewSettingsClient(tx.config)
 }
 

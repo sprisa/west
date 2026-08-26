@@ -10,9 +10,9 @@ import (
 	"github.com/sprisa/x/sig"
 )
 
-func Migrate() error {
+func Migrate(dataSource string) error {
 	ctx := sig.ShutdownContext(context.Background())
-	client, err := db.OpenDB()
+	client, err := db.OpenDB(ctx, dataSource)
 	if err != nil {
 		return err
 	}
