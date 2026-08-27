@@ -148,7 +148,7 @@ var AddCommand = &cli.Command{
 			return errutil.WrapErr(err, "error saving device")
 		}
 
-		println(token)
+		fmt.Println(token)
 		return nil
 	},
 }
