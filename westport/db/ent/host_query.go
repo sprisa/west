@@ -11,95 +11,70 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/sprisa/west/westport/db/ent/device"
 	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 )
 
-// DeviceQuery is the builder for querying Device entities.
-type DeviceQuery struct {
+// HostQuery is the builder for querying Host entities.
+type HostQuery struct {
 	config
 	ctx        *QueryContext
-	order      []device.OrderOption
+	order      []host.OrderOption
 	inters     []Interceptor
-	predicates []predicate.Device
-	withHost   *HostQuery
-	withFKs    bool
+	predicates []predicate.Host
 	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Device) error
+	loadTotal  []func(context.Context, []*Host) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the DeviceQuery builder.
-func (_q *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
+// Where adds a new predicate for the HostQuery builder.
+func (_q *HostQuery) Where(ps ...predicate.Host) *HostQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *DeviceQuery) Limit(limit int) *DeviceQuery {
+func (_q *HostQuery) Limit(limit int) *HostQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *DeviceQuery) Offset(offset int) *DeviceQuery {
+func (_q *HostQuery) Offset(offset int) *HostQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *DeviceQuery) Unique(unique bool) *DeviceQuery {
+func (_q *HostQuery) Unique(unique bool) *HostQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
+func (_q *HostQuery) Order(o ...host.OrderOption) *HostQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryHost chains the current query on the "host" edge.
-func (_q *DeviceQuery) QueryHost() *HostQuery {
-	query := (&HostClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(device.Table, device.FieldID, selector),
-			sqlgraph.To(host.Table, host.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, device.HostTable, device.HostColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Device entity from the query.
-// Returns a *NotFoundError when no Device was found.
-func (_q *DeviceQuery) First(ctx context.Context) (*Device, error) {
+// First returns the first Host entity from the query.
+// Returns a *NotFoundError when no Host was found.
+func (_q *HostQuery) First(ctx context.Context) (*Host, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{device.Label}
+		return nil, &NotFoundError{host.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *DeviceQuery) FirstX(ctx context.Context) *Device {
+func (_q *HostQuery) FirstX(ctx context.Context) *Host {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -107,22 +82,22 @@ func (_q *DeviceQuery) FirstX(ctx context.Context) *Device {
 	return node
 }
 
-// FirstID returns the first Device ID from the query.
-// Returns a *NotFoundError when no Device ID was found.
-func (_q *DeviceQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Host ID from the query.
+// Returns a *NotFoundError when no Host ID was found.
+func (_q *HostQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{device.Label}
+		err = &NotFoundError{host.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *DeviceQuery) FirstIDX(ctx context.Context) int {
+func (_q *HostQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -130,10 +105,10 @@ func (_q *DeviceQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Device entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Device entity is found.
-// Returns a *NotFoundError when no Device entities are found.
-func (_q *DeviceQuery) Only(ctx context.Context) (*Device, error) {
+// Only returns a single Host entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Host entity is found.
+// Returns a *NotFoundError when no Host entities are found.
+func (_q *HostQuery) Only(ctx context.Context) (*Host, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -142,14 +117,14 @@ func (_q *DeviceQuery) Only(ctx context.Context) (*Device, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{device.Label}
+		return nil, &NotFoundError{host.Label}
 	default:
-		return nil, &NotSingularError{device.Label}
+		return nil, &NotSingularError{host.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *DeviceQuery) OnlyX(ctx context.Context) *Device {
+func (_q *HostQuery) OnlyX(ctx context.Context) *Host {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -157,10 +132,10 @@ func (_q *DeviceQuery) OnlyX(ctx context.Context) *Device {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Device ID in the query.
-// Returns a *NotSingularError when more than one Device ID is found.
+// OnlyID is like Only, but returns the only Host ID in the query.
+// Returns a *NotSingularError when more than one Host ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *DeviceQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *HostQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -169,15 +144,15 @@ func (_q *DeviceQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{device.Label}
+		err = &NotFoundError{host.Label}
 	default:
-		err = &NotSingularError{device.Label}
+		err = &NotSingularError{host.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *DeviceQuery) OnlyIDX(ctx context.Context) int {
+func (_q *HostQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -185,18 +160,18 @@ func (_q *DeviceQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of Devices.
-func (_q *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
+// All executes the query and returns a list of Hosts.
+func (_q *HostQuery) All(ctx context.Context) ([]*Host, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Device, *DeviceQuery]()
-	return withInterceptors[[]*Device](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Host, *HostQuery]()
+	return withInterceptors[[]*Host](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *DeviceQuery) AllX(ctx context.Context) []*Device {
+func (_q *HostQuery) AllX(ctx context.Context) []*Host {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -204,20 +179,20 @@ func (_q *DeviceQuery) AllX(ctx context.Context) []*Device {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Device IDs.
-func (_q *DeviceQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Host IDs.
+func (_q *HostQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(device.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(host.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *DeviceQuery) IDsX(ctx context.Context) []int {
+func (_q *HostQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -226,16 +201,16 @@ func (_q *DeviceQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *DeviceQuery) Count(ctx context.Context) (int, error) {
+func (_q *HostQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*DeviceQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*HostQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *DeviceQuery) CountX(ctx context.Context) int {
+func (_q *HostQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -244,7 +219,7 @@ func (_q *DeviceQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *DeviceQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *HostQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -257,7 +232,7 @@ func (_q *DeviceQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *DeviceQuery) ExistX(ctx context.Context) bool {
+func (_q *HostQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -265,34 +240,22 @@ func (_q *DeviceQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the DeviceQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the HostQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *DeviceQuery) Clone() *DeviceQuery {
+func (_q *HostQuery) Clone() *HostQuery {
 	if _q == nil {
 		return nil
 	}
-	return &DeviceQuery{
+	return &HostQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]device.OrderOption{}, _q.order...),
+		order:      append([]host.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Device{}, _q.predicates...),
-		withHost:   _q.withHost.Clone(),
+		predicates: append([]predicate.Host{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithHost tells the query-builder to eager-load the nodes that are connected to
-// the "host" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *DeviceQuery) WithHost(opts ...func(*HostQuery)) *DeviceQuery {
-	query := (&HostClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withHost = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -305,15 +268,15 @@ func (_q *DeviceQuery) WithHost(opts ...func(*HostQuery)) *DeviceQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Device.Query().
-//		GroupBy(device.FieldCreatedTime).
+//	client.Host.Query().
+//		GroupBy(host.FieldCreatedTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
+func (_q *HostQuery) GroupBy(field string, fields ...string) *HostGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &DeviceGroupBy{build: _q}
+	grbuild := &HostGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = device.Label
+	grbuild.label = host.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -327,23 +290,23 @@ func (_q *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
 //		CreatedTime time.Time `json:"created_time,omitempty"`
 //	}
 //
-//	client.Device.Query().
-//		Select(device.FieldCreatedTime).
+//	client.Host.Query().
+//		Select(host.FieldCreatedTime).
 //		Scan(ctx, &v)
-func (_q *DeviceQuery) Select(fields ...string) *DeviceSelect {
+func (_q *HostQuery) Select(fields ...string) *HostSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &DeviceSelect{DeviceQuery: _q}
-	sbuild.label = device.Label
+	sbuild := &HostSelect{HostQuery: _q}
+	sbuild.label = host.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a DeviceSelect configured with the given aggregations.
-func (_q *DeviceQuery) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+// Aggregate returns a HostSelect configured with the given aggregations.
+func (_q *HostQuery) Aggregate(fns ...AggregateFunc) *HostSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
+func (_q *HostQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -355,7 +318,7 @@ func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !device.ValidColumn(f) {
+		if !host.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -369,28 +332,17 @@ func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Device, error) {
+func (_q *HostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Host, error) {
 	var (
-		nodes       = []*Device{}
-		withFKs     = _q.withFKs
-		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withHost != nil,
-		}
+		nodes = []*Host{}
+		_spec = _q.querySpec()
 	)
-	if _q.withHost != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Device).scanValues(nil, columns)
+		return (*Host).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Device{config: _q.config}
+		node := &Host{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -405,12 +357,6 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withHost; query != nil {
-		if err := _q.loadHost(ctx, query, nodes, nil,
-			func(n *Device, e *Host) { n.Edges.Host = e }); err != nil {
-			return nil, err
-		}
-	}
 	for i := range _q.loadTotal {
 		if err := _q.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
@@ -419,40 +365,7 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	return nodes, nil
 }
 
-func (_q *DeviceQuery) loadHost(ctx context.Context, query *HostQuery, nodes []*Device, init func(*Device), assign func(*Device, *Host)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Device)
-	for i := range nodes {
-		if nodes[i].device_host == nil {
-			continue
-		}
-		fk := *nodes[i].device_host
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(host.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "device_host" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-
-func (_q *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *HostQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -464,8 +377,8 @@ func (_q *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeInt))
+func (_q *HostQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(host.Table, host.Columns, sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -474,9 +387,9 @@ func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, device.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, host.FieldID)
 		for i := range fields {
-			if fields[i] != device.FieldID {
+			if fields[i] != host.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -504,12 +417,12 @@ func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *HostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(device.Table)
+	t1 := builder.Table(host.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = device.Columns
+		columns = host.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -536,28 +449,28 @@ func (_q *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// DeviceGroupBy is the group-by builder for Device entities.
-type DeviceGroupBy struct {
+// HostGroupBy is the group-by builder for Host entities.
+type HostGroupBy struct {
 	selector
-	build *DeviceQuery
+	build *HostQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *DeviceGroupBy) Aggregate(fns ...AggregateFunc) *DeviceGroupBy {
+func (_g *HostGroupBy) Aggregate(fns ...AggregateFunc) *HostGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *DeviceGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *HostGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*DeviceQuery, *DeviceGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*HostQuery, *HostGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *DeviceGroupBy) sqlScan(ctx context.Context, root *DeviceQuery, v any) error {
+func (_g *HostGroupBy) sqlScan(ctx context.Context, root *HostQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -584,28 +497,28 @@ func (_g *DeviceGroupBy) sqlScan(ctx context.Context, root *DeviceQuery, v any) 
 	return sql.ScanSlice(rows, v)
 }
 
-// DeviceSelect is the builder for selecting fields of Device entities.
-type DeviceSelect struct {
-	*DeviceQuery
+// HostSelect is the builder for selecting fields of Host entities.
+type HostSelect struct {
+	*HostQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *DeviceSelect) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+func (_s *HostSelect) Aggregate(fns ...AggregateFunc) *HostSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *DeviceSelect) Scan(ctx context.Context, v any) error {
+func (_s *HostSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*DeviceQuery, *DeviceSelect](ctx, _s.DeviceQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*HostQuery, *HostSelect](ctx, _s.HostQuery, _s, _s.inters, v)
 }
 
-func (_s *DeviceSelect) sqlScan(ctx context.Context, root *DeviceQuery, v any) error {
+func (_s *HostSelect) sqlScan(ctx context.Context, root *HostQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

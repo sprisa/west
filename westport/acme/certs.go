@@ -20,6 +20,7 @@ func GetCertificate(
 	httpProvider *HTTPProvider,
 	dnsProvider *DNSProvider,
 ) (*tls.Certificate, error) {
+	var cachedCert *tls.Certificate
 	// Check for existing key
 	if settings.TLSCert != nil && len(*settings.TLSCert) > 0 &&
 		settings.TLSCertKey != nil && len(*settings.TLSCertKey) > 0 {
@@ -29,19 +30,25 @@ func GetCertificate(
 		if err != nil {
 			return nil, errutil.WrapErr(err, "error parsing cert")
 		}
-
 		// Parse certificate to check expiry
 		x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
 		if err != nil {
 			return nil, errutil.WrapErr(err, "error parsing x509 cert")
 		}
 
+		now := time.Now()
+		if now.After(x509Cert.NotBefore) && now.Before(x509Cert.NotAfter) {
+			cachedCert = &cert
+		}
+
 		// Check if certificate needs renewal (30 days before expiry)
-		if x509Cert.NotAfter.Unix()-time.Now().Unix() < 30*24*3600 {
+		if cachedCert == nil {
+			l.Log.Warn().Msg("Cached certificate is not currently valid. Renewing now.")
+		} else if x509Cert.NotAfter.Unix()-now.Unix() < 30*24*3600 {
 			l.Log.Warn().Msg("Certificate expiring in < 30 days. Renewing now.")
 		} else {
 			l.Log.Info().Msg("Using cached TLS certificate")
-			return &cert, nil
+			return cachedCert, nil
 		}
 	}
 
@@ -85,6 +92,10 @@ func GetCertificate(
 
 	certs, err := client.Certificate.Obtain(request)
 	if err != nil {
+		if cachedCert != nil {
+			l.Log.Warn().Err(err).Msg("Certificate renewal failed; continuing with cached certificate")
+			return cachedCert, nil
+		}
 		return nil, errutil.WrapErr(err, "failed to obtain certificate")
 	}
 

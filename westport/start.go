@@ -21,6 +21,7 @@ import (
 	"github.com/sprisa/west/westport/db"
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/west/westport/dns"
 	"github.com/sprisa/west/westport/gql"
 	"github.com/sprisa/x/errutil"
@@ -58,7 +59,11 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	client, err := db.OpenDB()
+	localCfg, err := localconfig.Load()
+	if err != nil {
+		return errutil.WrapErr(err, "load local west-port config")
+	}
+	client, err := db.OpenDB(ctx, localCfg.Datastore)
 	if err != nil {
 		return errutil.WrapErr(err, "error opening db")
 	}
@@ -93,7 +98,7 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 	)
 	server := &http.Server{Addr: ":80", Handler: mux}
 	var httpsServer *http.Server
-	if settings.DomainZone != "" {
+	if settings.DomainZone != "" && len(settings.LetsencryptRegistration) > 0 {
 		httpsServer = &http.Server{
 			Addr:    ":443",
 			Handler: mux,
@@ -143,10 +148,10 @@ func startWestPort(ctx context.Context, c *cli.Command) error {
 		l.Log.Info().Msg("Shutting down gql server")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 		defer cancel()
-		err := errors.Join(
-			server.Shutdown(ctx),
-			httpsServer.Shutdown(ctx),
-		)
+		err := server.Shutdown(ctx)
+		if httpsServer != nil {
+			err = errors.Join(err, httpsServer.Shutdown(ctx))
+		}
 		if err != nil && errors.Is(err, http.ErrServerClosed) == false {
 			l.Log.Err(err).Msg("gql server shutdown")
 		}

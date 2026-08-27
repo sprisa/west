@@ -14,7 +14,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/settings"
 )
 
@@ -25,6 +27,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
+	// Host is the client for interacting with the Host builders.
+	Host *HostClient
 	// Settings is the client for interacting with the Settings builders.
 	Settings *SettingsClient
 	// additional fields for node api
@@ -41,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Device = NewDeviceClient(c.config)
+	c.Host = NewHostClient(c.config)
 	c.Settings = NewSettingsClient(c.config)
 }
 
@@ -135,6 +140,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:      ctx,
 		config:   cfg,
 		Device:   NewDeviceClient(cfg),
+		Host:     NewHostClient(cfg),
 		Settings: NewSettingsClient(cfg),
 	}, nil
 }
@@ -156,6 +162,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:      ctx,
 		config:   cfg,
 		Device:   NewDeviceClient(cfg),
+		Host:     NewHostClient(cfg),
 		Settings: NewSettingsClient(cfg),
 	}, nil
 }
@@ -186,6 +193,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Device.Use(hooks...)
+	c.Host.Use(hooks...)
 	c.Settings.Use(hooks...)
 }
 
@@ -193,6 +201,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Device.Intercept(interceptors...)
+	c.Host.Intercept(interceptors...)
 	c.Settings.Intercept(interceptors...)
 }
 
@@ -201,6 +210,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *DeviceMutation:
 		return c.Device.mutate(ctx, m)
+	case *HostMutation:
+		return c.Host.mutate(ctx, m)
 	case *SettingsMutation:
 		return c.Settings.mutate(ctx, m)
 	default:
@@ -316,6 +327,22 @@ func (c *DeviceClient) GetX(ctx context.Context, id int) *Device {
 	return obj
 }
 
+// QueryHost queries the host edge of a Device.
+func (c *DeviceClient) QueryHost(_m *Device) *HostQuery {
+	query := (&HostClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, id),
+			sqlgraph.To(host.Table, host.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, device.HostTable, device.HostColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DeviceClient) Hooks() []Hook {
 	return c.hooks.Device
@@ -338,6 +365,139 @@ func (c *DeviceClient) mutate(ctx context.Context, m *DeviceMutation) (Value, er
 		return (&DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Device mutation op: %q", m.Op())
+	}
+}
+
+// HostClient is a client for the Host schema.
+type HostClient struct {
+	config
+}
+
+// NewHostClient returns a client for the Host from the given config.
+func NewHostClient(c config) *HostClient {
+	return &HostClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `host.Hooks(f(g(h())))`.
+func (c *HostClient) Use(hooks ...Hook) {
+	c.hooks.Host = append(c.hooks.Host, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `host.Intercept(f(g(h())))`.
+func (c *HostClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Host = append(c.inters.Host, interceptors...)
+}
+
+// Create returns a builder for creating a Host entity.
+func (c *HostClient) Create() *HostCreate {
+	mutation := newHostMutation(c.config, OpCreate)
+	return &HostCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Host entities.
+func (c *HostClient) CreateBulk(builders ...*HostCreate) *HostCreateBulk {
+	return &HostCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *HostClient) MapCreateBulk(slice any, setFunc func(*HostCreate, int)) *HostCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &HostCreateBulk{err: fmt.Errorf("calling to HostClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*HostCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &HostCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Host.
+func (c *HostClient) Update() *HostUpdate {
+	mutation := newHostMutation(c.config, OpUpdate)
+	return &HostUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *HostClient) UpdateOne(_m *Host) *HostUpdateOne {
+	mutation := newHostMutation(c.config, OpUpdateOne, withHost(_m))
+	return &HostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *HostClient) UpdateOneID(id int) *HostUpdateOne {
+	mutation := newHostMutation(c.config, OpUpdateOne, withHostID(id))
+	return &HostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Host.
+func (c *HostClient) Delete() *HostDelete {
+	mutation := newHostMutation(c.config, OpDelete)
+	return &HostDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *HostClient) DeleteOne(_m *Host) *HostDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *HostClient) DeleteOneID(id int) *HostDeleteOne {
+	builder := c.Delete().Where(host.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &HostDeleteOne{builder}
+}
+
+// Query returns a query builder for Host.
+func (c *HostClient) Query() *HostQuery {
+	return &HostQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeHost},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Host entity by its id.
+func (c *HostClient) Get(ctx context.Context, id int) (*Host, error) {
+	return c.Query().Where(host.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *HostClient) GetX(ctx context.Context, id int) *Host {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *HostClient) Hooks() []Hook {
+	return c.hooks.Host
+}
+
+// Interceptors returns the client interceptors.
+func (c *HostClient) Interceptors() []Interceptor {
+	return c.inters.Host
+}
+
+func (c *HostClient) mutate(ctx context.Context, m *HostMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&HostCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&HostUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&HostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&HostDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Host mutation op: %q", m.Op())
 	}
 }
 
@@ -477,9 +637,9 @@ func (c *SettingsClient) mutate(ctx context.Context, m *SettingsMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Device, Settings []ent.Hook
+		Device, Host, Settings []ent.Hook
 	}
 	inters struct {
-		Device, Settings []ent.Interceptor
+		Device, Host, Settings []ent.Interceptor
 	}
 )

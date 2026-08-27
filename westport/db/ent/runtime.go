@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/schema"
 )
@@ -37,6 +38,25 @@ func init() {
 	deviceDescIP := deviceFields[1].Descriptor()
 	// device.IPValidator is a validator for the "ip" field. It is called by the builders before save.
 	device.IPValidator = deviceDescIP.Validators[0].(func(uint32) error)
+	hostMixin := schema.Host{}.Mixin()
+	hostMixinFields0 := hostMixin[0].Fields()
+	_ = hostMixinFields0
+	hostFields := schema.Host{}.Fields()
+	_ = hostFields
+	// hostDescCreatedTime is the schema descriptor for created_time field.
+	hostDescCreatedTime := hostMixinFields0[0].Descriptor()
+	// host.DefaultCreatedTime holds the default value on creation for the created_time field.
+	host.DefaultCreatedTime = hostDescCreatedTime.Default.(func() time.Time)
+	// hostDescUpdatedTime is the schema descriptor for updated_time field.
+	hostDescUpdatedTime := hostMixinFields0[1].Descriptor()
+	// host.DefaultUpdatedTime holds the default value on creation for the updated_time field.
+	host.DefaultUpdatedTime = hostDescUpdatedTime.Default.(func() time.Time)
+	// host.UpdateDefaultUpdatedTime holds the default value on update for the updated_time field.
+	host.UpdateDefaultUpdatedTime = hostDescUpdatedTime.UpdateDefault.(func() time.Time)
+	// hostDescIP is the schema descriptor for ip field.
+	hostDescIP := hostFields[0].Descriptor()
+	// host.IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	host.IPValidator = hostDescIP.Validators[0].(func(uint32) error)
 	settingsMixin := schema.Settings{}.Mixin()
 	settingsMixinFields0 := settingsMixin[0].Fields()
 	_ = settingsMixinFields0
@@ -52,8 +72,12 @@ func init() {
 	settings.DefaultUpdatedTime = settingsDescUpdatedTime.Default.(func() time.Time)
 	// settings.UpdateDefaultUpdatedTime holds the default value on update for the updated_time field.
 	settings.UpdateDefaultUpdatedTime = settingsDescUpdatedTime.UpdateDefault.(func() time.Time)
+	// settingsDescNetworkID is the schema descriptor for network_id field.
+	settingsDescNetworkID := settingsFields[0].Descriptor()
+	// settings.DefaultNetworkID holds the default value on creation for the network_id field.
+	settings.DefaultNetworkID = settingsDescNetworkID.Default.(string)
 	// settingsDescCipher is the schema descriptor for cipher field.
-	settingsDescCipher := settingsFields[1].Descriptor()
+	settingsDescCipher := settingsFields[2].Descriptor()
 	// settings.DefaultCipher holds the default value on creation for the cipher field.
 	settings.DefaultCipher = settingsDescCipher.Default.(string)
 }

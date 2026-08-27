@@ -21,6 +21,18 @@ func (f DeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeviceMutation", m)
 }
 
+// The HostFunc type is an adapter to allow the use of ordinary
+// function as Host mutator.
+type HostFunc func(context.Context, *ent.HostMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f HostFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.HostMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.HostMutation", m)
+}
+
 // The SettingsFunc type is an adapter to allow the use of ordinary
 // function as Settings mutator.
 type SettingsFunc func(context.Context, *ent.SettingsMutation) (ent.Value, error)

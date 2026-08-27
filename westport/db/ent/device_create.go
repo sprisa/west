@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/helpers"
 )
 
@@ -90,6 +91,17 @@ func (_c *DeviceCreate) SetToken(v helpers.EncryptedBytes) *DeviceCreate {
 	return _c
 }
 
+// SetHostID sets the "host" edge to the Host entity by ID.
+func (_c *DeviceCreate) SetHostID(id int) *DeviceCreate {
+	_c.mutation.SetHostID(id)
+	return _c
+}
+
+// SetHost sets the "host" edge to the Host entity.
+func (_c *DeviceCreate) SetHost(v *Host) *DeviceCreate {
+	return _c.SetHostID(v.ID)
+}
+
 // Mutation returns the DeviceMutation object of the builder.
 func (_c *DeviceCreate) Mutation() *DeviceMutation {
 	return _c.mutation
@@ -161,6 +173,9 @@ func (_c *DeviceCreate) check() error {
 	if _, ok := _c.mutation.Token(); !ok {
 		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "Device.token"`)}
 	}
+	if len(_c.mutation.HostIDs()) == 0 {
+		return &ValidationError{Name: "host", err: errors.New(`ent: missing required edge "Device.host"`)}
+	}
 	return nil
 }
 
@@ -210,6 +225,23 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Token(); ok {
 		_spec.SetField(device.FieldToken, field.TypeBytes, value)
 		_node.Token = value
+	}
+	if nodes := _c.mutation.HostIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.device_host = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
