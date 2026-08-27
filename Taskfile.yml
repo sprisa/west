@@ -111,6 +111,7 @@ tasks:
         msg: working tree must be clean before publishing
     cmds:
       - git tag -a "{{.VERSION}}" -m "{{.VERSION}}"
+      - git push origin "{{.VERSION}}"
       - goreleaser release --clean --skip=publish
       - |
         gh release create "{{.VERSION}}" \
