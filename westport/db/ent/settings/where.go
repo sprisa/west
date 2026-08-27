@@ -66,6 +66,11 @@ func UpdatedTime(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldUpdatedTime, v))
 }
 
+// NetworkID applies equality check predicate on the "network_id" field. It's identical to NetworkIDEQ.
+func NetworkID(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldNetworkID, v))
+}
+
 // DomainZone applies equality check predicate on the "domain_zone" field. It's identical to DomainZoneEQ.
 func DomainZone(v string) predicate.Settings {
 	return predicate.Settings(sql.FieldEQ(FieldDomainZone, v))
@@ -200,6 +205,71 @@ func UpdatedTimeLT(v time.Time) predicate.Settings {
 // UpdatedTimeLTE applies the LTE predicate on the "updated_time" field.
 func UpdatedTimeLTE(v time.Time) predicate.Settings {
 	return predicate.Settings(sql.FieldLTE(FieldUpdatedTime, v))
+}
+
+// NetworkIDEQ applies the EQ predicate on the "network_id" field.
+func NetworkIDEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEQ(FieldNetworkID, v))
+}
+
+// NetworkIDNEQ applies the NEQ predicate on the "network_id" field.
+func NetworkIDNEQ(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldNEQ(FieldNetworkID, v))
+}
+
+// NetworkIDIn applies the In predicate on the "network_id" field.
+func NetworkIDIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldIn(FieldNetworkID, vs...))
+}
+
+// NetworkIDNotIn applies the NotIn predicate on the "network_id" field.
+func NetworkIDNotIn(vs ...string) predicate.Settings {
+	return predicate.Settings(sql.FieldNotIn(FieldNetworkID, vs...))
+}
+
+// NetworkIDGT applies the GT predicate on the "network_id" field.
+func NetworkIDGT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGT(FieldNetworkID, v))
+}
+
+// NetworkIDGTE applies the GTE predicate on the "network_id" field.
+func NetworkIDGTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldGTE(FieldNetworkID, v))
+}
+
+// NetworkIDLT applies the LT predicate on the "network_id" field.
+func NetworkIDLT(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLT(FieldNetworkID, v))
+}
+
+// NetworkIDLTE applies the LTE predicate on the "network_id" field.
+func NetworkIDLTE(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldLTE(FieldNetworkID, v))
+}
+
+// NetworkIDContains applies the Contains predicate on the "network_id" field.
+func NetworkIDContains(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContains(FieldNetworkID, v))
+}
+
+// NetworkIDHasPrefix applies the HasPrefix predicate on the "network_id" field.
+func NetworkIDHasPrefix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasPrefix(FieldNetworkID, v))
+}
+
+// NetworkIDHasSuffix applies the HasSuffix predicate on the "network_id" field.
+func NetworkIDHasSuffix(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldHasSuffix(FieldNetworkID, v))
+}
+
+// NetworkIDEqualFold applies the EqualFold predicate on the "network_id" field.
+func NetworkIDEqualFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldEqualFold(FieldNetworkID, v))
+}
+
+// NetworkIDContainsFold applies the ContainsFold predicate on the "network_id" field.
+func NetworkIDContainsFold(v string) predicate.Settings {
+	return predicate.Settings(sql.FieldContainsFold(FieldNetworkID, v))
 }
 
 // DomainZoneEQ applies the EQ predicate on the "domain_zone" field.

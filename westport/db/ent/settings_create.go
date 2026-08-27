@@ -50,6 +50,20 @@ func (_c *SettingsCreate) SetNillableUpdatedTime(v *time.Time) *SettingsCreate {
 	return _c
 }
 
+// SetNetworkID sets the "network_id" field.
+func (_c *SettingsCreate) SetNetworkID(v string) *SettingsCreate {
+	_c.mutation.SetNetworkID(v)
+	return _c
+}
+
+// SetNillableNetworkID sets the "network_id" field if the given value is not nil.
+func (_c *SettingsCreate) SetNillableNetworkID(v *string) *SettingsCreate {
+	if v != nil {
+		_c.SetNetworkID(*v)
+	}
+	return _c
+}
+
 // SetDomainZone sets the "domain_zone" field.
 func (_c *SettingsCreate) SetDomainZone(v string) *SettingsCreate {
 	_c.mutation.SetDomainZone(v)
@@ -175,6 +189,10 @@ func (_c *SettingsCreate) defaults() {
 		v := settings.DefaultUpdatedTime()
 		_c.mutation.SetUpdatedTime(v)
 	}
+	if _, ok := _c.mutation.NetworkID(); !ok {
+		v := settings.DefaultNetworkID
+		_c.mutation.SetNetworkID(v)
+	}
 	if _, ok := _c.mutation.Cipher(); !ok {
 		v := settings.DefaultCipher
 		_c.mutation.SetCipher(v)
@@ -188,6 +206,9 @@ func (_c *SettingsCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedTime(); !ok {
 		return &ValidationError{Name: "updated_time", err: errors.New(`ent: missing required field "Settings.updated_time"`)}
+	}
+	if _, ok := _c.mutation.NetworkID(); !ok {
+		return &ValidationError{Name: "network_id", err: errors.New(`ent: missing required field "Settings.network_id"`)}
 	}
 	if _, ok := _c.mutation.Cipher(); !ok {
 		return &ValidationError{Name: "cipher", err: errors.New(`ent: missing required field "Settings.cipher"`)}
@@ -243,6 +264,10 @@ func (_c *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedTime(); ok {
 		_spec.SetField(settings.FieldUpdatedTime, field.TypeTime, value)
 		_node.UpdatedTime = value
+	}
+	if value, ok := _c.mutation.NetworkID(); ok {
+		_spec.SetField(settings.FieldNetworkID, field.TypeString, value)
+		_node.NetworkID = value
 	}
 	if value, ok := _c.mutation.DomainZone(); ok {
 		_spec.SetField(settings.FieldDomainZone, field.TypeString, value)

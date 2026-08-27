@@ -6,6 +6,7 @@ import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/anandvarma/namegen"
@@ -59,7 +60,9 @@ func (Device) Fields() []ent.Field {
 }
 
 func (Device) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.To("host", Host.Type).Required().Unique(),
+	}
 }
 
 func (Device) Indexes() []ent.Index {
@@ -67,8 +70,6 @@ func (Device) Indexes() []ent.Index {
 		index.Fields("ip").
 			Unique(),
 		index.Fields("name").
-			Unique(),
-		index.Fields("token").
 			Unique(),
 	}
 }

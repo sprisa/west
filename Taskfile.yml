@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  test:
+    desc: Run generation, tests, datastore integration tests, vet, and builds
+    cmds:
+      - task: test:generate
+      - task: test:unit
+      - task: test:race
+      - task: test:datastores
+      - task: test:vet
+      - task: test:build
+      - git diff --check
+
+  test:generate:
+    internal: true
+    cmd: go generate ./...
+
+  test:unit:
+    internal: true
+    cmd: go test ./...
+
+  test:race:
+    internal: true
+    cmd: go test -race ./west/... ./westport/...
+
+  test:datastores:
+    internal: true
+    preconditions:
+      - sh: docker version >/dev/null
+        msg: Docker is required for PostgreSQL and MySQL integration tests
+    cmd: |
+      set -eu
+
+      postgres_container="west-test-postgres-$$"
+      mysql_container="west-test-mysql-$$"
+      cleanup() {
+        docker rm -f "$postgres_container" "$mysql_container" >/dev/null 2>&1 || true
+      }
+      trap cleanup EXIT
+
+      docker run -d --rm \
+        --name "$postgres_container" \
+        -e POSTGRES_USER=west \
+        -e POSTGRES_PASSWORD=westpass \
+        -e POSTGRES_DB=west \
+        -p 127.0.0.1::5432 \
+        postgres:18-alpine >/dev/null
+
+      docker run -d --rm \
+        --name "$mysql_container" \
+        -e MYSQL_USER=west \
+        -e MYSQL_PASSWORD=westpass \
+        -e MYSQL_DATABASE=west \
+        -e MYSQL_ROOT_PASSWORD=rootpass \
+        -p 127.0.0.1::3306 \
+        mysql:8.4 >/dev/null
+
+      attempts=0
+      until docker exec "$postgres_container" pg_isready -U west -d west >/dev/null 2>&1; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge 60 ]; then
+          echo "PostgreSQL did not become ready" >&2
+          exit 1
+        fi
+        sleep 1
+      done
+
+      attempts=0
+      until docker exec "$mysql_container" mysqladmin ping -h127.0.0.1 -uroot -prootpass >/dev/null 2>&1; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge 60 ]; then
+          echo "MySQL did not become ready" >&2
+          exit 1
+        fi
+        sleep 1
+      done
+
+      postgres_address=$(docker port "$postgres_container" 5432)
+      mysql_address=$(docker port "$mysql_container" 3306)
+      WEST_TEST_POSTGRES_DSN="postgres://west:westpass@${postgres_address}/west?sslmode=disable" \
+      WEST_TEST_MYSQL_DSN="mysql://west:westpass@${mysql_address}/west" \
+        go test ./westport/db -run '^TestDatastoreSchema$' -count=1
+
+  test:vet:
+    internal: true
+    cmd: go vet ./...
+
+  test:build:
+    internal: true
+    cmd: go build ./cmd/west ./cmd/snap
+
+  publish:
+    desc: Tag and build a release with GoReleaser
+    requires:
+      vars: [VERSION]
+    preconditions:
+      - sh: goreleaser --version >/dev/null
+        msg: goreleaser is required
+      - sh: git diff --quiet
+        msg: working tree must be clean before publishing
+    cmds:
+      - git tag -a "{{.VERSION}}" -m "{{.VERSION}}"
+      - goreleaser release --clean

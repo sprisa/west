@@ -17,12 +17,21 @@ var (
 		{Name: "ip", Type: field.TypeUint32},
 		{Name: "leased_access_token", Type: field.TypeString, Nullable: true},
 		{Name: "token", Type: field.TypeBytes},
+		{Name: "device_host", Type: field.TypeInt},
 	}
 	// DevicesTable holds the schema information for the "devices" table.
 	DevicesTable = &schema.Table{
 		Name:       "devices",
 		Columns:    DevicesColumns,
 		PrimaryKey: []*schema.Column{DevicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "devices_hosts_host",
+				Columns:    []*schema.Column{DevicesColumns[7]},
+				RefColumns: []*schema.Column{HostsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "device_ip",
@@ -34,10 +43,25 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{DevicesColumns[3]},
 			},
+		},
+	}
+	// HostsColumns holds the columns for the "hosts" table.
+	HostsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_time", Type: field.TypeTime},
+		{Name: "updated_time", Type: field.TypeTime},
+		{Name: "ip", Type: field.TypeUint32},
+	}
+	// HostsTable holds the schema information for the "hosts" table.
+	HostsTable = &schema.Table{
+		Name:       "hosts",
+		Columns:    HostsColumns,
+		PrimaryKey: []*schema.Column{HostsColumns[0]},
+		Indexes: []*schema.Index{
 			{
-				Name:    "device_token",
+				Name:    "host_ip",
 				Unique:  true,
-				Columns: []*schema.Column{DevicesColumns[6]},
+				Columns: []*schema.Column{HostsColumns[3]},
 			},
 		},
 	}
@@ -46,6 +70,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_time", Type: field.TypeTime},
 		{Name: "updated_time", Type: field.TypeTime},
+		{Name: "network_id", Type: field.TypeString, Default: "default"},
 		{Name: "domain_zone", Type: field.TypeString, Nullable: true},
 		{Name: "cipher", Type: field.TypeString, Default: "aes"},
 		{Name: "ca_crt", Type: field.TypeBytes},
@@ -63,13 +88,22 @@ var (
 		Name:       "settings",
 		Columns:    SettingsColumns,
 		PrimaryKey: []*schema.Column{SettingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "settings_network_id",
+				Unique:  true,
+				Columns: []*schema.Column{SettingsColumns[3]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DevicesTable,
+		HostsTable,
 		SettingsTable,
 	}
 )
 
 func init() {
+	DevicesTable.ForeignKeys[0].RefTable = HostsTable
 }

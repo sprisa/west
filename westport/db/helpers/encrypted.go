@@ -6,12 +6,18 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
 var EncryptionKey [32]byte
 
-// var EncryptionKey = []byte("passphrasewhichneedstobe32bytes!")
+var encryptionSalt = []byte("west-port-v1")
+
+func SetEncryptionPassword(password []byte) {
+	key := argon2.IDKey(password, encryptionSalt, 3, 64*1024, 4, 32)
+	copy(EncryptionKey[:], key)
+}
 
 // EncryptedBytes is a custom type that automatically encrypts/decrypts
 type EncryptedBytes []byte
@@ -37,7 +43,7 @@ func (e *EncryptedBytes) Scan(value any) error {
 		return nil
 	}
 
-	decrypted, err := decrypt(string(encrypted))
+	decrypted, err := Decrypt(string(encrypted))
 	if err != nil {
 		return fmt.Errorf("failed to decrypt: %w", err)
 	}
@@ -52,7 +58,7 @@ func (e EncryptedBytes) Value() (driver.Value, error) {
 		return []byte{}, nil
 	}
 
-	encrypted, err := encrypt(e)
+	encrypted, err := Encrypt(e)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt: %w", err)
 	}
@@ -60,24 +66,22 @@ func (e EncryptedBytes) Value() (driver.Value, error) {
 	return []byte(encrypted), nil
 }
 
-func encrypt(plaintext []byte) (string, error) {
+func Encrypt(plaintext []byte) (string, error) {
 	aead, err := chacha20poly1305.NewX(EncryptionKey[:])
 	if err != nil {
 		return "", err
 	}
 
-	// Generate a random nonce (24 bytes for XChaCha20)
 	nonce := make([]byte, aead.NonceSize())
 	if _, err := rand.Read(nonce); err != nil {
 		return "", err
 	}
 
-	// Encrypt and authenticate
 	ciphertext := aead.Seal(nonce, nonce, plaintext, nil)
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
-func decrypt(ciphertext string) ([]byte, error) {
+func Decrypt(ciphertext string) ([]byte, error) {
 	data, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return []byte{}, err
