@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/helpers"
 )
@@ -75,9 +76,26 @@ func (_u *DeviceUpdate) SetToken(v helpers.EncryptedBytes) *DeviceUpdate {
 	return _u
 }
 
+// SetHostID sets the "host" edge to the Host entity by ID.
+func (_u *DeviceUpdate) SetHostID(id int) *DeviceUpdate {
+	_u.mutation.SetHostID(id)
+	return _u
+}
+
+// SetHost sets the "host" edge to the Host entity.
+func (_u *DeviceUpdate) SetHost(v *Host) *DeviceUpdate {
+	return _u.SetHostID(v.ID)
+}
+
 // Mutation returns the DeviceMutation object of the builder.
 func (_u *DeviceUpdate) Mutation() *DeviceMutation {
 	return _u.mutation
+}
+
+// ClearHost clears the "host" edge to the Host entity.
+func (_u *DeviceUpdate) ClearHost() *DeviceUpdate {
+	_u.mutation.ClearHost()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -116,7 +134,18 @@ func (_u *DeviceUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *DeviceUpdate) check() error {
+	if _u.mutation.HostCleared() && len(_u.mutation.HostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Device.host"`)
+	}
+	return nil
+}
+
 func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -139,6 +168,35 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Token(); ok {
 		_spec.SetField(device.FieldToken, field.TypeBytes, value)
+	}
+	if _u.mutation.HostCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HostIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -206,9 +264,26 @@ func (_u *DeviceUpdateOne) SetToken(v helpers.EncryptedBytes) *DeviceUpdateOne {
 	return _u
 }
 
+// SetHostID sets the "host" edge to the Host entity by ID.
+func (_u *DeviceUpdateOne) SetHostID(id int) *DeviceUpdateOne {
+	_u.mutation.SetHostID(id)
+	return _u
+}
+
+// SetHost sets the "host" edge to the Host entity.
+func (_u *DeviceUpdateOne) SetHost(v *Host) *DeviceUpdateOne {
+	return _u.SetHostID(v.ID)
+}
+
 // Mutation returns the DeviceMutation object of the builder.
 func (_u *DeviceUpdateOne) Mutation() *DeviceMutation {
 	return _u.mutation
+}
+
+// ClearHost clears the "host" edge to the Host entity.
+func (_u *DeviceUpdateOne) ClearHost() *DeviceUpdateOne {
+	_u.mutation.ClearHost()
+	return _u
 }
 
 // Where appends a list predicates to the DeviceUpdate builder.
@@ -260,7 +335,18 @@ func (_u *DeviceUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *DeviceUpdateOne) check() error {
+	if _u.mutation.HostCleared() && len(_u.mutation.HostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Device.host"`)
+	}
+	return nil
+}
+
 func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -300,6 +386,35 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 	}
 	if value, ok := _u.mutation.Token(); ok {
 		_spec.SetField(device.FieldToken, field.TypeBytes, value)
+	}
+	if _u.mutation.HostCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.HostIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   device.HostTable,
+			Columns: []string{device.HostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(host.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Device{config: _u.config}
 	_spec.Assign = _node.assignValues
