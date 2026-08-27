@@ -23,6 +23,8 @@ type Settings struct {
 	CreatedTime time.Time `json:"created_time,omitempty"`
 	// Time ent was updated
 	UpdatedTime time.Time `json:"updated_time,omitempty"`
+	// NetworkID holds the value of the "network_id" field.
+	NetworkID string `json:"network_id,omitempty"`
 	// Domain zone to use for nameserver
 	DomainZone string `json:"domain_zone,omitempty"`
 	// Nebula cipher. aes or chachapoly
@@ -61,7 +63,7 @@ func (*Settings) scanValues(columns []string) ([]any, error) {
 			values[i] = new(helpers.IpCidr)
 		case settings.FieldID, settings.FieldPortOverlayIP:
 			values[i] = new(sql.NullInt64)
-		case settings.FieldDomainZone, settings.FieldCipher:
+		case settings.FieldNetworkID, settings.FieldDomainZone, settings.FieldCipher:
 			values[i] = new(sql.NullString)
 		case settings.FieldCreatedTime, settings.FieldUpdatedTime:
 			values[i] = new(sql.NullTime)
@@ -97,6 +99,12 @@ func (_m *Settings) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_time", values[i])
 			} else if value.Valid {
 				_m.UpdatedTime = value.Time
+			}
+		case settings.FieldNetworkID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field network_id", values[i])
+			} else if value.Valid {
+				_m.NetworkID = value.String
 			}
 		case settings.FieldDomainZone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -207,6 +215,9 @@ func (_m *Settings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_time=")
 	builder.WriteString(_m.UpdatedTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("network_id=")
+	builder.WriteString(_m.NetworkID)
 	builder.WriteString(", ")
 	builder.WriteString("domain_zone=")
 	builder.WriteString(_m.DomainZone)

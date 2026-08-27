@@ -9,5 +9,8 @@ import (
 // Device is the predicate function for device builders.
 type Device func(*sql.Selector)
 
+// Host is the predicate function for host builders.
+type Host func(*sql.Selector)
+
 // Settings is the predicate function for settings builders.
 type Settings func(*sql.Selector)

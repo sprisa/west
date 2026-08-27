@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/ent/predicate"
 	"github.com/sprisa/west/westport/db/ent/settings"
 	"github.com/sprisa/west/westport/db/helpers"
@@ -28,6 +29,7 @@ const (
 
 	// Node types.
 	TypeDevice   = "Device"
+	TypeHost     = "Host"
 	TypeSettings = "Settings"
 )
 
@@ -45,6 +47,8 @@ type DeviceMutation struct {
 	leased_access_token *string
 	token               *helpers.EncryptedBytes
 	clearedFields       map[string]struct{}
+	host                *int
+	clearedhost         bool
 	done                bool
 	oldValue            func(context.Context) (*Device, error)
 	predicates          []predicate.Device
@@ -397,6 +401,45 @@ func (m *DeviceMutation) ResetToken() {
 	m.token = nil
 }
 
+// SetHostID sets the "host" edge to the Host entity by id.
+func (m *DeviceMutation) SetHostID(id int) {
+	m.host = &id
+}
+
+// ClearHost clears the "host" edge to the Host entity.
+func (m *DeviceMutation) ClearHost() {
+	m.clearedhost = true
+}
+
+// HostCleared reports if the "host" edge to the Host entity was cleared.
+func (m *DeviceMutation) HostCleared() bool {
+	return m.clearedhost
+}
+
+// HostID returns the "host" edge ID in the mutation.
+func (m *DeviceMutation) HostID() (id int, exists bool) {
+	if m.host != nil {
+		return *m.host, true
+	}
+	return
+}
+
+// HostIDs returns the "host" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// HostID instead. It exists only for internal usage by the builders.
+func (m *DeviceMutation) HostIDs() (ids []int) {
+	if id := m.host; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetHost resets all changes to the "host" edge.
+func (m *DeviceMutation) ResetHost() {
+	m.host = nil
+	m.clearedhost = false
+}
+
 // Where appends a list predicates to the DeviceMutation builder.
 func (m *DeviceMutation) Where(ps ...predicate.Device) {
 	m.predicates = append(m.predicates, ps...)
@@ -639,19 +682,28 @@ func (m *DeviceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DeviceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.host != nil {
+		edges = append(edges, device.EdgeHost)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *DeviceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case device.EdgeHost:
+		if id := m.host; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DeviceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -663,26 +715,513 @@ func (m *DeviceMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DeviceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedhost {
+		edges = append(edges, device.EdgeHost)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *DeviceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case device.EdgeHost:
+		return m.clearedhost
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *DeviceMutation) ClearEdge(name string) error {
+	switch name {
+	case device.EdgeHost:
+		m.ClearHost()
+		return nil
+	}
 	return fmt.Errorf("unknown Device unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *DeviceMutation) ResetEdge(name string) error {
+	switch name {
+	case device.EdgeHost:
+		m.ResetHost()
+		return nil
+	}
 	return fmt.Errorf("unknown Device edge %s", name)
+}
+
+// HostMutation represents an operation that mutates the Host nodes in the graph.
+type HostMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_time  *time.Time
+	updated_time  *time.Time
+	ip            *ipconv.IP
+	addip         *ipconv.IP
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Host, error)
+	predicates    []predicate.Host
+}
+
+var _ ent.Mutation = (*HostMutation)(nil)
+
+// hostOption allows management of the mutation configuration using functional options.
+type hostOption func(*HostMutation)
+
+// newHostMutation creates new mutation for the Host entity.
+func newHostMutation(c config, op Op, opts ...hostOption) *HostMutation {
+	m := &HostMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeHost,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withHostID sets the ID field of the mutation.
+func withHostID(id int) hostOption {
+	return func(m *HostMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Host
+		)
+		m.oldValue = func(ctx context.Context) (*Host, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Host.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withHost sets the old Host of the mutation.
+func withHost(node *Host) hostOption {
+	return func(m *HostMutation) {
+		m.oldValue = func(context.Context) (*Host, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m HostMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m HostMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *HostMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *HostMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Host.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedTime sets the "created_time" field.
+func (m *HostMutation) SetCreatedTime(t time.Time) {
+	m.created_time = &t
+}
+
+// CreatedTime returns the value of the "created_time" field in the mutation.
+func (m *HostMutation) CreatedTime() (r time.Time, exists bool) {
+	v := m.created_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedTime returns the old "created_time" field's value of the Host entity.
+// If the Host object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HostMutation) OldCreatedTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedTime: %w", err)
+	}
+	return oldValue.CreatedTime, nil
+}
+
+// ResetCreatedTime resets all changes to the "created_time" field.
+func (m *HostMutation) ResetCreatedTime() {
+	m.created_time = nil
+}
+
+// SetUpdatedTime sets the "updated_time" field.
+func (m *HostMutation) SetUpdatedTime(t time.Time) {
+	m.updated_time = &t
+}
+
+// UpdatedTime returns the value of the "updated_time" field in the mutation.
+func (m *HostMutation) UpdatedTime() (r time.Time, exists bool) {
+	v := m.updated_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedTime returns the old "updated_time" field's value of the Host entity.
+// If the Host object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HostMutation) OldUpdatedTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedTime: %w", err)
+	}
+	return oldValue.UpdatedTime, nil
+}
+
+// ResetUpdatedTime resets all changes to the "updated_time" field.
+func (m *HostMutation) ResetUpdatedTime() {
+	m.updated_time = nil
+}
+
+// SetIP sets the "ip" field.
+func (m *HostMutation) SetIP(i ipconv.IP) {
+	m.ip = &i
+	m.addip = nil
+}
+
+// IP returns the value of the "ip" field in the mutation.
+func (m *HostMutation) IP() (r ipconv.IP, exists bool) {
+	v := m.ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIP returns the old "ip" field's value of the Host entity.
+// If the Host object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *HostMutation) OldIP(ctx context.Context) (v ipconv.IP, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+	}
+	return oldValue.IP, nil
+}
+
+// AddIP adds i to the "ip" field.
+func (m *HostMutation) AddIP(i ipconv.IP) {
+	if m.addip != nil {
+		*m.addip += i
+	} else {
+		m.addip = &i
+	}
+}
+
+// AddedIP returns the value that was added to the "ip" field in this mutation.
+func (m *HostMutation) AddedIP() (r ipconv.IP, exists bool) {
+	v := m.addip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIP resets all changes to the "ip" field.
+func (m *HostMutation) ResetIP() {
+	m.ip = nil
+	m.addip = nil
+}
+
+// Where appends a list predicates to the HostMutation builder.
+func (m *HostMutation) Where(ps ...predicate.Host) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the HostMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *HostMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Host, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *HostMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *HostMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Host).
+func (m *HostMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *HostMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_time != nil {
+		fields = append(fields, host.FieldCreatedTime)
+	}
+	if m.updated_time != nil {
+		fields = append(fields, host.FieldUpdatedTime)
+	}
+	if m.ip != nil {
+		fields = append(fields, host.FieldIP)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *HostMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case host.FieldCreatedTime:
+		return m.CreatedTime()
+	case host.FieldUpdatedTime:
+		return m.UpdatedTime()
+	case host.FieldIP:
+		return m.IP()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *HostMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case host.FieldCreatedTime:
+		return m.OldCreatedTime(ctx)
+	case host.FieldUpdatedTime:
+		return m.OldUpdatedTime(ctx)
+	case host.FieldIP:
+		return m.OldIP(ctx)
+	}
+	return nil, fmt.Errorf("unknown Host field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HostMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case host.FieldCreatedTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedTime(v)
+		return nil
+	case host.FieldUpdatedTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedTime(v)
+		return nil
+	case host.FieldIP:
+		v, ok := value.(ipconv.IP)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIP(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Host field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *HostMutation) AddedFields() []string {
+	var fields []string
+	if m.addip != nil {
+		fields = append(fields, host.FieldIP)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *HostMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case host.FieldIP:
+		return m.AddedIP()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *HostMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case host.FieldIP:
+		v, ok := value.(ipconv.IP)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIP(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Host numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *HostMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *HostMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *HostMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Host nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *HostMutation) ResetField(name string) error {
+	switch name {
+	case host.FieldCreatedTime:
+		m.ResetCreatedTime()
+		return nil
+	case host.FieldUpdatedTime:
+		m.ResetUpdatedTime()
+		return nil
+	case host.FieldIP:
+		m.ResetIP()
+		return nil
+	}
+	return fmt.Errorf("unknown Host field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *HostMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *HostMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *HostMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *HostMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *HostMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *HostMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *HostMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Host unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *HostMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Host edge %s", name)
 }
 
 // SettingsMutation represents an operation that mutates the Settings nodes in the graph.
@@ -693,6 +1232,7 @@ type SettingsMutation struct {
 	id                       *int
 	created_time             *time.Time
 	updated_time             *time.Time
+	network_id               *string
 	domain_zone              *string
 	cipher                   *string
 	ca_crt                   *helpers.EncryptedBytes
@@ -879,6 +1419,42 @@ func (m *SettingsMutation) OldUpdatedTime(ctx context.Context) (v time.Time, err
 // ResetUpdatedTime resets all changes to the "updated_time" field.
 func (m *SettingsMutation) ResetUpdatedTime() {
 	m.updated_time = nil
+}
+
+// SetNetworkID sets the "network_id" field.
+func (m *SettingsMutation) SetNetworkID(s string) {
+	m.network_id = &s
+}
+
+// NetworkID returns the value of the "network_id" field in the mutation.
+func (m *SettingsMutation) NetworkID() (r string, exists bool) {
+	v := m.network_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNetworkID returns the old "network_id" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldNetworkID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNetworkID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNetworkID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNetworkID: %w", err)
+	}
+	return oldValue.NetworkID, nil
+}
+
+// ResetNetworkID resets all changes to the "network_id" field.
+func (m *SettingsMutation) ResetNetworkID() {
+	m.network_id = nil
 }
 
 // SetDomainZone sets the "domain_zone" field.
@@ -1383,12 +1959,15 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_time != nil {
 		fields = append(fields, settings.FieldCreatedTime)
 	}
 	if m.updated_time != nil {
 		fields = append(fields, settings.FieldUpdatedTime)
+	}
+	if m.network_id != nil {
+		fields = append(fields, settings.FieldNetworkID)
 	}
 	if m.domain_zone != nil {
 		fields = append(fields, settings.FieldDomainZone)
@@ -1435,6 +2014,8 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedTime()
 	case settings.FieldUpdatedTime:
 		return m.UpdatedTime()
+	case settings.FieldNetworkID:
+		return m.NetworkID()
 	case settings.FieldDomainZone:
 		return m.DomainZone()
 	case settings.FieldCipher:
@@ -1470,6 +2051,8 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCreatedTime(ctx)
 	case settings.FieldUpdatedTime:
 		return m.OldUpdatedTime(ctx)
+	case settings.FieldNetworkID:
+		return m.OldNetworkID(ctx)
 	case settings.FieldDomainZone:
 		return m.OldDomainZone(ctx)
 	case settings.FieldCipher:
@@ -1514,6 +2097,13 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedTime(v)
+		return nil
+	case settings.FieldNetworkID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNetworkID(v)
 		return nil
 	case settings.FieldDomainZone:
 		v, ok := value.(string)
@@ -1688,6 +2278,9 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldUpdatedTime:
 		m.ResetUpdatedTime()
+		return nil
+	case settings.FieldNetworkID:
+		m.ResetNetworkID()
 		return nil
 	case settings.FieldDomainZone:
 		m.ResetDomainZone()

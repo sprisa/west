@@ -6,6 +6,7 @@ import (
 
 	"github.com/sprisa/west/west"
 	"github.com/sprisa/west/westport/db"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/env"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
@@ -22,6 +23,7 @@ func init() {
 	// The db should be located under the user common dir, not root
 	// Use snap common dir for configs
 	db.DBFilePath = filepath.Join(configDirPath, db.DBFilePath)
+	localconfig.FilePath = filepath.Join(configDirPath, localconfig.FilePath)
 }
 
 func main() {

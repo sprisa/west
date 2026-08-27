@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/ent/device"
+	"github.com/sprisa/west/westport/db/ent/host"
 	"github.com/sprisa/west/westport/db/helpers"
 )
 
@@ -30,8 +31,32 @@ type Device struct {
 	// Access Token leased to a provisioned device. Can only issue 1 at a time, similar to a lock. Used to verify only 1 instance of the Device is running.
 	LeasedAccessToken *string `json:"-"`
 	// Token holds the value of the "token" field.
-	Token        helpers.EncryptedBytes `json:"-"`
+	Token helpers.EncryptedBytes `json:"-"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DeviceQuery when eager-loading is set.
+	Edges        DeviceEdges `json:"edges"`
+	device_host  *int
 	selectValues sql.SelectValues
+}
+
+// DeviceEdges holds the relations/edges for other nodes in the graph.
+type DeviceEdges struct {
+	// Host holds the value of the host edge.
+	Host *Host `json:"host,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// HostOrErr returns the Host value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DeviceEdges) HostOrErr() (*Host, error) {
+	if e.Host != nil {
+		return e.Host, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: host.Label}
+	}
+	return nil, &NotLoadedError{edge: "host"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -47,6 +72,8 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case device.FieldCreatedTime, device.FieldUpdatedTime:
 			values[i] = new(sql.NullTime)
+		case device.ForeignKeys[0]: // device_host
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -105,6 +132,13 @@ func (_m *Device) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.Token = *value
 			}
+		case device.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field device_host", value)
+			} else if value.Valid {
+				_m.device_host = new(int)
+				*_m.device_host = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -116,6 +150,11 @@ func (_m *Device) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Device) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryHost queries the "host" edge of the Device entity.
+func (_m *Device) QueryHost() *HostQuery {
+	return NewDeviceClient(_m.config).QueryHost(_m)
 }
 
 // Update returns a builder for updating this Device.

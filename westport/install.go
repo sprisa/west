@@ -3,6 +3,7 @@ package westport
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/errutil"
 	l "github.com/sprisa/x/log"
 	"github.com/urfave/cli/v3"
@@ -21,8 +23,13 @@ import (
 var InstallCommand = &cli.Command{
 	Name:      "install",
 	Usage:     "Install west port",
-	UsageText: "west port install",
+	UsageText: "west port install --datastore <connection-string>",
 	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "datastore",
+			Usage:    "Datastore connection: sqlite, sqlite://<path>, postgres://, or mysql://",
+			Required: true,
+		},
 		&cli.StringFlag{
 			Name:  "ca-crt",
 			Value: "ca.crt",
@@ -52,6 +59,39 @@ var InstallCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
+		if err := readEncryptionPassword(); err != nil {
+			return err
+		}
+
+		exists, err := localconfig.Exists()
+		if err != nil {
+			return errutil.WrapErr(err, "check local west-port installation")
+		}
+		if exists {
+			cfg, err := localconfig.Load()
+			if err != nil {
+				return fmt.Errorf("config at %s is unreadable: %w; remove it to reinstall", localconfig.FilePath, err)
+			}
+			l.Log.Info().Str("datastore", cfg.Datastore).
+				Msg("West port is already installed on this node")
+			return nil
+		}
+
+		dataSource := c.String("datastore")
+		client, err := db.OpenDB(ctx, dataSource)
+		if err != nil {
+			return errutil.WrapErr(err, "error opening db")
+		}
+		defer client.Close()
+		if err := migrate.MigrateClient(ctx, client); err != nil {
+			return errutil.WrapErr(err, "error migrating db")
+		}
+
+		_, err = client.Settings.Query().First(ctx)
+		if ent.IsNotFound(err) == false {
+			return errors.New("west port already installed with database present.")
+		}
+
 		caPath := c.String("ca-crt")
 		caKeyPath := c.String("ca-key")
 		ca, err := os.ReadFile(caPath)
@@ -60,32 +100,16 @@ var InstallCommand = &cli.Command{
 		}
 		caKey, err := os.ReadFile(caKeyPath)
 		if err != nil {
-			return errutil.WrapErr(err, "error reading ca-key at `%s`", caPath)
+			return errutil.WrapErr(err, "error reading ca-key at `%s`", caKeyPath)
 		}
 		cidr := c.String("cidr")
 		domainZone := strings.ToLower(c.String("domain-zone"))
 		letsencryptEmail := c.String("letsencrypt-email")
-		letsencryptTOSAccepted := c.Bool("letsencrypt-accept-tos")
-		if letsencryptEmail != "" && letsencryptTOSAccepted == false {
-			return errors.New("Required to accept Let's Encrypt terms of service (--letsencrypt-accept-tos)")
+		if letsencryptEmail != "" && !c.Bool("letsencrypt-accept-tos") {
+			return errors.New("required to accept Let's Encrypt terms of service (--letsencrypt-accept-tos)")
 		}
 		if letsencryptEmail != "" && domainZone == "" {
-			return errors.New("Domain zone must be specified in order to use Let's Encrypt certificates (--domain-zone)")
-		}
-
-		client, err := db.OpenDB()
-		if err != nil {
-			return errutil.WrapErr(err, "error opening db")
-		}
-		defer client.Close()
-		err = migrate.MigrateClient(ctx, client)
-		if err != nil {
-			return errutil.WrapErr(err, "error migrating db")
-		}
-
-		_, err = client.Settings.Query().First(ctx)
-		if ent.IsNotFound(err) == false {
-			return errors.New("west port already installed with database present.")
+			return errors.New("domain zone must be specified to use Let's Encrypt certificates (--domain-zone)")
 		}
 
 		lhCert, err := pki.SignCert(&pki.SignCertOptions{
@@ -113,28 +137,21 @@ var InstallCommand = &cli.Command{
 			if err != nil {
 				return errutil.WrapErr(err, "error creating new lets encrypt user")
 			}
-
 			acmeRegistration, err = acmeUser.ToBytes()
 			if err != nil {
 				return errutil.WrapErr(err, "error serializing acme registration")
 			}
-
-			l.Log.Info().
-				Str("email", letsencryptEmail).
-				Msg("Registered with Let's Encrypt")
+			l.Log.Info().Str("email", letsencryptEmail).Msg("Registered with Let's Encrypt")
 		}
 
-		l.Log.Info().Msg("Create a encryption a password")
-		err = readEncryptionPassword()
+		tx, err := client.Tx(ctx)
 		if err != nil {
 			return err
 		}
-
-		err = client.Settings.Create().
+		defer tx.Rollback()
+		err = tx.Settings.Create().
 			SetCaCrt(ca).
 			SetCaKey(caKey).
-			// TODO: Store info in a device so it get's all the
-			// DNS and uniqueness built in.
 			SetLighthouseCrt(lhCert.Cert).
 			SetLighthouseKey(lhCert.Key).
 			SetCidr(ipCidr).
@@ -145,10 +162,25 @@ var InstallCommand = &cli.Command{
 		if err != nil {
 			return errutil.WrapErr(err, "error saving settings")
 		}
+		err = tx.Host.Create().
+			SetIP(overlayIp).
+			Exec(ctx)
+		if err != nil {
+			return errutil.WrapErr(err, "error reserving lighthouse IP")
+		}
+		err = tx.Commit()
+		if err != nil {
+			return err
+		}
+
+		if err := localconfig.Save(localconfig.Config{
+			Datastore:    dataSource,
+			LighthouseIP: ipCidr.Addr().String(),
+		}); err != nil {
+			return errutil.WrapErr(err, "save local west-port config")
+		}
 
 		l.Log.Info().Msg("Done! Use `west port start` to run")
-		// TODO: Show extra steps on snap mode
-		// sudo snap connect west:network-control
 		return nil
 	},
 }

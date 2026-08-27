@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/sprisa/west/util/ipconv"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/mixin"
@@ -17,6 +18,9 @@ type Settings struct {
 
 func (Settings) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("network_id").
+			Default("default").
+			Immutable(),
 		field.String("domain_zone").
 			Optional().
 			Comment("Domain zone to use for nameserver"),
@@ -73,7 +77,9 @@ func (Settings) Edges() []ent.Edge {
 }
 
 func (Settings) Indexes() []ent.Index {
-	return []ent.Index{}
+	return []ent.Index{
+		index.Fields("network_id").Unique(),
+	}
 }
 
 func (Settings) Annotations() []schema.Annotation {

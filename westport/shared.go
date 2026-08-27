@@ -28,7 +28,7 @@ func readEncryptionPassword() (err error) {
 		}
 	}
 
-	copy(helpers.EncryptionKey[:], pswd)
+	helpers.SetEncryptionPassword([]byte(pswd))
 	// l.Log.Info().Msg(pswd)
 	// l.Log.Info().Msgf("key: %s", string(helpers.EncryptionKey[:]))
 	return nil

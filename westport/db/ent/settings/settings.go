@@ -17,6 +17,8 @@ const (
 	FieldCreatedTime = "created_time"
 	// FieldUpdatedTime holds the string denoting the updated_time field in the database.
 	FieldUpdatedTime = "updated_time"
+	// FieldNetworkID holds the string denoting the network_id field in the database.
+	FieldNetworkID = "network_id"
 	// FieldDomainZone holds the string denoting the domain_zone field in the database.
 	FieldDomainZone = "domain_zone"
 	// FieldCipher holds the string denoting the cipher field in the database.
@@ -48,6 +50,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedTime,
 	FieldUpdatedTime,
+	FieldNetworkID,
 	FieldDomainZone,
 	FieldCipher,
 	FieldCaCrt,
@@ -78,6 +81,8 @@ var (
 	DefaultUpdatedTime func() time.Time
 	// UpdateDefaultUpdatedTime holds the default value on update for the "updated_time" field.
 	UpdateDefaultUpdatedTime func() time.Time
+	// DefaultNetworkID holds the default value on creation for the "network_id" field.
+	DefaultNetworkID string
 	// DefaultCipher holds the default value on creation for the "cipher" field.
 	DefaultCipher string
 )
@@ -98,6 +103,11 @@ func ByCreatedTime(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedTime orders the results by the updated_time field.
 func ByUpdatedTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedTime, opts...).ToFunc()
+}
+
+// ByNetworkID orders the results by the network_id field.
+func ByNetworkID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNetworkID, opts...).ToFunc()
 }
 
 // ByDomainZone orders the results by the domain_zone field.
