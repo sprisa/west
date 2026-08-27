@@ -16,6 +16,7 @@ import (
 	"github.com/sprisa/west/westport/db/ent"
 	"github.com/sprisa/west/westport/db/helpers"
 	"github.com/sprisa/west/westport/db/migrate"
+	"github.com/sprisa/west/westport/localconfig"
 	"github.com/sprisa/x/errutil"
 	"github.com/urfave/cli/v3"
 )
@@ -48,7 +49,15 @@ var AddCommand = &cli.Command{
 			return errutil.WrapErr(err, "error parsing ip `%s`", ipStr)
 		}
 
-		client, err := db.OpenDB()
+		err = readEncryptionPassword()
+		if err != nil {
+			return err
+		}
+		localCfg, err := localconfig.Load()
+		if err != nil {
+			return errutil.WrapErr(err, "load local west-port config")
+		}
+		client, err := db.OpenDB(ctx, localCfg.Datastore)
 		if err != nil {
 			return errutil.WrapErr(err, "error opening db")
 		}
@@ -56,11 +65,6 @@ var AddCommand = &cli.Command{
 		err = migrate.MigrateClient(ctx, client)
 		if err != nil {
 			return errutil.WrapErr(err, "error migrating db")
-		}
-
-		err = readEncryptionPassword()
-		if err != nil {
-			return err
 		}
 
 		settings, err := client.Settings.Query().Only(ctx)
