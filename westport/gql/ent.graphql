@@ -5,6 +5,7 @@ Define a Relay Cursor type:
 https://relay.dev/graphql/connections.htm#sec-Cursor
 """
 scalar Cursor
+scalar Time
 type Device implements Node {
   id: ID!
   """
